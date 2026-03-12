@@ -1,0 +1,13 @@
+.header {
+    padding: var(--header-padding);
+    border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-surface);
+}
+
+.headerSidebar {
+    display: flex;
+    gap: var(--spacing-4);
+}

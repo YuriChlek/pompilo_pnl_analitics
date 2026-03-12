@@ -1,0 +1,51 @@
+.list {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.list .actions {
+    text-align: right;
+}
+
+.list .row {
+    border-bottom: var(--border-width-thin) solid var(--color-border-secondary);
+    transition: background-color 0.2s ease;
+}
+
+.list .row:hover {
+    background-color: var(--color-surface-secondary);
+}
+
+.listHeader th {
+    padding: var(--spacing-2);
+    border-bottom: var(--border-width-thin) solid var(--color-border-secondary);
+    text-align: left;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    background: var(--color-surface-secondary);
+}
+
+.list td {
+    padding: var(--spacing-2);
+    color: var(--color-text-primary);
+}
+
+.actionsButton {
+    background: var(--color-surface);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    border: var(--border-width-thin) solid var(--color-border-tertiary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+}
+
+.actionsButton:hover {
+    background: var(--color-surface-secondary);
+    border-color: var(--color-border-secondary);
+}

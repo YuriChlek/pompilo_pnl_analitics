@@ -1,0 +1,7 @@
+.menu {
+    display: flex;
+}
+
+.menu li {
+    padding: var(--spacing-3) var(--spacing-4);
+}

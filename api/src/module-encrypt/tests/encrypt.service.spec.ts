@@ -1,18 +1,30 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { EncryptService } from '../services/encrypt.service';
+import { ConfigService } from '@nestjs/config';
+import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 
 describe('EncryptService', () => {
     let service: EncryptService;
+    let configService: jest.Mocked<ConfigService>;
 
-    beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [EncryptService],
-        }).compile();
+    beforeEach(() => {
+        configService = {
+            getOrThrow: jest.fn().mockReturnValue('unit-test-secret'),
+        } as unknown as jest.Mocked<ConfigService>;
 
-        service = module.get<EncryptService>(EncryptService);
+        service = new EncryptService(configService);
     });
 
-    it('should be defined', () => {
-        expect(service).toBeDefined();
+    it('encrypts sensitive values and decrypts them back to the original text', () => {
+        const plaintext = 'SensitivePayload';
+        const ciphertext = service.encrypt(plaintext);
+
+        expect(ciphertext).not.toEqual(plaintext);
+        expect(service.decrypt(ciphertext)).toEqual(plaintext);
+    });
+
+    it('uses random initialization vectors so ciphertext changes each time', () => {
+        const first = service.encrypt('repeatable');
+        const second = service.encrypt('repeatable');
+
+        expect(first).not.toEqual(second);
     });
 });

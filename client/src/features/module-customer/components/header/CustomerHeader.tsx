@@ -8,7 +8,7 @@ import { LogoutBotton } from '@/features/module-auth/components/logout-button/Lo
 import { useUser } from '@/features/module-auth/hooks';
 import { UserRoles } from '@/features/module-auth/interfaces/auth';
 import { LoginButton } from '@/features/module-auth/components/login-button/LoginButton';
-import {UserBadge} from "@/features/module-auth/components/user-badge/UserBadge";
+import { UserBadge } from '@/features/module-auth/components/user-badge/UserBadge';
 
 export const CustomerHeader = () => {
     const { data, isLoading, isError, error } = useUser(UserRoles.CUSTOMER);

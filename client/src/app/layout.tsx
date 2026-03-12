@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { Providers } from '@/lib/tanstack/providers';
+import { Providers } from '@/lib/providers/providers';
 import '../shared/css/globals.css';
 import '../shared/css/normalise.css';
 import { NextFontWithVariable } from 'next/dist/compiled/@next/font';
+import Script from 'next/script';
+import { themeInitScript } from '@/shared/theme/initScript';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -22,7 +24,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="en" data-theme="light">
+        <html lang="en" suppressHydrationWarning>
+            <Script
+                id="theme-init"
+                strategy="beforeInteractive"
+                dangerouslySetInnerHTML={{ __html: themeInitScript }}
+            />
             <body className={`${geistSans.variable} ${geistMono.variable}`}>
                 <Providers>{children}</Providers>
             </body>

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+    BadRequestException,
+    HttpException,
+    Injectable,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import { TokenService } from '@/module-auth-token/services/token.service';
 import {
     type AccessTokenPayload,
@@ -35,11 +40,7 @@ export class AuthTokenService {
 
             return this.tokenService.createAccessToken(accessTokenPayload);
         } catch (error) {
-            if (error instanceof Error) {
-                throw new BadRequestException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to create access token');
         }
     }
 
@@ -63,10 +64,7 @@ export class AuthTokenService {
 
             return refreshToken;
         } catch (error) {
-            if (error instanceof Error) {
-                throw new BadRequestException(error.message);
-            }
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to create refresh token');
         }
     }
 
@@ -120,5 +118,13 @@ export class AuthTokenService {
             customerUserAgent,
             customerIpAddress,
         );
+    }
+
+    private handleUnexpectedError(error: unknown, message: string): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException(message);
     }
 }

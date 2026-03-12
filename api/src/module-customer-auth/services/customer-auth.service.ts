@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from '@/module-auth/services/auth.service';
 import type { Request, Response } from 'express';
 import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
@@ -39,11 +39,11 @@ export class CustomerAuthService {
                 COOKIE_NAMES.CUSTOMER_REFRESH_TOKEN,
             );
         } catch (error) {
-            if (error instanceof Error) {
-                throw new InternalServerErrorException(error.message);
+            if (error instanceof HttpException) {
+                throw error;
             }
 
-            throw new InternalServerErrorException('An unexpected error occurred');
+            throw new InternalServerErrorException('Failed to refresh customer token');
         }
     }
 

@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+    HttpException,
     Injectable,
     InternalServerErrorException,
     UnauthorizedException,
@@ -66,11 +66,7 @@ export class AuthService {
                 role,
             };
         } catch (error) {
-            if (error instanceof Error) {
-                throw new BadRequestException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to register user');
         }
     }
 
@@ -110,11 +106,7 @@ export class AuthService {
 
             return userPayload;
         } catch (error) {
-            if (error instanceof Error) {
-                throw new UnauthorizedException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to log in user');
         }
     }
 
@@ -228,11 +220,7 @@ export class AuthService {
                 path,
             });
         } catch (error) {
-            if (error instanceof Error) {
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to set authentication cookie');
         }
     }
 
@@ -298,11 +286,15 @@ export class AuthService {
                 this.setTokenCookie(response, refreshToken, TokenType.REFRESH, payload.role);
             }
         } catch (error) {
-            if (error instanceof Error) {
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedError(error, 'Failed to set authentication tokens');
         }
+    }
+
+    private handleUnexpectedError(error: unknown, message: string): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException(message);
     }
 }

@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    HttpException,
+    Injectable,
+    InternalServerErrorException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { CreateApiKeyDto } from '../dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '../dto/update-api-key.dto';
 import type { Request } from 'express';
@@ -61,11 +67,7 @@ export class ApiKeysService {
                 exchangeUserAccountId: validationData?.exchangeUserAccountId,
             };
         } catch (error) {
-            if (error instanceof Error) {
-                throw new UnauthorizedException(error.message);
-            }
-
-            throw new UnauthorizedException('Invalid or missing user.');
+            this.handleUnexpectedError(error, 'Failed to create API key');
         }
     }
 
@@ -87,10 +89,7 @@ export class ApiKeysService {
 
             throw new UnauthorizedException('Invalid or missing user.');
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                throw new UnauthorizedException(error.message);
-            }
-            throw new UnauthorizedException('Invalid or missing user.');
+            this.handleUnexpectedError(error, 'Failed to retrieve API keys');
         }
     }
 
@@ -123,5 +122,13 @@ export class ApiKeysService {
         const visiblePart = apiKey.slice(-4);
 
         return `***${visiblePart}`;
+    }
+
+    private handleUnexpectedError(error: unknown, message: string): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException(message);
     }
 }

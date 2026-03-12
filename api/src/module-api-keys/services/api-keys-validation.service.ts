@@ -35,33 +35,30 @@ export class ApiKeysValidationService {
         return await this.bybitService.validateApiKey(exchange, apiKey, privateKey);
     }
 
-    async validateBinanceApiKey(
-        apiKeyId: string,
-        privateKey: string,
-    ): Promise<ApiValidationInterface> {
+    validateBinanceApiKey(apiKeyId: string, privateKey: string): Promise<ApiValidationInterface> {
         console.log(apiKeyId, privateKey);
-        return {
+        return Promise.resolve({
             valid: false,
             exchangeUserAccountId: null,
-        };
+        });
     }
 
-    async validateOKXApiKey(apiKeyId: string, privateKey: string): Promise<ApiValidationInterface> {
+    validateOKXApiKey(apiKeyId: string, privateKey: string): Promise<ApiValidationInterface> {
         console.log(apiKeyId, privateKey);
-        return {
+        return Promise.resolve({
             valid: false,
             exchangeUserAccountId: null,
-        };
+        });
     }
 
-    async validateHyperLiquidApiKey(
+    validateHyperLiquidApiKey(
         apiKeyId: string,
         privataKey: string,
     ): Promise<ApiValidationInterface> {
         console.log(apiKeyId, privataKey);
-        return {
+        return Promise.resolve({
             valid: false,
             exchangeUserAccountId: null,
-        };
+        });
     }
 }

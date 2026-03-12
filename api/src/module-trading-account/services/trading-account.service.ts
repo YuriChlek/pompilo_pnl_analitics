@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    HttpException,
+    Injectable,
+    InternalServerErrorException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { CreateTradingAccountDto } from '../dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from '../dto/update-trading-account.dto';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -60,11 +65,7 @@ export class TradingAccountService {
 
             return null;
         } catch (error) {
-            if (error instanceof Error) {
-                throw new BadRequestException(error.message);
-            }
-
-            throw new BadRequestException(error);
+            this.handleUnexpectedError(error, 'Failed to create trading account');
         }
     }
 
@@ -82,11 +83,20 @@ export class TradingAccountService {
         return `This action returns a #${id} tradingAccount`;
     }
 
-    update(id: number, updateTradingAccountDto: UpdateTradingAccountDto) {
+    update(id: number, _updateTradingAccountDto: UpdateTradingAccountDto) {
+        void _updateTradingAccountDto;
         return `This action updates a #${id} tradingAccount`;
     }
 
     remove(id: number) {
         return `This action removes a #${id} tradingAccount`;
+    }
+
+    private handleUnexpectedError(error: unknown, message: string): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException(message);
     }
 }

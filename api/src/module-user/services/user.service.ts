@@ -1,5 +1,6 @@
 import {
     ConflictException,
+    HttpException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
@@ -37,19 +38,9 @@ export class UserService {
                 password: hashPassword,
             });
         } catch (error) {
-            if (error instanceof Error) {
-                if ('code' in error && error?.code === '23505') {
-                    throw new ConflictException(
-                        'User with this email or user name already exists.',
-                    );
-                }
-
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException(
-                'An unexpected error occurred while creating the user.',
-            );
+            this.handleUnexpectedDatabaseError(error, 'Failed to create user.', {
+                treatUniqueAsConflict: true,
+            });
         }
     }
 
@@ -57,56 +48,40 @@ export class UserService {
         try {
             const { name, email } = createUserDto;
 
-            return this.userRepository.find({
+            return await this.userRepository.find({
                 where: [{ name }, { email }],
             });
         } catch (error) {
-            if (error instanceof Error) {
-                if ('code' in error && error?.code === '23505') {
-                    throw new ConflictException(
-                        'An unexpected error occurred while fetching users.',
-                    );
-                }
-
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedDatabaseError(error, 'Failed to fetch users.');
         }
     }
 
     async findById(id: string): Promise<User | null> {
         try {
-            return this.userRepository.findOne({
+            return await this.userRepository.findOne({
                 where: {
                     id,
                 },
             });
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                if ('code' in error && error?.code === '23505') {
-                    throw new ConflictException(`User with this id: ${id} already exists.`);
-                }
-
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException(
-                'An unexpected error occurred while fetching the user.',
-            );
+            this.handleUnexpectedDatabaseError(error, 'Failed to fetch the user.');
         }
     }
 
     async findByLogin(login: string): Promise<User | null> {
-        const user: User | null = await this.userRepository.findOne({
-            where: [{ email: login }, { name: login }],
-        });
+        try {
+            const user: User | null = await this.userRepository.findOne({
+                where: [{ email: login }, { name: login }],
+            });
 
-        if (!user) {
-            throw new UnauthorizedException('Invalid login or password');
+            if (!user) {
+                throw new UnauthorizedException('Invalid login or password');
+            }
+
+            return user;
+        } catch (error) {
+            this.handleUnexpectedDatabaseError(error, 'Failed to fetch user by login.');
         }
-
-        return user;
     }
 
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
@@ -114,7 +89,7 @@ export class UserService {
             const user: User | null = await this.findById(id);
 
             if (!user) {
-                throw new ConflictException(`User with ID '${id}' not found.`);
+                throw new NotFoundException(`User with ID '${id}' not found.`);
             }
 
             if (updateUserDto.email || updateUserDto.name) {
@@ -140,37 +115,13 @@ export class UserService {
                 updateData.password = await Argon2HashUtil.hash(updateUserDto.password);
             }
 
-            try {
-                await this.userRepository.update(id, updateData);
+            await this.userRepository.update(id, updateData);
 
-                return await this.findById(id);
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    if ('code' in error && error?.code === '23505') {
-                        throw new ConflictException(
-                            'User with this email or user name already exists.',
-                        );
-                    }
-
-                    throw new InternalServerErrorException(error.message);
-                }
-
-                throw new InternalServerErrorException(
-                    'An unexpected error occurred while updating the user.',
-                );
-            }
+            return await this.findById(id);
         } catch (error) {
-            if (error instanceof Error) {
-                if ('code' in error && error?.code === '23505') {
-                    throw new ConflictException(
-                        'User with this email or user name already exists.',
-                    );
-                }
-
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedDatabaseError(error, 'Failed to update user.', {
+                treatUniqueAsConflict: true,
+            });
         }
     }
 
@@ -182,19 +133,9 @@ export class UserService {
                 throw new NotFoundException(`User with ID ${id} not found`);
             }
 
-            return this.userRepository.delete(id);
+            return await this.userRepository.delete(id);
         } catch (error) {
-            if (error instanceof Error) {
-                if ('code' in error && error?.code === '23505') {
-                    throw new ConflictException(
-                        'User with this email or user name already exists.',
-                    );
-                }
-
-                throw new InternalServerErrorException(error.message);
-            }
-
-            throw new InternalServerErrorException('An unexpected error occurred');
+            this.handleUnexpectedDatabaseError(error, 'Failed to remove user.');
         }
     }
 
@@ -212,5 +153,30 @@ export class UserService {
         }
 
         return query.getMany();
+    }
+
+    private handleUnexpectedDatabaseError(
+        error: unknown,
+        message: string,
+        options?: { treatUniqueAsConflict?: boolean },
+    ): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        if (options?.treatUniqueAsConflict && this.isUniqueViolation(error)) {
+            throw new ConflictException('User with this email or user name already exists.');
+        }
+
+        throw new InternalServerErrorException(message);
+    }
+
+    private isUniqueViolation(error: unknown): boolean {
+        return Boolean(
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            (error as { code?: string }).code === '23505',
+        );
     }
 }

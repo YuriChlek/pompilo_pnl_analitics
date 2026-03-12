@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { Job } from 'bullmq';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';
-import { BadRequestException } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 @Processor('excange-pnl-sync')
@@ -16,10 +16,10 @@ export class ExchangePnlProcessor extends WorkerHost {
             await this.handleBybitSync(job);
         } catch (error) {
             if (error instanceof Error) {
-                throw new Error(error.message);
+                throw error;
             }
 
-            throw new BadRequestException(error);
+            throw new InternalServerErrorException('Exchange PnL processing failed');
         }
     }
 

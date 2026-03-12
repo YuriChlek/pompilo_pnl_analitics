@@ -3,8 +3,6 @@ import { AdminAuthService } from './services/admin-auth.service';
 import type { Request, Response } from 'express';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
 import { LoginAdminDto } from '@/module-admin-auth/dto/login-admin.dto';
-import { Authorisation } from '@/module-auth/decorators/auth.decorator';
-import { UserRoles } from '@/module-auth/enums/role.enum';
 
 @Controller()
 export class AdminAuthController {

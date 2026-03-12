@@ -4,8 +4,6 @@ import type { Request, Response } from 'express';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
 import { LoginCustomerDto } from '@/module-customer-auth/dto/login-customer.dto';
 import { RegisterCustomerDto } from '@/module-customer-auth/dto/register-customer.dto';
-import { Authorisation } from '@/module-auth/decorators/auth.decorator';
-import { UserRoles } from '@/module-auth/enums/role.enum';
 
 @Controller()
 export class CustomerAuthController {

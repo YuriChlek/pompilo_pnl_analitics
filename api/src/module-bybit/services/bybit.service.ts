@@ -1,4 +1,4 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { StringValue } from 'ms';
 import * as crypto from 'crypto';
@@ -107,6 +107,11 @@ export class BybitService {
             return await this.bybitRepositoryService.saveClosedPnl(closedPnlData);
         } catch (error) {
             console.error(error);
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Failed to save Bybit PnL data');
         }
     }
 

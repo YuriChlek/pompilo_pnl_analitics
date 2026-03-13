@@ -1,24 +1,5 @@
 @import './tokens/index.css';
 
-/* ===== Automatic theme detection ===== */
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme]) {
-        --color-background: var(--color-gray-50);
-        --color-text-primary: var(--color-gray-900);
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) {
-        --color-background: linear-gradient(135deg, var(--color-gray-800), var(--color-gray-900));
-        --color-text-primary: var(--color-gray-100);
-    }
-
-    html {
-        color-scheme: dark;
-    }
-}
-
 /* ===== Base styles ===== */
 html,
 body {

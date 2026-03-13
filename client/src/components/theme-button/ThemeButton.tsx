@@ -1,50 +1,33 @@
 'use client';
 
-import styles from './styles.module.css';
-import { useMemo } from 'react';
-import { useTheme } from '@/shared/theme/useTheme';
-import type { ThemeMode } from '@/shared/theme/types';
-
-const MODE_SEQUENCE: ThemeMode[] = ['light', 'dark', 'system'];
-const MODE_LABEL: Record<ThemeMode, string> = {
-    light: '☀️ Light',
-    dark: '🌙 Dark',
-    system: '🖥️ System',
-};
+import { useState } from 'react';
+import styles from '@/components/theme-button/styles.module.css';
+import type { Theme } from '@/shared/theme/types';
+import { persistTheme } from '@/shared/theme/actions';
+import { getCookie } from 'cookies-next';
 
 export const ThemeButton = () => {
-    const { mode, resolvedTheme, setMode, isReady } = useTheme();
+    const [theme, setTheme] = useState<Theme>();
 
-    const nextMode = useMemo(() => {
-        const index = MODE_SEQUENCE.indexOf(mode);
-        const nextIndex = (index + 1) % MODE_SEQUENCE.length;
-        return MODE_SEQUENCE[nextIndex];
-    }, [mode]);
+    const handleToggle = async () => {
+        const currentTheme = await getCookie('theme');
+        const updatedTheme: Theme = currentTheme === 'dark' ? 'light' : 'dark';
 
-    const handleToggle = () => {
-        setMode(nextMode);
+        setTheme(updatedTheme);
+
+        await persistTheme(updatedTheme);
     };
 
-    const label = MODE_LABEL[mode];
-    const resolvedHint = mode === 'system' ? ` (${resolvedTheme})` : '';
-
-    const content = isReady ? (
-        <>
-            {label}
-            {resolvedHint}
-        </>
-    ) : (
-        'Theme'
-    );
+    const label = theme === 'light' ? '☀️ Light' : '🌙 Dark';
 
     return (
         <button
             className={styles.toggleThemeButton}
+            type="button"
             onClick={handleToggle}
-            aria-label={isReady ? `Switch theme to ${nextMode}` : 'Theme preference'}
-            disabled={!isReady}
+            aria-label="Toggle between light and dark theme"
         >
-            {content}
+            {label}
         </button>
     );
 };

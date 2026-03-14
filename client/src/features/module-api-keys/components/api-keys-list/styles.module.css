@@ -1,35 +1,63 @@
 .list {
     width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
     background: var(--color-surface);
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius-2xl);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
+}
+
+.listHeader th {
+    padding: var(--spacing-3) var(--spacing-4);
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    background: linear-gradient(120deg, var(--color-surface-secondary), transparent);
+}
+
+.list tbody tr {
+    transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.list tbody tr:hover {
+    background-color: var(--color-surface-secondary);
+}
+
+.list tbody tr:focus-within {
+    box-shadow: inset 0 0 0 1px var(--color-primary-light);
+}
+
+.list td {
+    padding: var(--spacing-3) var(--spacing-4);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    border-top: var(--border-width-thin) solid var(--color-border-secondary);
+}
+
+.list tbody tr:first-child td {
+    border-top: none;
 }
 
 .list .actions {
     text-align: right;
+    width: 140px;
 }
 
-.list .row {
-    border-bottom: var(--border-width-thin) solid var(--color-border-secondary);
-    transition: background-color 0.2s ease;
-}
-
-.list .row:hover {
-    background-color: var(--color-surface-secondary);
-}
-
-.listHeader th {
-    padding: var(--spacing-2);
-    border-bottom: var(--border-width-thin) solid var(--color-border-secondary);
-    text-align: left;
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    background: var(--color-surface-secondary);
-}
-
-.list td {
-    padding: var(--spacing-2);
-    color: var(--color-text-primary);
+.placeholder {
+    width: 100%;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-6);
+    border-radius: var(--border-radius-2xl);
+    border: 1px dashed var(--color-border-secondary);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
 }

@@ -6,25 +6,28 @@ import { getMenu } from '@/features/module-menu/config/menu-config';
 import styles from './styles.module.css';
 import { usePathname } from 'next/navigation';
 
-export const Menu = () => {
-    const menuItems: Array<MenuItem> = getMenu(MenuTypes.CUSTOMER);
+export const Menu = ({isLogin} : {isLogin: boolean}) => {
+    const menuType = isLogin ? MenuTypes.CUSTOMER : MenuTypes.GUEST;
+    const menuItems: Array<MenuItem> = getMenu(menuType);
     const pathname = usePathname();
 
     return (
-        <nav className="navbar navbar-default">
+        <nav className={styles.nav}>
             <ul className={styles.menu}>
-                {menuItems.length &&
-                    menuItems.map(({ title, href }) => {
-                        const isActive = pathname === href;
+                {menuItems.map(({ title, href }) => {
+                    const isActive = pathname === href;
 
-                        return (
-                            <li key={href}>
-                                <Link className={isActive ? 'active' : ''} href={href}>
-                                    {title}
-                                </Link>
-                            </li>
-                        );
-                    })}
+                    return (
+                        <li key={href}>
+                            <Link
+                                className={`${styles.link} ${isActive ? styles.active : ''}`}
+                                href={href}
+                            >
+                                {title}
+                            </Link>
+                        </li>
+                    );
+                })}
                 {/*<li key={LoginLogoutTitle}>
                     <LogoutBotton />
                 </li>*/}

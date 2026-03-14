@@ -8,6 +8,7 @@ import { useApiKeysList } from '@/features/module-api-keys/hooks';
 import { useRouter } from 'next/navigation';
 import { ApiKey } from '@/features/module-api-keys/interfaces/apiKeys';
 import { useCreateTradingAccount } from '@/features/module-trading-account/hooks';
+import { EmptyState } from '@/components/empty-state';
 
 export const AddTradingAccount = () => {
     const [open, setOpen] = useState(false);
@@ -66,17 +67,19 @@ export const AddTradingAccount = () => {
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.field}>
                         {!apiKeysList || !apiKeysList.length ? (
-                            <div className={styles.noApiKeys}>
-                                <p>You don’t have any API Keys yet. Please add one first.</p>
-
-                                <Button
-                                    variant="secondary"
-                                    type="button"
-                                    onClick={() => router.push('/customer/api-keys')}
-                                >
-                                    Go to API Keys
-                                </Button>
-                            </div>
+                            <EmptyState
+                                title="Connect an API key first"
+                                description="Add an API key to link your exchange account, then return to create a trading account."
+                                action={
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={() => router.push('/customer/api-keys')}
+                                    >
+                                        Go to API Keys
+                                    </Button>
+                                }
+                            />
                         ) : (
                             <>
                                 <label htmlFor="apiKey">Api Key</label>

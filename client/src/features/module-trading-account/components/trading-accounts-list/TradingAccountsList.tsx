@@ -3,18 +3,36 @@
 import { useTradingAccountList } from '@/features/module-trading-account/hooks';
 import styles from '@/features/module-api-keys/components/api-keys-list/styles.module.css';
 import { TradingAccountRow } from '@/features/module-trading-account/components/trading-account-row/TradingAccountRow';
+import { Loader } from '@/components/loader/Loader';
+import { EmptyState } from '@/components/empty-state';
 
 export const TradingAccountsList = () => {
     const { data, isLoading, isError, error } = useTradingAccountList();
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) {
+        return (
+            <div className={styles.placeholder}>
+                <Loader label="Loading trading accounts" />
+            </div>
+        );
+    }
 
     if (isError) {
-        return <p>Error: {error instanceof Error ? error.message : 'Unknown error'}</p>;
+        return (
+            <EmptyState
+                title="Unable to load trading accounts"
+                description={error instanceof Error ? error.message : 'Unknown error'}
+            />
+        );
     }
 
     if (!data || data.length === 0) {
-        return <p>No trading accounts found</p>;
+        return (
+            <EmptyState
+                title="No trading accounts yet"
+                description="Create your first trading account to start tracking performance."
+            />
+        );
     }
 
     return (

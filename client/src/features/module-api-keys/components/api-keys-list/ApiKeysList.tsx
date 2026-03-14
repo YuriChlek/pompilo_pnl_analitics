@@ -3,19 +3,37 @@
 import styles from './styles.module.css';
 import { useApiKeysList } from '@/features/module-api-keys/hooks';
 import { capitalCase } from 'change-case';
+import { Loader } from '@/components/loader/Loader';
+import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/button';
 
 export const ApiKeysList = () => {
     const { data, isLoading, isError, error } = useApiKeysList();
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) {
+        return (
+            <div className={styles.placeholder}>
+                <Loader label="Loading API keys" />
+            </div>
+        );
+    }
 
     if (isError) {
-        return <p>Error: {error instanceof Error ? error.message : 'Unknown error'}</p>;
+        return (
+            <EmptyState
+                title="Unable to load API keys"
+                description={error instanceof Error ? error.message : 'Unknown error'}
+            />
+        );
     }
 
     if (!data || data.length === 0) {
-        return <p>No API keys found</p>;
+        return (
+            <EmptyState
+                title="No API keys yet"
+                description="Add your first API key to start connecting exchanges."
+            />
+        );
     }
 
     return (
@@ -32,7 +50,7 @@ export const ApiKeysList = () => {
             </thead>
             <tbody>
                 {data.map(item => (
-                    <tr className={styles.row} key={item.id}>
+                    <tr key={item.id}>
                         <td>{capitalCase(item.exchange ?? '')}</td>
                         <td>{capitalCase(item.connectionStatus ?? '')}</td>
                         <td>{capitalCase(item.market ?? '')}</td>

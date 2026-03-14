@@ -1,0 +1,45 @@
+.empty {
+    width: 100%;
+    padding: var(--spacing-8) var(--spacing-6);
+    border-radius: var(--border-radius-2xl);
+    border: 1px dashed var(--color-border-secondary);
+    background: var(--color-surface);
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+}
+
+.icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.copy {
+    max-width: 480px;
+}
+
+.title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-2);
+}
+
+.description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+.action {
+    margin-top: var(--spacing-2);
+}

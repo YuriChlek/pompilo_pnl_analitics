@@ -4,4 +4,5 @@
 @import './typography.css';
 @import './borders.css';
 @import './shadow.css';
+@import './breakpoints.css';
 @import './z-index.css';

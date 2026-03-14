@@ -24,7 +24,20 @@ export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
                 href: '/customer/dashboard',
             },
         ],
-        guest: [],
+        guest: [
+            {
+                title: 'Home Page',
+                href: '/',
+            },
+            {
+                title: 'About',
+                href: '/about',
+            },
+            {
+                title: 'Analytics',
+                href: '/analytics',
+            },
+        ],
     };
     return config[menuType];
 };

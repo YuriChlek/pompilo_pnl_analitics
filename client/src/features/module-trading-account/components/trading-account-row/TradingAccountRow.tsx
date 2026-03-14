@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { capitalCase } from 'change-case';
 import { useRouter } from 'next/navigation';
 import styles from '@/features/module-trading-account/components/trading-account-row/styles.module.css';
@@ -14,6 +15,10 @@ export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {
         router.push(`/customer/trading-account/${account.id}`);
     };
 
+    const handleSettingsClick = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+    };
+
     return (
         <tr className={styles.row} onClick={handleClick} style={{ cursor: 'pointer' }}>
             <td>{capitalCase(account.tradingAccountName ?? '')}</td>
@@ -22,7 +27,9 @@ export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {
             <td>{account.apiKey?.apiKeyName ?? '—'}</td>
 
             <td className={styles.actions}>
-                <button className={styles.actionsButton}>Settings</button>
+                <button className={styles.actionsButton} onClick={handleSettingsClick}>
+                    Settings
+                </button>
             </td>
         </tr>
     );

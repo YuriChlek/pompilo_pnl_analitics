@@ -14,7 +14,7 @@ class HttpClient extends AbstractHttpClient {
         body?: HttpData<TBody>,
         config?: RequestConfig,
     ): Promise<HttpResponse<TResponse>> {
-        const url = new URL(path, this.baseUrl);
+        const url = new URL(`/api${path}`, this.baseUrl);
 
         if (config?.params) {
             Object.entries(config.params).forEach(([key, value]) =>
@@ -31,6 +31,7 @@ class HttpClient extends AbstractHttpClient {
             next: this.next,
             signal: config?.signal,
         };
+
         return await this.fetchData(options, url, path);
     }
 }

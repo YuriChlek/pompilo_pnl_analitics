@@ -3,4 +3,13 @@
     background: none;
     color: inherit;
     display: block;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.25s ease, text-shadow 0.25s ease;
+    will-change: transform;
+}
+
+.toggleThemeButton:hover {
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    text-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
 }

@@ -5,7 +5,7 @@ import { HttpResponse } from '@/lib/http-client';
 export const apiKeysService: AuthApiKeys = {
     async createApiKey(apiKeyPayload: ApiKeyPayload): Promise<ApiKey> {
         const response: HttpResponse<ApiKey> = await apiClient.post<ApiKey, ApiKeyPayload>(
-            'customer/api-key/create',
+            '/customer/api-key/create',
             apiKeyPayload,
         );
 
@@ -17,7 +17,7 @@ export const apiKeysService: AuthApiKeys = {
     },
     async getUserApiKeys(): Promise<ApiKey[]> {
         const response: HttpResponse<ApiKey[]> = await apiClient.post<ApiKey[], {}>(
-            'customer/api-key/user-api-keys',
+            '/customer/api-key/user-api-keys',
             {},
         );
 

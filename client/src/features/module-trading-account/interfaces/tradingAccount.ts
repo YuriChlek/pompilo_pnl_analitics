@@ -14,9 +14,12 @@ export interface TradingAccount {
     exchange: string;
     market: string;
 }
+
+/*
 export interface TradingAccountStatistic {}
 export interface TradingAccountClosedPnL {}
 export interface TradingAccountOpenPnL {}
+*/
 
 export interface TradingAccountService {
     createTradingAccount: (tradingAccountPayload: TradingAccountPayload) => Promise<TradingAccount>;

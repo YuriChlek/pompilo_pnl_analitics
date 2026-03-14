@@ -4,8 +4,12 @@
     color: inherit;
     display: block;
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.25s ease, text-shadow 0.25s ease;
+    transition:
+        color 0.2s ease,
+        transform 0.25s ease,
+        text-shadow 0.25s ease;
     will-change: transform;
+    font-size: var(--font-size-sm);
 }
 
 .toggleThemeButton:hover {

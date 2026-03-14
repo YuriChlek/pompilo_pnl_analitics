@@ -1,15 +1,13 @@
 export const BREAKPOINTS = {
-    mobile: 0,
-    tablet: 600,
-    laptop: 900,
-    desktop: 1200,
-    wide: 1440,
+    tablet: 768,
+    laptop: 1024,
+    desktop: 1280,
+    wide: 1536,
 } as const;
 
 export type BreakpointKey = keyof typeof BREAKPOINTS;
 
 export const MEDIA_QUERIES = {
-    mobileUp: `@media (min-width: ${BREAKPOINTS.mobile}px)`,
     tabletUp: `@media (min-width: ${BREAKPOINTS.tablet}px)`,
     laptopUp: `@media (min-width: ${BREAKPOINTS.laptop}px)`,
     desktopUp: `@media (min-width: ${BREAKPOINTS.desktop}px)`,
@@ -18,7 +16,7 @@ export const MEDIA_QUERIES = {
 
 export const CONTAINER_WIDTHS = {
     mobile: '100%',
-    tablet: 640,
+    tablet: 720,
     laptop: 960,
     desktop: 1200,
     wide: 1440,

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import styles from '@/components/button/styles.module.css';
 
@@ -13,15 +14,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     { children, className, variant = 'primary', size = 'md', type = 'button', disabled, ...rest },
     ref,
 ) {
-    const classes = [
+    const classes = clsx(
         styles.button,
         styles[variant],
         size === 'sm' ? styles.sizeSm : styles.sizeMd,
-        disabled ? styles.disabled : '',
-        className ?? '',
-    ]
-        .filter(Boolean)
-        .join(' ');
+        {
+            [styles.disabled]: !!disabled,
+        },
+        className,
+    );
 
     return (
         <button ref={ref} className={classes} type={type} disabled={disabled} {...rest}>

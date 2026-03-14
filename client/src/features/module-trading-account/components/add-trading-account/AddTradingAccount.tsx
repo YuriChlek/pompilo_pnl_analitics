@@ -119,9 +119,7 @@ export const AddTradingAccount = () => {
                             Cancel
                         </Button>
                         {!!(apiKeysList && apiKeysList.length > 0) && (
-                            <Button type="submit">
-                                Save
-                            </Button>
+                            <Button type="submit">Save</Button>
                         )}
                     </div>
                 </form>

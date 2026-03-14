@@ -1,12 +1,13 @@
 'use client';
 
+import clsx from 'clsx';
 import Link from 'next/link';
 import { MenuItem, MenuTypes } from '@/features/module-menu/interfaces/menu';
 import { getMenu } from '@/features/module-menu/config/menu-config';
 import styles from './styles.module.css';
 import { usePathname } from 'next/navigation';
 
-export const Menu = ({isLogin} : {isLogin: boolean}) => {
+export const Menu = ({ isLogin }: { isLogin: boolean }) => {
     const menuType = isLogin ? MenuTypes.CUSTOMER : MenuTypes.GUEST;
     const menuItems: Array<MenuItem> = getMenu(menuType);
     const pathname = usePathname();
@@ -20,7 +21,9 @@ export const Menu = ({isLogin} : {isLogin: boolean}) => {
                     return (
                         <li key={href}>
                             <Link
-                                className={`${styles.link} ${isActive ? styles.active : ''}`}
+                                className={clsx(styles.link, {
+                                    [styles.active]: isActive,
+                                })}
                                 href={href}
                             >
                                 {title}

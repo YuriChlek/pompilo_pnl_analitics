@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { CSSProperties } from 'react';
 import styles from './styles.module.css';
 
@@ -20,10 +21,14 @@ export const Loader = ({ size = 'md', label = 'Loading', className }: LoaderProp
         '--loader-size': SIZE_MAP[size],
     } as CSSProperties;
 
-    const loaderClassName = className ? `${styles.loader} ${className}` : styles.loader;
-
     return (
-        <div className={loaderClassName} role="status" aria-live="polite" aria-label={label} style={style}>
+        <div
+            className={clsx(styles.loader, className)}
+            role="status"
+            aria-live="polite"
+            aria-label={label}
+            style={style}
+        >
             <span className={styles.spinner} aria-hidden="true" />
             {label ? <span className={styles.label}>{label}</span> : null}
         </div>

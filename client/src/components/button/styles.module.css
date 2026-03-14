@@ -76,6 +76,5 @@
 .sizeSm {
     min-height: 32px;
     padding: var(--spacing-1) var(--spacing-2);
-    font-size: var(--font-size-xs);
     border-radius: var(--border-radius-sm);
 }

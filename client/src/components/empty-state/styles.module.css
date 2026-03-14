@@ -13,17 +13,6 @@
     box-shadow: var(--shadow-sm);
 }
 
-.icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: var(--color-primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-}
-
 .copy {
     max-width: 480px;
 }

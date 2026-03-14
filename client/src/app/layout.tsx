@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/lib/providers/providers';
@@ -25,7 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
     return (
         <html lang="en" data-theme={theme} suppressHydrationWarning>
-            <body className={`${geistSans.variable} ${geistMono.variable}`}>
+            <body className={clsx(geistSans.variable, geistMono.variable)}>
                 <Providers>{children}</Providers>
             </body>
         </html>

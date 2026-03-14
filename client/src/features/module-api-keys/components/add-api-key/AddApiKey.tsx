@@ -128,9 +128,7 @@ export const AddApiKey = () => {
                             Cancel
                         </Button>
 
-                        <Button type="submit">
-                            Save
-                        </Button>
+                        <Button type="submit">Save</Button>
                     </div>
                 </form>
             </Popup>

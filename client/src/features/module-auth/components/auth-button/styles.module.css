@@ -1,0 +1,17 @@
+.authButton {
+    min-height: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    color: inherit;
+}
+
+.authButton:hover:not(:disabled),
+.authButton:active:not(:disabled) {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    box-shadow: none;
+    text-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+}

@@ -4,6 +4,7 @@ import { FormEvent } from 'react';
 import styles from './styles.module.css';
 import { LoginData, UserRoles } from '@/features/module-auth/interfaces/auth';
 import { useLogin } from '@/features/module-auth/hooks';
+import { Button } from '@/components/button';
 
 interface LoginFormProps {
     mode: UserRoles;
@@ -34,7 +35,9 @@ export const LoginForm = ({ mode, title }: LoginFormProps) => {
                 <h2>{title}</h2>
                 <input type="login" name="login" placeholder="Login" required />
                 <input type="password" name="password" placeholder="Password" required />
-                <button type="submit">Login</button>
+                <Button type="submit" className={styles.submitButton}>
+                    Login
+                </Button>
             </form>
         </div>
     );

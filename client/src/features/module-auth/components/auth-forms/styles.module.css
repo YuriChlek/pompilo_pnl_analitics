@@ -42,22 +42,6 @@
     box-shadow: 0 0 0 var(--ring-width) var(--ring-color-primary);
 }
 
-.form button {
-    padding: var(--spacing-3) var(--spacing-4);
-    border-radius: var(--border-radius-lg);
-    border: none;
-    background-color: var(--color-button-primary-bg);
-    color: var(--color-white);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.25s ease, transform 0.25s ease;
-    box-shadow: var(--shadow-sm);
-    will-change: transform;
-}
-
-.form button:hover {
-    background-color: var(--color-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+.submitButton {
+    width: 100%;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
+import { Button } from '@/components/button';
 import { Popup } from '@/components/popup/Popup';
 import styles from './styles.module.css';
 import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums';
@@ -44,9 +45,9 @@ export const AddApiKey = () => {
 
     return (
         <div className={styles.wrapper}>
-            <button className={styles.secondaryButton} onClick={() => setOpen(true)}>
+            <Button variant="secondary" onClick={() => setOpen(true)}>
                 Add API Key
-            </button>
+            </Button>
 
             <Popup open={open} onClose={() => setOpen(false)} title="Add API Key">
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -123,17 +124,13 @@ export const AddApiKey = () => {
                     </div>
 
                     <div className={styles.actions}>
-                        <button
-                            type="button"
-                            className={styles.secondaryButton}
-                            onClick={() => setOpen(false)}
-                        >
+                        <Button variant="secondary" type="button" onClick={() => setOpen(false)}>
                             Cancel
-                        </button>
+                        </Button>
 
-                        <button type="submit" className={styles.primaryButton}>
+                        <Button type="submit">
                             Save
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </Popup>

@@ -1,6 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
+import { Button } from '@/components/button';
 import { Popup } from '@/components/popup/Popup';
 import styles from './styles.module.css';
 import { useApiKeysList } from '@/features/module-api-keys/hooks';
@@ -57,9 +58,9 @@ export const AddTradingAccount = () => {
 
     return (
         <div className={styles.wrapper}>
-            <button className={styles.secondaryButton} onClick={() => setOpen(true)}>
+            <Button variant="secondary" onClick={() => setOpen(true)}>
                 Add Trading Account
-            </button>
+            </Button>
 
             <Popup open={open} onClose={() => setOpen(false)} title="Add Trading Account">
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -68,13 +69,13 @@ export const AddTradingAccount = () => {
                             <div className={styles.noApiKeys}>
                                 <p>You don’t have any API Keys yet. Please add one first.</p>
 
-                                <button
+                                <Button
+                                    variant="secondary"
                                     type="button"
-                                    className={styles.secondaryButton}
                                     onClick={() => router.push('/customer/api-keys')}
                                 >
                                     Go to API Keys
-                                </button>
+                                </Button>
                             </div>
                         ) : (
                             <>
@@ -111,17 +112,13 @@ export const AddTradingAccount = () => {
                     </div>
 
                     <div className={styles.actions}>
-                        <button
-                            type="button"
-                            className={styles.secondaryButton}
-                            onClick={() => setOpen(false)}
-                        >
+                        <Button variant="secondary" type="button" onClick={() => setOpen(false)}>
                             Cancel
-                        </button>
+                        </Button>
                         {!!(apiKeysList && apiKeysList.length > 0) && (
-                            <button type="submit" className={styles.primaryButton}>
+                            <Button type="submit">
                                 Save
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </form>

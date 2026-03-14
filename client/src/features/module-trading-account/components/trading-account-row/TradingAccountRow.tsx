@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react';
 import { capitalCase } from 'change-case';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/button';
 import styles from '@/features/module-trading-account/components/trading-account-row/styles.module.css';
 import { TradingAccount } from '@/features/module-trading-account/interfaces/tradingAccount';
 
@@ -27,9 +28,9 @@ export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {
             <td>{account.apiKey?.apiKeyName ?? '—'}</td>
 
             <td className={styles.actions}>
-                <button className={styles.actionsButton} onClick={handleSettingsClick}>
+                <Button variant="ghost" size="md" onClick={handleSettingsClick}>
                     Settings
-                </button>
+                </Button>
             </td>
         </tr>
     );

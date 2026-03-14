@@ -3,6 +3,7 @@
 import styles from './styles.module.css';
 import { useApiKeysList } from '@/features/module-api-keys/hooks';
 import { capitalCase } from 'change-case';
+import { Button } from '@/components/button';
 
 export const ApiKeysList = () => {
     const { data, isLoading, isError, error } = useApiKeysList();
@@ -38,7 +39,9 @@ export const ApiKeysList = () => {
                         <td>{item.apiKeyName}</td>
                         <td>{item.apiKey}</td>
                         <td className={styles.actions}>
-                            <button className={styles.actionsButton}>Settings</button>
+                            <Button variant="ghost" size="sm">
+                                Settings
+                            </Button>
                         </td>
                     </tr>
                 ))}

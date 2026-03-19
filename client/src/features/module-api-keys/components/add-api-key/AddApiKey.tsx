@@ -6,7 +6,7 @@ import { Popup } from '@/components/popup/Popup';
 import styles from './styles.module.css';
 import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums';
 import { ApiKeyPayload } from '@/features/module-api-keys/interfaces/apiKeys';
-import { useCreateApiKey } from '@/features/module-api-keys/hooks';
+import { useCreateApiKey } from '@/features/module-api-keys/hooks/mutation';
 
 export const AddApiKey = () => {
     const [open, setOpen] = useState(false);

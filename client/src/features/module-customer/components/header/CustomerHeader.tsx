@@ -3,9 +3,9 @@
 import styles from './styles.module.css';
 import { Logo } from '@/components/logo/Logo';
 import { ThemeButton } from '@/components/theme-button/ThemeButton';
-import { AuthButton } from '@/features/module-auth/components/auth-button';
+import { AuthButton } from '@/features/module-auth/components/auth-button/AuthButton';
 import { Menu } from '@/features/module-menu/components/menu/Menu';
-import { useUser } from '@/features/module-auth/hooks';
+import { useUser } from '@/features/module-auth/hooks/query';
 import { UserRoles } from '@/features/module-auth/interfaces/auth';
 import { UserBadge } from '@/features/module-auth/components/user-badge/UserBadge';
 

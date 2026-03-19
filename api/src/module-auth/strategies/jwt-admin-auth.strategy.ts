@@ -3,8 +3,9 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { COOKIE_NAMES, JWT_ALGORITHM } from '@/module-auth/constants/auth.constants';
+import { JWT_ALGORITHM } from '@/module-auth/constants/auth.constants';
 import { AccessTokenPayload } from '@/module-auth-token/interfaces/auth-token.interfaces';
+import { COOKIE_NAMES } from '@/module-auth/enums';
 
 @Injectable()
 export class JwtAdminAuthStrategy extends PassportStrategy(Strategy, 'admin-jwt') {

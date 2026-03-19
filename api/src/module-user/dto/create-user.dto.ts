@@ -8,7 +8,7 @@ import {
     Matches,
     MinLength,
 } from 'class-validator';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Type } from 'class-transformer';
 
@@ -61,15 +61,15 @@ export class CreateUserDto {
 
     @ApiPropertyOptional({
         description: 'User role in the system',
-        enum: UserRoles,
+        enum: USER_ROLES,
         enumName: 'UserRoles',
-        example: UserRoles.CUSTOMER,
-        default: UserRoles.CUSTOMER,
+        example: USER_ROLES.CUSTOMER,
+        default: USER_ROLES.CUSTOMER,
         required: false,
     })
     @IsOptional()
-    @IsEnum(UserRoles, {
-        message: `Role must be one of: ${Object.values(UserRoles).join(', ')}`,
+    @IsEnum(USER_ROLES, {
+        message: `Role must be one of: ${Object.values(USER_ROLES).join(', ')}`,
     })
-    role?: UserRoles = UserRoles.CUSTOMER;
+    role?: USER_ROLES = USER_ROLES.CUSTOMER;
 }

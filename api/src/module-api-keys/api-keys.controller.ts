@@ -4,33 +4,33 @@ import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 import type { Request } from 'express';
 import { Authorisation } from '@/module-auth/decorators/auth.decorator';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums';
 
 @Controller()
 export class ApiKeysController {
     constructor(private readonly apiKeysService: ApiKeysService) {}
 
     @Post('create')
-    @Authorisation(UserRoles.CUSTOMER)
+    @Authorisation(USER_ROLES.CUSTOMER)
     create(@Req() request: Request, @Body() createApiKeyDto: CreateApiKeyDto) {
         return this.apiKeysService.create(request, createApiKeyDto);
     }
 
     @Post('user-api-keys')
-    @Authorisation(UserRoles.CUSTOMER)
+    @Authorisation(USER_ROLES.CUSTOMER)
     getUserApiKeys(@Req() request: Request) {
         return this.apiKeysService.getUserApiKeys(request);
     }
 
     @Patch('update/:id')
-    @Authorisation(UserRoles.CUSTOMER)
+    @Authorisation(USER_ROLES.CUSTOMER)
     update(@Param('id') id: string, @Body() updateApiKeyDto: UpdateApiKeyDto) {
         return this.apiKeysService.update(+id, updateApiKeyDto);
     }
 
     @Delete('remove/:id')
-    @Authorisation(UserRoles.CUSTOMER)
-    remove(@Param('id') id: string) {
-        return this.apiKeysService.remove(+id);
+    @Authorisation(USER_ROLES.CUSTOMER)
+    remove(@Param('id') apiKeyId: string) {
+        return this.apiKeysService.remove(apiKeyId);
     }
 }

@@ -51,6 +51,12 @@
     width: 140px;
 }
 
+.actionsInner {
+    position: relative;
+    display: inline-flex;
+    justify-content: flex-end;
+}
+
 .placeholder {
     width: 100%;
     min-height: 220px;

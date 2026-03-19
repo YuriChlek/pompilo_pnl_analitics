@@ -1,10 +1,10 @@
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums';
 
 export interface UserPayload {
     id: string;
     name: string;
     email: string;
-    role: UserRoles;
+    role: USER_ROLES;
 }
 
 export interface UserJWTPayload extends UserPayload {

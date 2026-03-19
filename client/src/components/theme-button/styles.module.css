@@ -15,5 +15,5 @@
 .toggleThemeButton:hover {
     color: var(--color-primary);
     transform: translateY(-1px);
-    text-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+    text-shadow: 0 2px 6px var(--color-accent-glow);
 }

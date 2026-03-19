@@ -1,0 +1,68 @@
+.menu {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + var(--spacing-2));
+    transform: translateY(-50%) translateX(10px) scale(0.96);
+    padding: var(--spacing-1);
+    border-radius: var(--border-radius-2xl);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+    box-shadow: var(--shadow-xl);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    z-index: var(--z-index-modal);
+    backdrop-filter: blur(14px);
+    white-space: nowrap;
+    transform-origin: right center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 0.2s ease,
+        transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.2s ease;
+}
+
+.menuItem {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 var(--spacing-3);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    background: transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.menuItem:hover {
+    background: var(--color-surface-secondary);
+}
+
+.menuItemDanger {
+    color: var(--color-text-secondary);
+}
+
+.menuItemDanger:hover {
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+}
+
+.menuOpen {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0) scale(1);
+}
+
+.menuClosed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}

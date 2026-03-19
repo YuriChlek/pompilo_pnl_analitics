@@ -1,23 +1,29 @@
 /* ===== Базові кольори ===== */
 :root {
     /* Primary */
-    --color-primary: #4f46e5;
-    --color-primary-hover: #4338ca;
-    --color-primary-light: rgba(79, 70, 229, 0.15);
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-primary-light: rgba(37, 99, 235, 0.16);
 
     /* Neutral */
     --color-white: #ffffff;
     --color-black: #000000;
+    --color-shadow-rgb: 15, 23, 42;
+    --color-background-accent-start: rgba(37, 99, 235, 0.14);
+    --color-background-accent-end: rgba(14, 165, 233, 0.1);
+    --color-accent-glow: rgba(37, 99, 235, 0.24);
+    --color-backdrop: rgba(15, 23, 42, 0.48);
+    --color-spinner-highlight: rgba(148, 163, 184, 0.16);
 
     /* Gray scale - light theme default */
-    --color-gray-50: #fafafa;
-    --color-gray-100: #f5f5f5;
-    --color-gray-200: #ebebeb;
-    --color-gray-300: #d0d0d0;
-    --color-gray-400: #a1a1a1;
-    --color-gray-500: #666666;
-    --color-gray-600: #545454;
-    --color-gray-700: #383838;
+    --color-gray-50: #f8fafc;
+    --color-gray-100: #f1f5f9;
+    --color-gray-200: #e2e8f0;
+    --color-gray-300: #cbd5e1;
+    --color-gray-400: #94a3b8;
+    --color-gray-500: #64748b;
+    --color-gray-600: #475569;
+    --color-gray-700: #334155;
     --color-gray-800: #1e293b;
     --color-gray-900: #0f172a;
 }
@@ -25,48 +31,62 @@
 /* ===== Тематичні змінні ===== */
 :root[data-theme='light'] {
     /* Backgrounds */
-    --color-background: var(--color-gray-50);
-    --color-surface: var(--color-white);
-    --color-surface-secondary: var(--color-gray-100);
+    --color-background: linear-gradient(180deg, #fcfaf6 0%, #f6f1e8 100%);
+    --color-surface: #fffdf8;
+    --color-surface-secondary: #f7f1e7;
 
     /* Text */
-    --color-text-primary: var(--color-gray-800);
-    --color-text-secondary: var(--color-gray-500);
-    --color-text-tertiary: var(--color-gray-400);
+    --color-text-primary: #2f2a24;
+    --color-text-secondary: #5f584f;
+    --color-text-tertiary: #857b70;
 
     /* Borders */
-    --color-border-primary: var(--color-gray-700);
-    --color-border-secondary: var(--color-gray-200);
-    --color-border-tertiary: var(--color-gray-300);
+    --color-border-primary: #d8cdc0;
+    --color-border-secondary: #e7ddd1;
+    --color-border-tertiary: #ddd2c5;
 
     /* Buttons */
     --color-button-primary-bg: var(--color-primary);
-    --color-button-primary-hover: var(--color-gray-700);
+    --color-button-primary-hover: var(--color-primary-hover);
     --color-button-secondary-bg: transparent;
-    --color-button-secondary-hover: var(--color-gray-100);
-    --color-button-secondary-border: var(--color-gray-200);
+    --color-button-secondary-hover: rgba(111, 92, 70, 0.06);
+    --color-button-secondary-border: #e3d7c9;
+
+    --color-background-accent-start: rgba(217, 196, 168, 0.22);
+    --color-background-accent-end: rgba(196, 176, 149, 0.16);
+    --color-accent-glow: rgba(150, 127, 98, 0.18);
+    --color-backdrop: rgba(48, 39, 28, 0.34);
+    --color-spinner-highlight: rgba(160, 142, 118, 0.14);
+    --color-shadow-rgb: 60, 44, 26;
 }
 
 :root[data-theme='dark'] {
     /* Backgrounds */
-    --color-background: linear-gradient(135deg, var(--color-gray-800), var(--color-gray-900));
-    --color-surface: var(--color-gray-800);
-    --color-surface-secondary: var(--color-gray-900);
+    --color-background: linear-gradient(180deg, #161311 0%, #1b1714 100%);
+    --color-surface: #211d19;
+    --color-surface-secondary: #2a2520;
 
     /* Text */
-    --color-text-primary: var(--color-gray-200);
-    --color-text-secondary: var(--color-gray-100);
-    --color-text-tertiary: var(--color-gray-300);
+    --color-text-primary: #ece4d8;
+    --color-text-secondary: #c5baac;
+    --color-text-tertiary: #9f9282;
 
     /* Borders */
-    --color-border-primary: var(--color-gray-100);
-    --color-border-secondary: var(--color-gray-600);
-    --color-border-tertiary: var(--color-gray-400);
+    --color-border-primary: rgba(196, 179, 157, 0.24);
+    --color-border-secondary: rgba(196, 179, 157, 0.12);
+    --color-border-tertiary: rgba(196, 179, 157, 0.18);
 
     /* Buttons */
     --color-button-primary-bg: var(--color-primary);
-    --color-button-primary-hover: var(--color-gray-700);
+    --color-button-primary-hover: #4f7de0;
     --color-button-secondary-bg: transparent;
-    --color-button-secondary-hover: var(--color-gray-800);
-    --color-button-secondary-border: var(--color-gray-600);
+    --color-button-secondary-hover: rgba(196, 179, 157, 0.08);
+    --color-button-secondary-border: rgba(196, 179, 157, 0.16);
+
+    --color-background-accent-start: rgba(95, 123, 186, 0.14);
+    --color-background-accent-end: rgba(113, 92, 71, 0.12);
+    --color-accent-glow: rgba(108, 138, 206, 0.22);
+    --color-backdrop: rgba(10, 8, 6, 0.68);
+    --color-spinner-highlight: rgba(196, 179, 157, 0.07);
+    --color-shadow-rgb: 8, 6, 4;
 }

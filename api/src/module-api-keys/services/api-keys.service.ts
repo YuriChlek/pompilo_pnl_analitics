@@ -14,6 +14,7 @@ import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.re
 import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class ApiKeysService {
@@ -112,8 +113,16 @@ export class ApiKeysService {
         return `This action updates a #${id} apiKey`;
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} apiKey`;
+    async remove(apiKeyId: string): Promise<{ removed: boolean }> {
+        try {
+            await this.apiKeysRepositoryService.remove(apiKeyId);
+
+            return {
+                removed: true,
+            };
+        } catch (error) {
+            this.handleUnexpectedError(error, 'Failed to remove API key');
+        }
     }
 
     private maskApiKey(apiKey: string): string {

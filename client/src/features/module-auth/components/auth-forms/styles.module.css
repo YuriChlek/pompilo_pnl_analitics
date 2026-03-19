@@ -8,13 +8,13 @@
 .form {
     padding: 2rem;
     border-radius: 1rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-lg);
     width: 100%;
     max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    border: 1px solid #334155;
+    border: 1px solid var(--color-border-primary);
 }
 
 .form h2 {

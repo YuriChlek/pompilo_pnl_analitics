@@ -16,8 +16,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background:
-        radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.18), transparent 45%),
-        radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.15), transparent 40%),
+        radial-gradient(circle at 20% 20%, var(--color-background-accent-start), transparent 45%),
+        radial-gradient(circle at 80% 0%, var(--color-background-accent-end), transparent 40%),
         var(--color-background);
     background-attachment: fixed;
     color: var(--color-text-primary);

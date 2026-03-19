@@ -1,18 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { tradingAccountService } from '@/features/module-trading-account/api-service';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     TradingAccount,
     TradingAccountPayload,
 } from '@/features/module-trading-account/interfaces/tradingAccount';
-
-export const useTradingAccountList = () => {
-    return useQuery<TradingAccount[]>({
-        queryKey: ['tradingAccountsList'],
-        queryFn: (): Promise<TradingAccount[]> => tradingAccountService.getTradingAccountList(),
-        gcTime: 300000,
-        refetchInterval: 10000,
-    });
-};
+import { tradingAccountService } from '@/features/module-trading-account/api-service';
 
 export const useCreateTradingAccount = () => {
     const queryClient = useQueryClient();

@@ -1,11 +1,10 @@
 import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from '@/module-auth/services/auth.service';
 import type { Request, Response } from 'express';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
 import { LoginCustomerDto } from '@/module-customer-auth/dto/login-customer.dto';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
 import { RegisterCustomerDto } from '@/module-customer-auth/dto/register-customer.dto';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums';
 
 @Injectable()
 export class CustomerAuthService {
@@ -28,7 +27,7 @@ export class CustomerAuthService {
     }
 
     async logout(request: Request, response: Response): Promise<void> {
-        await this.authService.logout(request, response, UserRoles.CUSTOMER);
+        await this.authService.logout(request, response, USER_ROLES.CUSTOMER);
     }
 
     async refreshCustomerToken(response: Response, request: Request) {
@@ -48,6 +47,6 @@ export class CustomerAuthService {
     }
 
     getMe(request: Request): UserPayload | null {
-        return this.authService.getMe(request, UserRoles.CUSTOMER);
+        return this.authService.getMe(request, USER_ROLES.CUSTOMER);
     }
 }

@@ -16,9 +16,9 @@ export const apiKeysService: AuthApiKeys = {
         return response.data as unknown as ApiKey;
     },
     async getUserApiKeys(): Promise<ApiKey[]> {
-        const response: HttpResponse<ApiKey[]> = await apiClient.post<ApiKey[], {}>(
+        const response: HttpResponse<ApiKey[]> = await apiClient.post<ApiKey[], null>(
             '/customer/api-key/user-api-keys',
-            {},
+            null,
         );
 
         if (!response.success) {
@@ -28,9 +28,14 @@ export const apiKeysService: AuthApiKeys = {
         return response.data as unknown as ApiKey[];
     },
     async updateApiKey(id: string, apiKey: string, publicKey: string): Promise<ApiKey | null> {
+
         return null;
     },
-    async removeApiKey(id: string): Promise<ApiKey | null> {
-        return null;
+    async removeApiKey(id: string): Promise<boolean | null> {
+        const response: HttpResponse<{removed: boolean}> = await apiClient.delete<{removed: boolean}>(
+            `/customer/api-key/remove/${id}`,
+        );
+
+        return response.data?.removed as unknown as boolean;
     },
 };

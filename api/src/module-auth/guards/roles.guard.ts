@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '@/module-auth/decorators/auth.decorator';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums';
 import { Request } from 'express';
 import { AccessTokenPayload } from '@/module-auth-token/interfaces/auth-token.interfaces';
 
@@ -10,7 +10,7 @@ export class RolesGuard implements CanActivate {
     constructor(private readonly reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {
-        const requiredRoles: UserRoles[] = this.reflector.getAllAndOverride<UserRoles[]>(
+        const requiredRoles: USER_ROLES[] = this.reflector.getAllAndOverride<USER_ROLES[]>(
             ROLES_KEY,
             [context.getHandler(), context.getClass()],
         );
@@ -27,7 +27,7 @@ export class RolesGuard implements CanActivate {
             throw new ForbiddenException('User not authorized.');
         }
 
-        if (!requiredRoles.includes(user.role as UserRoles)) {
+        if (!requiredRoles.includes(user.role as USER_ROLES)) {
             throw new ForbiddenException(`Access denied.`);
         }
 

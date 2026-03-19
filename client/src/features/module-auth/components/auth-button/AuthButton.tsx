@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/button';
-import { useLogout } from '@/features/module-auth/hooks';
+import { useLogout } from '@/features/module-auth/hooks/mutation';
 import styles from '@/features/module-auth/components/auth-button/styles.module.css';
 
 type AuthButtonProps = {

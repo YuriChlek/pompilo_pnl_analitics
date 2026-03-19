@@ -15,6 +15,11 @@ export interface TradingAccount {
     market: string;
 }
 
+export interface TradingAccountSettingsPopupProps {
+    tradingAccountId: string;
+    open: boolean;
+}
+
 /*
 export interface TradingAccountStatistic {}
 export interface TradingAccountClosedPnL {}

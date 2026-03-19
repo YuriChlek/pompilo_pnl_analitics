@@ -3,7 +3,7 @@
 import { FormEvent } from 'react';
 import styles from './styles.module.css';
 import { CreateUserData } from '@/features/module-auth/interfaces/auth';
-import { useRegister } from '@/features/module-auth/hooks';
+import { useRegister } from '@/features/module-auth/hooks/mutation';
 import { Button } from '@/components/button';
 
 export const RegisterForm = () => {

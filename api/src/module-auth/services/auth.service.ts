@@ -14,8 +14,8 @@ import ms, { type StringValue } from 'ms';
 import { LoginUserDto } from '@/module-auth/dto/login-user.dto';
 import { User } from '@/module-user/entities/user.entity';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
-import { UserRoles } from '@/module-auth/enums/role.enum';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
+import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums';
+
 import {
     type AccessTokenPayload,
     RefreshTokenVerificationResult,
@@ -110,7 +110,7 @@ export class AuthService {
         }
     }
 
-    async logout(request: Request, response: Response, userRole: UserRoles) {
+    async logout(request: Request, response: Response, userRole: USER_ROLES) {
         const cookiesKeys: string[] = Object.keys(request.cookies);
         const accessTokenCookieName: string = this.getCookieName(userRole, TokenType.ACCESS);
         const refreshTokenCookieName: string = this.getCookieName(userRole, TokenType.REFRESH);
@@ -137,7 +137,7 @@ export class AuthService {
         await this.tokenService.removeRefreshToken(userId, userAgent, ipAddress);
     }
 
-    getMe(request: Request, userRole: UserRoles): UserPayload | null {
+    getMe(request: Request, userRole: USER_ROLES): UserPayload | null {
         const cookieName: string = this.getCookieName(userRole, TokenType.ACCESS);
         const userToken: string = request.cookies[cookieName] as string;
 
@@ -150,7 +150,7 @@ export class AuthService {
                 id: userId,
                 email,
                 name: username,
-                role: role as UserRoles,
+                role: role as USER_ROLES,
             };
         }
 
@@ -200,7 +200,7 @@ export class AuthService {
         response: Response,
         token: string,
         type: TokenType,
-        userRole: UserRoles,
+        userRole: USER_ROLES,
     ): void {
         try {
             const ttl =
@@ -208,7 +208,9 @@ export class AuthService {
             const ttlMs = ms(ttl);
             const expires = new Date(Date.now() + ttlMs);
             const path: string =
-                userRole === UserRoles.ADMIN || userRole === UserRoles.SUPER_ADMIN ? '/admin' : '/';
+                userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN
+                    ? '/admin'
+                    : '/';
             const cookieName: string = this.getCookieName(userRole, type);
 
             response.cookie(cookieName, token, {
@@ -224,9 +226,9 @@ export class AuthService {
         }
     }
 
-    private removeTokenCookie(response: Response, userRole: UserRoles, tokenName: string): void {
+    private removeTokenCookie(response: Response, userRole: USER_ROLES, tokenName: string): void {
         const path =
-            userRole === UserRoles.ADMIN || userRole === UserRoles.SUPER_ADMIN ? '/admin' : '/';
+            userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN ? '/admin' : '/';
 
         response.cookie(tokenName, '', {
             httpOnly: true,
@@ -238,8 +240,9 @@ export class AuthService {
         });
     }
 
-    private getCookieName(userRole: UserRoles, type: TokenType): string {
-        const isAdmin: boolean = userRole === UserRoles.ADMIN || userRole === UserRoles.SUPER_ADMIN;
+    private getCookieName(userRole: USER_ROLES, type: TokenType): string {
+        const isAdmin: boolean =
+            userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN;
 
         if (isAdmin) {
             return type === TokenType.ACCESS
@@ -264,12 +267,12 @@ export class AuthService {
         };
     }
 
-    private isRoleAllowed(userRole: UserRoles, requestedRole: UserRoles): boolean {
-        const adminRoles = [UserRoles.ADMIN, UserRoles.SUPER_ADMIN];
+    private isRoleAllowed(userRole: USER_ROLES, requestedRole: USER_ROLES): boolean {
+        const adminRoles = [USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN];
 
-        if (userRole === UserRoles.CUSTOMER && adminRoles.includes(requestedRole)) return false;
+        if (userRole === USER_ROLES.CUSTOMER && adminRoles.includes(requestedRole)) return false;
 
-        return !(adminRoles.includes(userRole) && requestedRole === UserRoles.CUSTOMER);
+        return !(adminRoles.includes(userRole) && requestedRole === USER_ROLES.CUSTOMER);
     }
 
     private async setTokens(

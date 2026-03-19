@@ -4,11 +4,11 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Button } from '@/components/button';
 import { Popup } from '@/components/popup/Popup';
 import styles from './styles.module.css';
-import { useApiKeysList } from '@/features/module-api-keys/hooks';
 import { useRouter } from 'next/navigation';
 import { ApiKey } from '@/features/module-api-keys/interfaces/apiKeys';
-import { useCreateTradingAccount } from '@/features/module-trading-account/hooks';
+import { useCreateTradingAccount } from '@/features/module-trading-account/hooks/mutation';
 import { EmptyState } from '@/components/empty-state';
+import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
 
 export const AddTradingAccount = () => {
     const [open, setOpen] = useState(false);

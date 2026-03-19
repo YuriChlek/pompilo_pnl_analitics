@@ -1,9 +1,8 @@
 import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from '@/module-auth/services/auth.service';
 import type { Request, Response } from 'express';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
 import { LoginAdminDto } from '@/module-admin-auth/dto/login-admin.dto';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
 
 @Injectable()
@@ -15,7 +14,7 @@ export class AdminAuthService {
     }
 
     async logout(request: Request, response: Response): Promise<void> {
-        await this.authService.logout(request, response, UserRoles.ADMIN);
+        await this.authService.logout(request, response, USER_ROLES.ADMIN);
     }
 
     async refreshAdminToken(response: Response, request: Request) {
@@ -35,6 +34,6 @@ export class AdminAuthService {
     }
 
     getMe(request: Request): UserPayload | null {
-        return this.authService.getMe(request, UserRoles.ADMIN);
+        return this.authService.getMe(request, USER_ROLES.ADMIN);
     }
 }

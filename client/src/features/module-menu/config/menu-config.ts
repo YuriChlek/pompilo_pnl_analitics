@@ -4,8 +4,8 @@ export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
     const config: Record<string, Array<MenuItem>> = {
         customer: [
             {
-                title: 'Account',
-                href: '/customer/account',
+                title: 'Dashboard',
+                href: '/customer/dashboard',
             },
             {
                 title: 'API Keys',
@@ -16,12 +16,16 @@ export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
                 href: '/customer/trading-account',
             },
             {
+                title: 'Trading strategies',
+                href: '/customer/trading-strategies',
+            },
+            {
                 title: 'Diary',
                 href: '/customer/analise-diary',
             },
             {
-                title: 'Dashboard',
-                href: '/customer/dashboard',
+                title: 'Account',
+                href: '/customer/account',
             },
         ],
         guest: [

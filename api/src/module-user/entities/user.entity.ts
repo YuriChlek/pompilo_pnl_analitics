@@ -8,7 +8,7 @@ import {
     Index,
 } from 'typeorm';
 
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums';
 import { Token } from '@/module-auth-token/entities/auth-token.entity';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 
@@ -31,10 +31,10 @@ export class User {
     @Column({
         type: 'enum',
         name: 'role',
-        enum: UserRoles,
-        default: UserRoles.CUSTOMER,
+        enum: USER_ROLES,
+        default: USER_ROLES.CUSTOMER,
     })
-    role: UserRoles;
+    role: USER_ROLES;
 
     @Column({ name: 'is_active', default: true })
     isActive: boolean;

@@ -1,6 +1,6 @@
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 
 export class ApiKeysRepositoryService {
     public constructor(
@@ -12,9 +12,11 @@ export class ApiKeysRepositoryService {
         return await this.apiKeysRepository.save(apiKeyPayload);
     }
 
-    async updateApiKey() {}
+    async update() {}
 
-    async removeApiKeyBuId() {}
+    async remove(apiKeyId: string): Promise<DeleteResult> {
+        return await this.apiKeysRepository.delete(apiKeyId);
+    }
 
     async getUserExchangeAccountId(apiKeyId: string): Promise<string | null> {
         const record = await this.apiKeysRepository.findOne({

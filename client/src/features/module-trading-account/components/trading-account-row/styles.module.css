@@ -1,5 +1,12 @@
 .actions {
     text-align: right;
+    position: relative;
+}
+
+.actionsInner {
+    position: relative;
+    display: inline-flex;
+    justify-content: flex-end;
 }
 
 .row {

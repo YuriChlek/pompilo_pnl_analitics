@@ -1,10 +1,10 @@
 'use client';
 
-import { useTradingAccountList } from '@/features/module-trading-account/hooks';
 import styles from '@/features/module-api-keys/components/api-keys-list/styles.module.css';
 import { TradingAccountRow } from '@/features/module-trading-account/components/trading-account-row/TradingAccountRow';
 import { Loader } from '@/components/loader/Loader';
 import { EmptyState } from '@/components/empty-state';
+import { useTradingAccountList } from '@/features/module-trading-account/hooks/query';
 
 export const TradingAccountsList = () => {
     const { data, isLoading, isError, error } = useTradingAccountList();

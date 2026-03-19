@@ -3,7 +3,7 @@
 import { FormEvent } from 'react';
 import styles from './styles.module.css';
 import { LoginData, UserRoles } from '@/features/module-auth/interfaces/auth';
-import { useLogin } from '@/features/module-auth/hooks';
+import { useLogin } from '@/features/module-auth/hooks/mutation';
 import { Button } from '@/components/button';
 
 interface LoginFormProps {

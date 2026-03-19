@@ -4,7 +4,7 @@ import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 import type { Request } from 'express';
 import { Authorisation } from '@/module-auth/decorators/auth.decorator';
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 @Controller()
 export class ApiKeysController {

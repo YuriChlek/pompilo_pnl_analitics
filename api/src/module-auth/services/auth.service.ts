@@ -14,13 +14,13 @@ import ms, { type StringValue } from 'ms';
 import { LoginUserDto } from '@/module-auth/dto/login-user.dto';
 import { User } from '@/module-user/entities/user.entity';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
-import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums';
+import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums/auth-enums';
 
 import {
     type AccessTokenPayload,
     RefreshTokenVerificationResult,
-    TokenType,
 } from '@/module-auth-token/interfaces/auth-token.interfaces';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 
 @Injectable()
 export class AuthService {
@@ -112,8 +112,8 @@ export class AuthService {
 
     async logout(request: Request, response: Response, userRole: USER_ROLES) {
         const cookiesKeys: string[] = Object.keys(request.cookies);
-        const accessTokenCookieName: string = this.getCookieName(userRole, TokenType.ACCESS);
-        const refreshTokenCookieName: string = this.getCookieName(userRole, TokenType.REFRESH);
+        const accessTokenCookieName: string = this.getCookieName(userRole, TOKEN_TYPE.ACCESS);
+        const refreshTokenCookieName: string = this.getCookieName(userRole, TOKEN_TYPE.REFRESH);
 
         if (
             !cookiesKeys.includes(accessTokenCookieName) ||
@@ -138,7 +138,7 @@ export class AuthService {
     }
 
     getMe(request: Request, userRole: USER_ROLES): UserPayload | null {
-        const cookieName: string = this.getCookieName(userRole, TokenType.ACCESS);
+        const cookieName: string = this.getCookieName(userRole, TOKEN_TYPE.ACCESS);
         const userToken: string = request.cookies[cookieName] as string;
 
         if (userToken) {
@@ -199,12 +199,12 @@ export class AuthService {
     private setTokenCookie(
         response: Response,
         token: string,
-        type: TokenType,
+        type: TOKEN_TYPE,
         userRole: USER_ROLES,
     ): void {
         try {
             const ttl =
-                type === TokenType.ACCESS ? this.JWT_ACCESS_TOKEN_TTL : this.JWT_REFRESH_TOKEN_TTL;
+                type === TOKEN_TYPE.ACCESS ? this.JWT_ACCESS_TOKEN_TTL : this.JWT_REFRESH_TOKEN_TTL;
             const ttlMs = ms(ttl);
             const expires = new Date(Date.now() + ttlMs);
             const path: string =
@@ -240,17 +240,17 @@ export class AuthService {
         });
     }
 
-    private getCookieName(userRole: USER_ROLES, type: TokenType): string {
+    private getCookieName(userRole: USER_ROLES, type: TOKEN_TYPE): string {
         const isAdmin: boolean =
             userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN;
 
         if (isAdmin) {
-            return type === TokenType.ACCESS
+            return type === TOKEN_TYPE.ACCESS
                 ? COOKIE_NAMES.ADMIN_ACCESS_TOKEN
                 : COOKIE_NAMES.ADMIN_REFRESH_TOKEN;
         }
 
-        return type === TokenType.ACCESS
+        return type === TOKEN_TYPE.ACCESS
             ? COOKIE_NAMES.CUSTOMER_ACCESS_TOKEN
             : COOKIE_NAMES.CUSTOMER_REFRESH_TOKEN;
     }
@@ -282,11 +282,11 @@ export class AuthService {
     ): Promise<void> {
         try {
             const accessToken: string = this.tokenService.createAccessToken(payload);
-            this.setTokenCookie(response, accessToken, TokenType.ACCESS, payload.role);
+            this.setTokenCookie(response, accessToken, TOKEN_TYPE.ACCESS, payload.role);
 
             if (setRefreshToken) {
                 const refreshToken: string = await this.tokenService.createRefreshToken(payload);
-                this.setTokenCookie(response, refreshToken, TokenType.REFRESH, payload.role);
+                this.setTokenCookie(response, refreshToken, TOKEN_TYPE.REFRESH, payload.role);
             }
         } catch (error) {
             this.handleUnexpectedError(error, 'Failed to set authentication tokens');

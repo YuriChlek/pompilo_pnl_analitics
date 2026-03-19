@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 export class CreateTradingAccountDto {
     @ApiProperty({
@@ -21,17 +21,17 @@ export class CreateTradingAccountDto {
 
     @ApiProperty({
         description: 'Exchange name',
-        enum: Exchanges,
-        example: Exchanges.BYBIT,
+        enum: EXCHANGES,
+        example: EXCHANGES.BYBIT,
     })
-    @IsEnum(Exchanges)
-    exchange: Exchanges;
+    @IsEnum(EXCHANGES)
+    exchange: EXCHANGES;
 
     @ApiProperty({
         description: 'Market type',
-        enum: MarketTypes,
-        example: MarketTypes.FUTURES,
+        enum: MARKET_TYPES,
+        example: MARKET_TYPES.FUTURES,
     })
-    @IsEnum(MarketTypes)
-    market: MarketTypes;
+    @IsEnum(MARKET_TYPES)
+    market: MARKET_TYPES;
 }

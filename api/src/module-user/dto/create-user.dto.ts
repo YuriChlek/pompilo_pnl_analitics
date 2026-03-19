@@ -8,7 +8,7 @@ import {
     Matches,
     MinLength,
 } from 'class-validator';
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Type } from 'class-transformer';
 

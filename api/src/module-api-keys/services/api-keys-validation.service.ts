@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BybitService } from '@/module-bybit/services/bybit.service';
-import { Exchanges } from '@/module-api-keys/enums';
+import { EXCHANGES } from '@/module-api-keys/enums/api-keys-enums';
 import { ApiValidationInterface } from '@/module-api-keys/interfaces/api-keys.interfaces';
 
 @Injectable()
@@ -10,14 +10,14 @@ export class ApiKeysValidationService {
     async validate(
         apiKeyId: string,
         privateKey: string,
-        exchange: Exchanges,
+        exchange: EXCHANGES,
     ): Promise<ApiValidationInterface | undefined> {
         switch (exchange) {
-            case Exchanges.BYBIT:
-                return await this.validateBybitApiKey(Exchanges.BYBIT, apiKeyId, privateKey);
-            case Exchanges.BYBIT_DEMO:
-                return await this.validateBybitApiKey(Exchanges.BYBIT_DEMO, apiKeyId, privateKey);
-            case Exchanges.BINANCE:
+            case EXCHANGES.BYBIT:
+                return await this.validateBybitApiKey(EXCHANGES.BYBIT, apiKeyId, privateKey);
+            case EXCHANGES.BYBIT_DEMO:
+                return await this.validateBybitApiKey(EXCHANGES.BYBIT_DEMO, apiKeyId, privateKey);
+            case EXCHANGES.BINANCE:
                 return await this.validateBinanceApiKey(apiKeyId, privateKey);
             default:
                 return {
@@ -28,7 +28,7 @@ export class ApiKeysValidationService {
     }
 
     async validateBybitApiKey(
-        exchange: Exchanges.BYBIT_DEMO | Exchanges.BYBIT,
+        exchange: EXCHANGES.BYBIT_DEMO | EXCHANGES.BYBIT,
         apiKey: string,
         privateKey: string,
     ): Promise<ApiValidationInterface | undefined> {

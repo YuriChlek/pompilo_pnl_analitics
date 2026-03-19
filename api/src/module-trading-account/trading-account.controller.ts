@@ -3,7 +3,7 @@ import { TradingAccountService } from './services/trading-account.service';
 import { CreateTradingAccountDto } from './dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from './dto/update-trading-account.dto';
 import { Authorisation } from '@/module-auth/decorators/auth.decorator';
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 import type { Request } from 'express';
 
 @Controller()

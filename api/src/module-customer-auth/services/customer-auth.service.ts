@@ -4,7 +4,7 @@ import type { Request, Response } from 'express';
 import { LoginCustomerDto } from '@/module-customer-auth/dto/login-customer.dto';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
 import { RegisterCustomerDto } from '@/module-customer-auth/dto/register-customer.dto';
-import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums';
+import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums/auth-enums';
 
 @Injectable()
 export class CustomerAuthService {

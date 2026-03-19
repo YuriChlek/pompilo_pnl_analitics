@@ -1,5 +1,5 @@
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 
 let tradingSeq = 1;
 

@@ -28,7 +28,7 @@ import { UserRoles } from '@/module-auth/enums/role.enum';
 import { ApiKeysController } from '@/module-api-keys/api-keys.controller';
 import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
 import { CreateApiKeyDto } from '@/module-api-keys/dto/create-api-key.dto';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import type { AccessTokenPayload } from '@/module-auth-token/interfaces/auth-token.interfaces';
 import { JwtAuthGuard } from '@/module-auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/module-auth/guards/roles.guard';

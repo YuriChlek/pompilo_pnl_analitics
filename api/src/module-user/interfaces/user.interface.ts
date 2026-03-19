@@ -1,4 +1,4 @@
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 export interface UserPayload {
     id: string;

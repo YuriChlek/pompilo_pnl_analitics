@@ -10,13 +10,13 @@ import {
     RefreshTokenPayload,
     RefreshTokenVerificationResult,
     TokenFromDbPayload,
-    TokenType,
 } from '@/module-auth-token/interfaces/auth-token.interfaces';
 import { UserJWTPayload } from '@/module-user/interfaces/user.interface';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
 import { randomBytes } from 'crypto';
 import { normalizeStr } from '@/common/utils/string.utils';
 import { AuthTokenRepositoryService } from '@/module-auth-token/services/auth-token.repository.service';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 
 @Injectable()
 export class AuthTokenService {
@@ -35,7 +35,7 @@ export class AuthTokenService {
                 role: user.role,
                 ipAddress: user.ipAddress,
                 userAgent: normalizeStr(user.userAgent),
-                type: TokenType.ACCESS,
+                type: TOKEN_TYPE.ACCESS,
             };
 
             return this.tokenService.createAccessToken(accessTokenPayload);
@@ -55,7 +55,7 @@ export class AuthTokenService {
                 userId: user.id,
                 userAgent: normalizeStr(user.userAgent),
                 ipAddress: user.ipAddress,
-                type: TokenType.REFRESH,
+                type: TOKEN_TYPE.REFRESH,
                 jti: randomBytes(64).toString('hex'),
             };
 

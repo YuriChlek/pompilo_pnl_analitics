@@ -2,7 +2,7 @@ import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
 import { AuthPasswordDto } from '@/module-auth/dto/auth-password.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 export class LoginUserDto extends AuthPasswordDto {
     @ApiProperty({

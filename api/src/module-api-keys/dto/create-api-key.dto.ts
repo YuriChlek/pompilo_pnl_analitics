@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class CreateApiKeyDto {
@@ -26,20 +26,20 @@ export class CreateApiKeyDto {
         example: 'bybit',
     })
     @IsNotEmpty({ message: 'Exchange is required.' })
-    @IsEnum(Exchanges, {
-        message: `Exchange must be one of: ${Object.values(Exchanges).join(', ')}`,
+    @IsEnum(EXCHANGES, {
+        message: `Exchange must be one of: ${Object.values(EXCHANGES).join(', ')}`,
     })
-    exchange: Exchanges;
+    exchange: EXCHANGES;
 
     @ApiProperty({
         description: 'Market type',
-        example: MarketTypes.FUTURES,
+        example: MARKET_TYPES.FUTURES,
     })
     @IsNotEmpty({ message: 'Market is required.' })
-    @IsEnum(MarketTypes, {
-        message: `Market must be one of: ${Object.values(MarketTypes).join(', ')}`,
+    @IsEnum(MARKET_TYPES, {
+        message: `Market must be one of: ${Object.values(MARKET_TYPES).join(', ')}`,
     })
-    market: MarketTypes;
+    market: MARKET_TYPES;
 
     @ApiPropertyOptional({
         description: 'Custom account name for identification',

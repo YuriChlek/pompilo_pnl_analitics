@@ -9,7 +9,7 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.repository.service';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import { buildCreateApiKeyDto } from '../../fixtures/api-keys.fixtures';
 

@@ -1,4 +1,4 @@
-export enum Exchanges {
+export enum EXCHANGES {
     BYBIT = 'bybit',
     BYBIT_DEMO = 'bybit-demo',
     BINANCE = 'binance',
@@ -6,13 +6,13 @@ export enum Exchanges {
     HYPER_LIQUID = 'hyper-liquid',
 }
 
-export enum MarketTypes {
+export enum MARKET_TYPES {
     FUTURES = 'linear',
     INVERSE_FUTURES = 'inverse',
     SPOT = 'spot',
 }
 
-export enum ConnectionStatus {
+export enum CONNECTION_STATUS {
     CONNECTED = 'CONNECTED',
     DISCONNECTED = 'DISCONNECTED',
 }

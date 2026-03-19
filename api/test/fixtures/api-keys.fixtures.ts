@@ -1,4 +1,4 @@
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import { CreateApiKeyDto } from '@/module-api-keys/dto/create-api-key.dto';
 
 let apiKeySeq = 1000;

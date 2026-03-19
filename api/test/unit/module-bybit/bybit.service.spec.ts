@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpException, InternalServerErrorException } from '@nestjs/common';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);

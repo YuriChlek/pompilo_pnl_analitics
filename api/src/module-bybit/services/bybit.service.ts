@@ -9,7 +9,7 @@ import {
 } from '@/module-bybit/interfaces/bybit-exchange.interfaces';
 import { ApiValidationInterface } from '@/module-api-keys/interfaces/api-keys.interfaces';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 @Injectable()
@@ -26,13 +26,13 @@ export class BybitService {
     }
 
     async getTradingPnl(
-        exchange: Exchanges.BYBIT | Exchanges.BYBIT_DEMO,
+        exchange: EXCHANGES.BYBIT | EXCHANGES.BYBIT_DEMO,
         apiKey: string,
         secret: string,
-        category: MarketTypes,
+        category: MARKET_TYPES,
         lastTradeTime: string | null,
     ): Promise<FuturesClosedPnl[]> {
-        const bybitUrl = exchange === Exchanges.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
+        const bybitUrl = exchange === EXCHANGES.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
         const endpoint = `${bybitUrl}/v5/position/closed-pnl`;
         const recvWindow = '20000';
 
@@ -116,14 +116,14 @@ export class BybitService {
     }
 
     async validateApiKey(
-        exchange: Exchanges.BYBIT | Exchanges.BYBIT_DEMO,
+        exchange: EXCHANGES.BYBIT | EXCHANGES.BYBIT_DEMO,
         apiKey: string,
         secret: string,
     ): Promise<ApiValidationInterface | undefined> {
         const timestamp = Date.now().toString();
         const recvWindow = '5000';
         const queryString = '';
-        const bybitUrl = exchange === Exchanges.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
+        const bybitUrl = exchange === EXCHANGES.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
         const endpoint = `${bybitUrl}/v5/user/query-api`;
 
         const signature = this.generateSignature(

@@ -1,9 +1,5 @@
 import { User } from '@/module-user/entities/user.entity';
-
-export enum TokenType {
-    ACCESS = 'access',
-    REFRESH = 'refresh',
-}
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 
 export type RefreshTokenVerificationResult =
     | { verified: true; user: Partial<User> }
@@ -14,7 +10,7 @@ interface BaseTokenMeta {
     userAgent: string;
 }
 
-interface JwtPayloadBase<T extends TokenType> extends BaseTokenMeta {
+interface JwtPayloadBase<T extends TOKEN_TYPE> extends BaseTokenMeta {
     sub: string;
     userId: string;
     type: T;
@@ -27,11 +23,11 @@ export interface TokenFromDbPayload extends BaseTokenMeta {
 }
 
 /** ===== JWT ===== */
-export interface RefreshTokenPayload extends JwtPayloadBase<TokenType.REFRESH> {
+export interface RefreshTokenPayload extends JwtPayloadBase<TOKEN_TYPE.REFRESH> {
     jti: string;
 }
 
-export interface AccessTokenPayload extends JwtPayloadBase<TokenType.ACCESS> {
+export interface AccessTokenPayload extends JwtPayloadBase<TOKEN_TYPE.ACCESS> {
     email: string;
     username: string;
     role: string | string[];

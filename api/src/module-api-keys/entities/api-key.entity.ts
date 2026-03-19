@@ -8,7 +8,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
-import { ConnectionStatus, Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { CONNECTION_STATUS, EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { Exclude } from 'class-transformer';
 import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
 
@@ -44,24 +44,24 @@ export class ApiKey {
     @Column({
         type: 'enum',
         name: 'exchange',
-        enum: Exchanges,
+        enum: EXCHANGES,
     })
-    exchange: Exchanges;
+    exchange: EXCHANGES;
 
     @Column({
         type: 'enum',
         name: 'connection_status',
-        enum: ConnectionStatus,
-        default: ConnectionStatus.CONNECTED,
+        enum: CONNECTION_STATUS,
+        default: CONNECTION_STATUS.CONNECTED,
     })
-    connectionStatus: ConnectionStatus;
+    connectionStatus: CONNECTION_STATUS;
 
     @Column({
         type: 'enum',
         name: 'market',
-        enum: MarketTypes,
+        enum: MARKET_TYPES,
     })
-    market: MarketTypes;
+    market: MARKET_TYPES;
 
     @Column({
         type: 'varchar',

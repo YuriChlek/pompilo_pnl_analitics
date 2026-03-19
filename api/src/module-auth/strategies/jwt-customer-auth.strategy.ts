@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { JWT_ALGORITHM } from '@/module-auth/constants/auth.constants';
 import { AccessTokenPayload } from '@/module-auth-token/interfaces/auth-token.interfaces';
-import { COOKIE_NAMES } from '@/module-auth/enums';
+import { COOKIE_NAMES } from '@/module-auth/enums/auth-enums';
 
 @Injectable()
 export class JwtCustomerAuthStrategy extends PassportStrategy(Strategy, 'customer-jwt') {

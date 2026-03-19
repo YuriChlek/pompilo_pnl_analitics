@@ -15,7 +15,7 @@ import {
 } from './support/e2e-test.module';
 import { UserRoles } from '@/module-auth/enums/role.enum';
 import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import { JwtAuthGuard } from '@/module-auth/guards/jwt-auth.guard';
 import { expectSuccessResponse, expectErrorResponse } from '../utils/request-helpers';
 

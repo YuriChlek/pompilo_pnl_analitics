@@ -1,12 +1,12 @@
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 export interface ExchangeSyncPnlJob {
     tradingAccountId: string;
     apiKey: string;
     secretKey: string;
-    market: MarketTypes;
+    market: MARKET_TYPES;
 }
 
 export interface BybitSyncPnlJobResponse extends ExchangeSyncPnlJob {
-    exchange: Exchanges.BYBIT_DEMO | Exchanges.BYBIT;
+    exchange: EXCHANGES.BYBIT_DEMO | EXCHANGES.BYBIT;
 }

@@ -14,7 +14,6 @@ import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.re
 import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
-import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class ApiKeysService {

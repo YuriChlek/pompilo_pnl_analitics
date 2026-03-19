@@ -8,7 +8,7 @@ import {
     Index,
 } from 'typeorm';
 
-import { USER_ROLES } from '@/module-auth/enums';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { Token } from '@/module-auth-token/entities/auth-token.entity';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 

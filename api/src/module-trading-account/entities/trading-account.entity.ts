@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 @Entity({ name: 'trading_account' })
 export class TradingAccount {
@@ -29,9 +29,9 @@ export class TradingAccount {
 
     @Column({
         type: 'enum',
-        enum: Exchanges,
+        enum: EXCHANGES,
     })
-    exchange: Exchanges;
+    exchange: EXCHANGES;
 
     @Column({
         type: 'varchar',
@@ -41,7 +41,7 @@ export class TradingAccount {
 
     @Column({
         type: 'enum',
-        enum: MarketTypes,
+        enum: MARKET_TYPES,
     })
-    market: MarketTypes;
+    market: MARKET_TYPES;
 }

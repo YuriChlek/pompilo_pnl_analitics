@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { ExchangePnlProcessor } from '@/module-processor/processors/exchange-pnl.processor';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';

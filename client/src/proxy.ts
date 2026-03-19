@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { COOKIE_NAMES } from '@/features/module-auth/constants/auth.constants';
+import {COOKIE_NAMES} from "@/features/module-auth/enums/auth.enums";
 
 const STATIC_PATH_REGEX =
     /^\/(_next|api|favicon\.ico$|.*\.(js|css|map|png|jpg|jpeg|gif|svg|woff|woff2)$)/;

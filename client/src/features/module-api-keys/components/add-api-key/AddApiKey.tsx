@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Button } from '@/components/button';
 import { Popup } from '@/components/popup/Popup';
 import styles from './styles.module.css';
-import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums';
+import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums/api-keys.enums';
 import { ApiKeyPayload } from '@/features/module-api-keys/interfaces/apiKeys';
 import { useCreateApiKey } from '@/features/module-api-keys/hooks/mutation';
 

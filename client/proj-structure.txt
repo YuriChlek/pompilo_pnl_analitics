@@ -34,9 +34,9 @@ src/
 ├── features/                     # Модулі (основне місце для запитів)
 │   └── auth/                     # Приклад модуля
 │       ├── api/                  # ⭐ API модуля
-│       │   ├── index.ts   // Queries модуля
+│       │   ├── api-keys.enums.ts   // Queries модуля
 │       │   ├── auth.mutations.ts // Mutations модуля
-│       │   ├── index.ts       // API функції модуля
+│       │   ├── api-keys.enums.ts       // API функції модуля
 │       │   ├── query-keys.ts     // Query keys модуля
 │       │   └── http-http-client.config.ts.sample          // Експорт API
 │       │

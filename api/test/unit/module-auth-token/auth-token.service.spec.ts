@@ -3,9 +3,9 @@ import { AuthTokenService } from '@/module-auth-token/services/auth-token.servic
 import { TokenService } from '@/module-auth-token/services/token.service';
 import { AuthTokenRepositoryService } from '@/module-auth-token/services/auth-token.repository.service';
 import { UserJWTPayload } from '@/module-user/interfaces/user.interface';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
-import { TokenType } from '@/module-auth-token/interfaces/auth-token.interfaces';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 
 jest.mock('@/common/utils/hash.util', () => ({
     Argon2HashUtil: {
@@ -41,7 +41,7 @@ describe('AuthTokenService', () => {
         id: 'user-id',
         name: 'John Doe',
         email: 'john@example.com',
-        role: UserRoles.CUSTOMER,
+        role: USER_ROLES.CUSTOMER,
         ipAddress: '203.0.113.1',
         userAgent: 'Mac Chrome',
     };
@@ -79,7 +79,7 @@ describe('AuthTokenService', () => {
                 role: userPayload.role,
                 ipAddress: userPayload.ipAddress,
                 userAgent: 'mac chrome',
-                type: TokenType.ACCESS,
+                type: TOKEN_TYPE.ACCESS,
             });
             expect(token).toBe('signed-access');
         });
@@ -124,7 +124,7 @@ describe('AuthTokenService', () => {
 
     describe('verifyRefreshToken', () => {
         const payload = {
-            type: TokenType.REFRESH,
+            type: TOKEN_TYPE.REFRESH,
             userId: 'user-id',
             ipAddress: '203.0.113.1',
             userAgent: 'mac chrome',

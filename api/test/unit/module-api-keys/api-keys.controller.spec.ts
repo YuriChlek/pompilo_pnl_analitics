@@ -55,11 +55,13 @@ describe('ApiKeysController', () => {
         expect(getUserApiKeysMock).toHaveBeenCalledWith(req);
     });
 
-    it('delegates update and remove handlers to the service', () => {
-        controller.update('5', {} as UpdateApiKeyDto);
-        expect(updateMock).toHaveBeenCalledWith(5, expect.any(Object));
+    it('delegates update and remove handlers to the service', async () => {
+        const req = {} as Request;
 
-        controller.remove('10');
-        expect(removeMock).toHaveBeenCalledWith(10);
+        await controller.update(req, '5', {} as UpdateApiKeyDto);
+        expect(updateMock).toHaveBeenCalledWith(req, '5', expect.any(Object));
+
+        await controller.remove('10');
+        expect(removeMock).toHaveBeenCalledWith('10');
     });
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent } from 'react';
-import styles from './styles.module.css';
+import styles from '@/features/module-auth/components/auth-forms/styles.module.css';
 import { CreateUserData } from '@/features/module-auth/interfaces/auth';
 import { useRegister } from '@/features/module-auth/hooks/mutation';
 import { Button } from '@/components/button';

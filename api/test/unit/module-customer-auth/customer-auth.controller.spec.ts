@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { CustomerAuthController } from '@/module-customer-auth/customer-auth.controller';
 import { CustomerAuthService } from '@/module-customer-auth/services/customer-auth.service';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 describe('CustomerAuthController', () => {
     let controller: CustomerAuthController;
@@ -46,7 +46,7 @@ describe('CustomerAuthController', () => {
         const dto: Parameters<CustomerAuthController['login']>[2] = {
             login: 'john',
             password: 'Secret123',
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         };
 
         await controller.login(res, req, dto);

@@ -4,20 +4,6 @@
     font-size: clamp(2.25rem, 4vw, 3rem);
     font-weight: var(--font-weight-bold);
     letter-spacing: var(--letter-spacing-tight);
-    background-image: linear-gradient(120deg, var(--color-primary), var(--color-text-primary));
-    -webkit-background-clip: text;
-    color: transparent;
+    color: var(--color-text-primary);
     position: relative;
-}
-
-.title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -0.5rem;
-    width: 72px;
-    height: 3px;
-    border-radius: var(--border-radius-sm);
-    background: var(--color-primary);
-    opacity: 0.35;
 }

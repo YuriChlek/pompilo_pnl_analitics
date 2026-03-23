@@ -1,4 +1,4 @@
-import styles from './styles.module.css';
+import styles from '@/components/page-title/styles.module.css';
 
 interface PageTitleProps {
     pageTitle: string;

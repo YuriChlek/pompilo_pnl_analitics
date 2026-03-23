@@ -18,11 +18,22 @@ export interface ApiKeyPayload {
 export interface AuthApiKeys {
     createApiKey: (apiKeyPayload: ApiKeyPayload) => Promise<ApiKey>;
     getUserApiKeys(): Promise<ApiKey[]>;
-    updateApiKey(id: string, apiKey: string, publicKey: string): Promise<ApiKey | null>;
+    updateApiKey(id: string, apiKeyPayload: ApiKeyPayload): Promise<ApiKey | null>;
     removeApiKey(id: string): Promise<boolean | null>;
 }
 
 export interface ApiKeySettingsPopupProps {
-    apiKeyId: string;
+    apiKey: ApiKey;
     open: boolean;
+    onClose: () => void;
 }
+
+export interface ApiKeyFormPopupProps {
+    open: boolean;
+    title: string;
+    submitLabel: string;
+    initialData: ApiKeyPayload;
+    onClose: () => void;
+    onSubmit: (payload: ApiKeyPayload) => void;
+    isPending?: boolean;
+};

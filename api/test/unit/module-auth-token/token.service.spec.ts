@@ -4,8 +4,8 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import {
     AccessTokenPayload,
     RefreshTokenPayload,
-    TokenType,
 } from '@/module-auth-token/interfaces/auth-token.interfaces';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 
 describe('TokenService', () => {
     let service: TokenService;
@@ -41,7 +41,7 @@ describe('TokenService', () => {
             role: 'customer',
             ipAddress: '1.1.1.1',
             userAgent: 'ua',
-            type: TokenType.ACCESS,
+            type: TOKEN_TYPE.ACCESS,
         } satisfies AccessTokenPayload;
 
         const token = service.createAccessToken(payload);
@@ -56,7 +56,7 @@ describe('TokenService', () => {
             userId: 'user-id',
             ipAddress: '1.1.1.1',
             userAgent: 'ua',
-            type: TokenType.REFRESH,
+            type: TOKEN_TYPE.REFRESH,
             jti: 'id',
         } satisfies RefreshTokenPayload;
 

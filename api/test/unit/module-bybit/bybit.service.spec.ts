@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpException, InternalServerErrorException } from '@nestjs/common';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -64,10 +64,10 @@ describe('BybitService', () => {
                 );
 
             const result = await service.getTradingPnl(
-                Exchanges.BYBIT,
+                EXCHANGES.BYBIT,
                 'apiKey',
                 'secret',
-                MarketTypes.FUTURES,
+                MARKET_TYPES.FUTURES,
                 '0',
             );
 
@@ -81,7 +81,7 @@ describe('BybitService', () => {
             );
 
             await expect(
-                service.getTradingPnl(Exchanges.BYBIT, 'api', 'secret', MarketTypes.FUTURES, '0'),
+                service.getTradingPnl(EXCHANGES.BYBIT, 'api', 'secret', MARKET_TYPES.FUTURES, '0'),
             ).rejects.toBeInstanceOf(HttpException);
         });
     });
@@ -114,7 +114,7 @@ describe('BybitService', () => {
                 createResponse({ retCode: 0, result: { userID: '123' } }),
             );
 
-            const result = await service.validateApiKey(Exchanges.BYBIT, 'api', 'secret');
+            const result = await service.validateApiKey(EXCHANGES.BYBIT, 'api', 'secret');
 
             expect(result).toEqual({ valid: true, exchangeUserAccountId: '123' });
         });
@@ -127,7 +127,7 @@ describe('BybitService', () => {
             });
 
             await expect(
-                service.validateApiKey(Exchanges.BYBIT, 'api', 'secret'),
+                service.validateApiKey(EXCHANGES.BYBIT, 'api', 'secret'),
             ).rejects.toBeInstanceOf(HttpException);
         });
     });

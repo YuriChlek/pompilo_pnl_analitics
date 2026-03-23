@@ -8,7 +8,7 @@ import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { buildTradingAccountDto } from '../../fixtures/trading.fixtures';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
@@ -66,8 +66,8 @@ describe('TradingAccountService', () => {
                 apiKeyName: 'API Key',
                 apiKey: 'APIKEY',
                 secretKey: 'SECRET',
-                exchange: Exchanges.BYBIT,
-                market: MarketTypes.FUTURES,
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
                 exchangeUserAccountId: 'acc-1',
             } as ApiKey);
             repository.saveTradingAccount.mockResolvedValue({

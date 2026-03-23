@@ -2,8 +2,7 @@ import { InternalServerErrorException, UnauthorizedException } from '@nestjs/com
 import type { Request, Response } from 'express';
 import { AdminAuthService } from '@/module-admin-auth/services/admin-auth.service';
 import { AuthService } from '@/module-auth/services/auth.service';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { LoginAdminDto } from '@/module-admin-auth/dto/login-admin.dto';
 
 describe('AdminAuthService', () => {
@@ -32,7 +31,7 @@ describe('AdminAuthService', () => {
         const dto: LoginAdminDto = {
             login: 'admin@example.com',
             password: 'Password1',
-            role: UserRoles.ADMIN,
+            role: USER_ROLES.ADMIN,
         };
 
         await service.login(response, request, dto);
@@ -43,7 +42,7 @@ describe('AdminAuthService', () => {
     it('logs admin out with the admin role', async () => {
         await service.logout(request, response);
 
-        expect(authService.logout).toHaveBeenCalledWith(request, response, UserRoles.ADMIN);
+        expect(authService.logout).toHaveBeenCalledWith(request, response, USER_ROLES.ADMIN);
     });
 
     it('refreshes admin token using the admin cookie', async () => {
@@ -75,6 +74,6 @@ describe('AdminAuthService', () => {
         const result = service.getMe(request);
 
         expect(result).toEqual({ id: 'admin' });
-        expect(authService.getMe).toHaveBeenCalledWith(request, UserRoles.ADMIN);
+        expect(authService.getMe).toHaveBeenCalledWith(request, USER_ROLES.ADMIN);
     });
 });

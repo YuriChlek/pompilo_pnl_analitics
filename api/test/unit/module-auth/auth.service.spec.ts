@@ -8,8 +8,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from '@/module-auth/services/auth.service';
 import { UserService } from '@/module-user/services/user.service';
 import { AuthTokenService } from '@/module-auth-token/services/auth-token.service';
-import { UserRoles } from '@/module-auth/enums/role.enum';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
+import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
 import { buildRegisterDto, buildLoginDto } from '../../fixtures/auth.fixtures';
 
@@ -55,7 +54,7 @@ describe('AuthService', () => {
     let request: Request;
 
     const registerDto = buildRegisterDto();
-    const loginDto = buildLoginDto({ login: registerDto.email, role: UserRoles.CUSTOMER });
+    const loginDto = buildLoginDto({ login: registerDto.email, role: USER_ROLES.CUSTOMER });
 
     beforeEach(() => {
         userService = {
@@ -106,7 +105,7 @@ describe('AuthService', () => {
                 id: 'user-id',
                 name: 'John Doe',
                 email: 'john.doe@example.com',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             } as AwaitedReturn<ReturnType<UserService['create']>>);
 
             const result = await service.register(response, request, registerDto);
@@ -125,7 +124,7 @@ describe('AuthService', () => {
                 id: 'user-id',
                 name: 'John Doe',
                 email: 'john.doe@example.com',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             });
         });
 
@@ -154,7 +153,7 @@ describe('AuthService', () => {
             email: 'john.doe@example.com',
             password: 'hash',
             isActive: true,
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         } as const;
 
         beforeEach(() => {
@@ -194,7 +193,7 @@ describe('AuthService', () => {
         it('rejects when requested role is not allowed for the user', async () => {
             userService.findByLogin.mockResolvedValue({
                 ...baseUser,
-                role: UserRoles.ADMIN,
+                role: USER_ROLES.ADMIN,
             } as AwaitedReturn<ReturnType<UserService['findByLogin']>>);
 
             await expect(service.login(response, request, loginDto)).rejects.toBeInstanceOf(
@@ -226,11 +225,11 @@ describe('AuthService', () => {
                     id: 'user-id',
                     name: 'John',
                     email: 'john@example.com',
-                    role: UserRoles.CUSTOMER,
+                    role: USER_ROLES.CUSTOMER,
                 },
             });
 
-            await service.logout(logoutRequest, response, UserRoles.CUSTOMER);
+            await service.logout(logoutRequest, response, USER_ROLES.CUSTOMER);
 
             expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith(
                 'refresh-token',
@@ -260,7 +259,7 @@ describe('AuthService', () => {
             const badRequest = createRequest({ cookies: {} });
 
             await expect(
-                service.logout(badRequest, response, UserRoles.CUSTOMER),
+                service.logout(badRequest, response, USER_ROLES.CUSTOMER),
             ).rejects.toBeInstanceOf(UnauthorizedException);
         });
     });
@@ -277,21 +276,21 @@ describe('AuthService', () => {
                 userId: 'user-id',
                 email: 'john@example.com',
                 username: 'John',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             } as ReturnType<AuthTokenService['getTokenData']>);
 
-            const result = service.getMe(meRequest, UserRoles.CUSTOMER);
+            const result = service.getMe(meRequest, USER_ROLES.CUSTOMER);
 
             expect(result).toEqual({
                 id: 'user-id',
                 email: 'john@example.com',
                 name: 'John',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             });
         });
 
         it('returns null when access token is missing', () => {
-            const result = service.getMe(request, UserRoles.CUSTOMER);
+            const result = service.getMe(request, USER_ROLES.CUSTOMER);
 
             expect(result).toBeNull();
         });
@@ -311,7 +310,7 @@ describe('AuthService', () => {
                     id: 'user-id',
                     name: 'John Doe',
                     email: 'john@example.com',
-                    role: UserRoles.CUSTOMER,
+                    role: USER_ROLES.CUSTOMER,
                 },
             });
 

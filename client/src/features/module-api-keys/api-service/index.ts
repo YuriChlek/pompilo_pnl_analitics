@@ -27,12 +27,22 @@ export const apiKeysService: AuthApiKeys = {
 
         return response.data as unknown as ApiKey[];
     },
-    async updateApiKey(id: string, apiKey: string, publicKey: string): Promise<ApiKey | null> {
+    async updateApiKey(id: string, apiKeyPayload: ApiKeyPayload): Promise<ApiKey | null> {
+        const response: HttpResponse<ApiKey> = await apiClient.patch<ApiKey, ApiKeyPayload>(
+            `/customer/api-key/update/${id}`,
+            apiKeyPayload,
+        );
 
-        return null;
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
+        return response.data as unknown as ApiKey;
     },
     async removeApiKey(id: string): Promise<boolean | null> {
-        const response: HttpResponse<{removed: boolean}> = await apiClient.delete<{removed: boolean}>(
+        const response: HttpResponse<{ removed: boolean }> = await apiClient.delete<{
+            removed: boolean;
+        }>(
             `/customer/api-key/remove/${id}`,
         );
 

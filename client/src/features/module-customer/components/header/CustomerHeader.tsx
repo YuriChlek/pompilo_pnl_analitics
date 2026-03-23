@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './styles.module.css';
+import styles from '@/features/module-customer/components/header/styles.module.css';
 import { Logo } from '@/components/logo/Logo';
 import { ThemeButton } from '@/components/theme-button/ThemeButton';
 import { AuthButton } from '@/features/module-auth/components/auth-button/AuthButton';

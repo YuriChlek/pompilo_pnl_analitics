@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { MenuItem, MenuTypes } from '@/features/module-menu/interfaces/menu';
 import { getMenu } from '@/features/module-menu/config/menu-config';
-import styles from './styles.module.css';
+import styles from '@/features/module-menu/components/menu/styles.module.css';
 import { usePathname } from 'next/navigation';
 
 export const Menu = ({ isLogin }: { isLogin: boolean }) => {

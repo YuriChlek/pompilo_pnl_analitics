@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { ExchangePnlProcessor } from '@/module-processor/processors/exchange-pnl.processor';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';
@@ -10,8 +10,8 @@ const createJob = (data: Partial<BybitSyncPnlJobResponse>): BybitSyncPnlJobRespo
     tradingAccountId: 'account-id',
     apiKey: 'api',
     secretKey: 'secret',
-    market: MarketTypes.FUTURES,
-    exchange: Exchanges.BYBIT,
+    market: MARKET_TYPES.FUTURES,
+    exchange: EXCHANGES.BYBIT,
     ...data,
 });
 
@@ -51,15 +51,15 @@ describe('ExchangePnlProcessor', () => {
     });
 
     it('fetches pnl from Bybit and persists it', async () => {
-        const job = wrapAsJob(createJob({ market: MarketTypes.FUTURES }));
+        const job = wrapAsJob(createJob({ market: MARKET_TYPES.FUTURES }));
 
         await processor.process(job);
 
         expect(getTradingPnlMock).toHaveBeenCalledWith(
-            Exchanges.BYBIT,
+            EXCHANGES.BYBIT,
             'api',
             'secret',
-            MarketTypes.FUTURES,
+            MARKET_TYPES.FUTURES,
             '0',
         );
         expect(savePnlMock).toHaveBeenCalledWith([{ closedPnl: '1' }], 'account-id');

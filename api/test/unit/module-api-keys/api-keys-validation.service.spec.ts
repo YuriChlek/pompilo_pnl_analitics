@@ -1,6 +1,6 @@
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
 import { BybitService } from '@/module-bybit/services/bybit.service';
-import { Exchanges } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES } from '@/module-api-keys/enums/api-keys-enums';
 
 const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
 
@@ -20,25 +20,25 @@ describe('ApiKeysValidationService', () => {
     });
 
     it('delegates Bybit checks to BybitService', async () => {
-        await service.validate('key', 'secret', Exchanges.BYBIT);
-        await service.validate('key', 'secret', Exchanges.BYBIT_DEMO);
+        await service.validate('key', 'secret', EXCHANGES.BYBIT);
+        await service.validate('key', 'secret', EXCHANGES.BYBIT_DEMO);
 
         expect(bybitService.validateApiKey).toHaveBeenNthCalledWith(
             1,
-            Exchanges.BYBIT,
+            EXCHANGES.BYBIT,
             'key',
             'secret',
         );
         expect(bybitService.validateApiKey).toHaveBeenNthCalledWith(
             2,
-            Exchanges.BYBIT_DEMO,
+            EXCHANGES.BYBIT_DEMO,
             'key',
             'secret',
         );
     });
 
     it('returns default invalid response for unsupported exchanges', async () => {
-        const result = await service.validate('key', 'secret', Exchanges.BINANCE);
+        const result = await service.validate('key', 'secret', EXCHANGES.BINANCE);
 
         expect(result).toEqual({ valid: false, exchangeUserAccountId: null });
     });

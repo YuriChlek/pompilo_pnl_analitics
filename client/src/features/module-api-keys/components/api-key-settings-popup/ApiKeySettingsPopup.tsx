@@ -1,35 +1,78 @@
 'use client';
 
+import { useState } from 'react';
 import styles from '@/features/module-api-keys/components/api-key-settings-popup/styles.module.css';
-import { ApiKeySettingsPopupProps } from '@/features/module-api-keys/interfaces/apiKeys';
-import {useRemoveApiKey} from "@/features/module-api-keys/hooks/mutation";
+import { ApiKeyPayload, ApiKeySettingsPopupProps } from '@/features/module-api-keys/interfaces/apiKeys';
+import { useRemoveApiKey, useUpdateApiKey } from '@/features/module-api-keys/hooks/mutation';
+import { ApiKeyFormPopup } from '@/features/module-api-keys/components/api-key-form-popup/ApiKeyFormPopup';
 
-export const ApiKeySettingsPopup = ({ apiKeyId, open }: ApiKeySettingsPopupProps) => {
-    const {mutate} = useRemoveApiKey()
+export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPopupProps) => {
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const { mutate: removeMutate } = useRemoveApiKey();
+    const { mutate: updateMutate, isPending } = useUpdateApiKey();
+
     const remove = () => {
-        mutate(apiKeyId)
+        removeMutate(apiKey.id, {
+            onSuccess: () => {
+                onClose();
+            },
+        });
     };
 
-    const edit = () => {};
+    const edit = () => {
+        setIsEditOpen(true);
+        onClose();
+    };
+
+    const initialData: ApiKeyPayload = {
+        exchange: apiKey.exchange,
+        market: apiKey.market,
+        apiKey: '',
+        secretKey: '',
+        apiKeyName: apiKey.apiKeyName,
+    };
+
+    const handleUpdate = (payload: ApiKeyPayload) => {
+        updateMutate(
+            { id: apiKey.id, payload },
+            {
+                onSuccess: () => {
+                    setIsEditOpen(false);
+                },
+            },
+        );
+    };
 
     return (
-        <div
-            className={`${styles.menu} ${open ? styles.menuOpen : styles.menuClosed}`}
-            role="menu"
-            aria-label={`Settings for api key ${apiKeyId}`}
-            aria-hidden={!open}
-        >
-            <button onClick={edit} className={styles.menuItem} type="button" role="menuitem">
-                Edit
-            </button>
-            <button
-                onClick={remove}
-                className={`${styles.menuItem} ${styles.menuItemDanger}`}
-                type="button"
-                role="menuitem"
+        <>
+            <div
+                className={`${styles.menu} ${open ? styles.menuOpen : styles.menuClosed}`}
+                role="menu"
+                aria-label={`Settings for api key ${apiKey.id}`}
+                aria-hidden={!open}
             >
-                Delete
-            </button>
-        </div>
+                <button onClick={edit} className={styles.menuItem} type="button" role="menuitem">
+                    Edit
+                </button>
+                <button
+                    onClick={remove}
+                    className={`${styles.menuItem} ${styles.menuItemDanger}`}
+                    type="button"
+                    role="menuitem"
+                >
+                    Delete
+                </button>
+            </div>
+
+            <ApiKeyFormPopup
+                open={isEditOpen}
+                onClose={() => setIsEditOpen(false)}
+                title="Edit API Key"
+                submitLabel="Update"
+                initialData={initialData}
+                onSubmit={handleUpdate}
+                isPending={isPending}
+            />
+        </>
     );
 };

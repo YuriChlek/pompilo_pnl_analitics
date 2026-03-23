@@ -19,20 +19,43 @@ export const useCreateApiKey = () => {
     });
 };
 
-export const useRemoveApiKey = () => {
+export const useUpdateApiKey = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: string) => apiKeysService.removeApiKey(payload),
+        mutationFn: ({ id, payload }: { id: string; payload: ApiKeyPayload }) =>
+            apiKeysService.updateApiKey(id, payload),
 
-        onSuccess: (_result,id: string) => {
+        onSuccess: (updatedApiKey: ApiKey | null, variables) => {
             queryClient.setQueryData<ApiKey[]>(['apiKeysList'], old =>
-                old ? old.filter(item => item.id !== id) : []
+                old
+                    ? old.map(item => (item.id === variables.id && updatedApiKey ? updatedApiKey : item))
+                    : updatedApiKey
+                      ? [updatedApiKey]
+                      : [],
             );
         },
 
         onError: error => {
             console.log(error.message);
         },
-    })
-}
+    });
+};
+
+export const useRemoveApiKey = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: string) => apiKeysService.removeApiKey(payload),
+
+        onSuccess: (_result, id: string) => {
+            queryClient.setQueryData<ApiKey[]>(['apiKeysList'], old =>
+                old ? old.filter(item => item.id !== id) : [],
+            );
+        },
+
+        onError: error => {
+            console.log(error.message);
+        },
+    });
+};

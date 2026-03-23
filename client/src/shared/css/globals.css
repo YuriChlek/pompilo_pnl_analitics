@@ -15,10 +15,7 @@ body {
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background:
-        radial-gradient(circle at 20% 20%, var(--color-background-accent-start), transparent 45%),
-        radial-gradient(circle at 80% 0%, var(--color-background-accent-end), transparent 40%),
-        var(--color-background);
+    background: var(--color-background);
     background-attachment: fixed;
     color: var(--color-text-primary);
 }

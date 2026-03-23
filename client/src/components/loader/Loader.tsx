@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { CSSProperties } from 'react';
-import styles from './styles.module.css';
+import styles from '@/components/loader/styles.module.css';
 
 type LoaderSize = 'sm' | 'md' | 'lg';
 

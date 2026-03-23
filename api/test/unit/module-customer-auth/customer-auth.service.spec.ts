@@ -2,8 +2,7 @@ import { InternalServerErrorException, UnauthorizedException } from '@nestjs/com
 import type { Request, Response } from 'express';
 import { CustomerAuthService } from '@/module-customer-auth/services/customer-auth.service';
 import { AuthService } from '@/module-auth/services/auth.service';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
@@ -54,7 +53,7 @@ describe('CustomerAuthService', () => {
         const dto: Parameters<CustomerAuthService['login']>[2] = {
             login: 'john',
             password: 'Secret123',
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         };
 
         await service.login(response, request, dto);
@@ -65,7 +64,7 @@ describe('CustomerAuthService', () => {
     it('logs customer out with customer role', async () => {
         await service.logout(request, response);
 
-        expect(authService.logout).toHaveBeenCalledWith(request, response, UserRoles.CUSTOMER);
+        expect(authService.logout).toHaveBeenCalledWith(request, response, USER_ROLES.CUSTOMER);
     });
 
     it('refreshes customer token using the correct cookie name', async () => {
@@ -98,6 +97,6 @@ describe('CustomerAuthService', () => {
         const result = service.getMe(request);
 
         expect(result).toEqual({ id: '1' });
-        expect(authService.getMe).toHaveBeenCalledWith(request, UserRoles.CUSTOMER);
+        expect(authService.getMe).toHaveBeenCalledWith(request, USER_ROLES.CUSTOMER);
     });
 });

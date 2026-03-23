@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { AdminAuthController } from '@/module-admin-auth/admin-auth.controller';
 import { AdminAuthService } from '@/module-admin-auth/services/admin-auth.service';
 import { LoginAdminDto } from '@/module-admin-auth/dto/login-admin.dto';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 
 describe('AdminAuthController', () => {
     let controller: AdminAuthController;
@@ -32,7 +32,7 @@ describe('AdminAuthController', () => {
         const dto: LoginAdminDto = {
             login: 'admin@example.com',
             password: 'Password1',
-            role: UserRoles.ADMIN,
+            role: USER_ROLES.ADMIN,
         };
 
         await controller.login(res, req, dto);

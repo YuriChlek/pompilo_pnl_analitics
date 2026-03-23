@@ -1,4 +1,4 @@
-import styles from './styles.module.css';
+import styles from '@/components/default-icon/styles.module.css';
 
 export const DefaultIcon = () => (
     <div className={styles.icon}>

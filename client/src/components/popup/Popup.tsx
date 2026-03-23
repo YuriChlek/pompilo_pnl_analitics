@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './styles.module.css';
+import styles from '@/components/popup/styles.module.css';
 import { ReactNode } from 'react';
 
 type PopupProps = {

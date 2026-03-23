@@ -3,6 +3,7 @@ import {
     HttpException,
     Injectable,
     InternalServerErrorException,
+    NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { CreateApiKeyDto } from '../dto/create-api-key.dto';
@@ -14,6 +15,7 @@ import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.re
 import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
+import { UpdateResult } from 'typeorm';
 
 @Injectable()
 export class ApiKeysService {
@@ -107,9 +109,68 @@ export class ApiKeysService {
         };
     }
 
-    update(id: number, updateApiKeyDto: UpdateApiKeyDto) {
-        console.log(updateApiKeyDto);
-        return `This action updates a #${id} apiKey`;
+    async update(request: Request, apiKeyId: string, updateApiKeyDto: UpdateApiKeyDto) {
+        try {
+            const userId = getUserIdFromToken(request, this.tokenService);
+
+            if (!userId) {
+                throw new UnauthorizedException('Invalid or missing user.');
+            }
+
+            const existingApiKey = await this.apiKeysRepositoryService.getUserApiKeyById(apiKeyId);
+
+            if (!existingApiKey) {
+                throw new NotFoundException('API key not found.');
+            }
+
+            if (existingApiKey.userId !== userId) {
+                throw new UnauthorizedException('Invalid or missing user.');
+            }
+
+            const { apiKey, secretKey, exchange, apiKeyName, market } = updateApiKeyDto;
+
+            if (!apiKey || !secretKey || !exchange || !apiKeyName || !market) {
+                throw new BadRequestException('All API key update fields are required.');
+            }
+
+            const validationData = await this.apiKeysValidationService.validate(
+                apiKey,
+                secretKey,
+                exchange,
+            );
+
+            if (!validationData || !validationData.valid) {
+                throw new BadRequestException('Api key validation failed.');
+            }
+
+            const encryptedApiKey = this.encryptService.encrypt(apiKey);
+            const encryptedSecretKey = this.encryptService.encrypt(secretKey);
+
+            const data: UpdateResult = await this.apiKeysRepositoryService.update(apiKeyId, {
+                apiKeyName,
+                apiKey: encryptedApiKey,
+                secretKey: encryptedSecretKey,
+                exchange,
+                market: market,
+                exchangeUserAccountId: validationData.exchangeUserAccountId,
+            });
+
+            if (!data.affected) {
+                throw new NotFoundException('API key not found.');
+            }
+
+            return {
+                id: existingApiKey.id,
+                apiKey: this.maskApiKey(apiKey),
+                exchange,
+                apiKeyName,
+                connectionStatus: existingApiKey.connectionStatus,
+                market,
+                exchangeUserAccountId: validationData.exchangeUserAccountId,
+            };
+        } catch (error) {
+            this.handleUnexpectedError(error, 'Failed to update API key');
+        }
     }
 
     async remove(apiKeyId: string): Promise<{ removed: boolean }> {

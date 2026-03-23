@@ -3,7 +3,7 @@ import { TradingAccountController } from '@/module-trading-account/trading-accou
 import { TradingAccountService } from '@/module-trading-account/services/trading-account.service';
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
@@ -34,8 +34,8 @@ describe('TradingAccountController', () => {
         const dto: CreateTradingAccountDto = {
             tradingAccountName: 'Test',
             apiKeyId: 'api-key',
-            exchange: Exchanges.BYBIT,
-            market: MarketTypes.FUTURES,
+            exchange: EXCHANGES.BYBIT,
+            market: MARKET_TYPES.FUTURES,
         };
         createMock.mockResolvedValue({ id: 'acc' } as AwaitedReturn<
             ReturnType<TradingAccountService['create']>

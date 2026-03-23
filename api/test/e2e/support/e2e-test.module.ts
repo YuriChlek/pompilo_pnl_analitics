@@ -23,16 +23,15 @@ import { CustomerAuthService } from '@/module-customer-auth/services/customer-au
 import { RegisterCustomerDto } from '@/module-customer-auth/dto/register-customer.dto';
 import { LoginCustomerDto } from '@/module-customer-auth/dto/login-customer.dto';
 import { UserPayload } from '@/module-user/interfaces/user.interface';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
-import { UserRoles } from '@/module-auth/enums/role.enum';
+import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { ApiKeysController } from '@/module-api-keys/api-keys.controller';
 import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
 import { CreateApiKeyDto } from '@/module-api-keys/dto/create-api-key.dto';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import type { AccessTokenPayload } from '@/module-auth-token/interfaces/auth-token.interfaces';
 import { JwtAuthGuard } from '@/module-auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/module-auth/guards/roles.guard';
-import { TokenType } from '@/module-auth-token/interfaces/auth-token.interfaces';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
 import { TradingAccountController } from '@/module-trading-account/trading-account.controller';
 import { TradingAccountService } from '@/module-trading-account/services/trading-account.service';
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
@@ -43,7 +42,7 @@ type StoredUser = {
     name: string;
     email: string;
     password: string;
-    role: UserRoles;
+    role: USER_ROLES;
 };
 
 @Injectable()
@@ -62,7 +61,7 @@ export class FakeCustomerAuthService {
             name: 'Existing Customer',
             email: 'existing@example.com',
             password: 'Password1',
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         });
         this.sequence = 1;
     }
@@ -82,14 +81,14 @@ export class FakeCustomerAuthService {
             name: registerCustomerDto.name,
             email: registerCustomerDto.email,
             password: registerCustomerDto.password,
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         });
 
         return Promise.resolve({
             id,
             name: registerCustomerDto.name,
             email: registerCustomerDto.email,
-            role: UserRoles.CUSTOMER,
+            role: USER_ROLES.CUSTOMER,
         });
     }
 
@@ -143,8 +142,8 @@ export class FakeApiKeysService {
         userId: string;
         apiKey: string;
         apiKeyName: string;
-        exchange: Exchanges;
-        market: MarketTypes;
+        exchange: EXCHANGES;
+        market: MARKET_TYPES;
         connectionStatus: string;
     }> = [];
     private sequence = 1;
@@ -198,8 +197,8 @@ export class FakeTradingAccountService {
         id: string;
         tradingAccountName: string;
         apiKeyId: string;
-        exchange: Exchanges;
-        market: MarketTypes;
+        exchange: EXCHANGES;
+        market: MARKET_TYPES;
     }> = [];
     private sequence = 1;
     private readonly activeApiKey = '118d866c-048f-4710-be77-a9ab672456c4';
@@ -352,9 +351,9 @@ export class TestingJwtAuthGuard implements CanActivate {
             throw new UnauthorizedException('Unauthorized user token.');
         }
 
-        const [role = UserRoles.CUSTOMER, userId = 'user-guard'] = authHeader.split(':');
+        const [role = USER_ROLES.CUSTOMER, userId = 'user-guard'] = authHeader.split(':');
 
-        if (!Object.values<string>(UserRoles).includes(role)) {
+        if (!Object.values<string>(USER_ROLES).includes(role)) {
             throw new UnauthorizedException('Unauthorized user token.');
         }
 
@@ -363,10 +362,10 @@ export class TestingJwtAuthGuard implements CanActivate {
             userId,
             email: `${userId}@example.com`,
             username: 'Test User',
-            role: role as UserRoles,
+            role: role as USER_ROLES,
             ipAddress: '127.0.0.1',
             userAgent: 'supertest',
-            type: TokenType.ACCESS,
+            type: TOKEN_TYPE.ACCESS,
         };
 
         request.user = payload;

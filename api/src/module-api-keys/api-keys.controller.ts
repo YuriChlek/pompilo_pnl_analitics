@@ -24,8 +24,12 @@ export class ApiKeysController {
 
     @Patch('update/:id')
     @Authorisation(USER_ROLES.CUSTOMER)
-    update(@Param('id') id: string, @Body() updateApiKeyDto: UpdateApiKeyDto) {
-        return this.apiKeysService.update(+id, updateApiKeyDto);
+    update(
+        @Req() request: Request,
+        @Param('id') id: string,
+        @Body() updateApiKeyDto: UpdateApiKeyDto,
+    ) {
+        return this.apiKeysService.update(request, id, updateApiKeyDto);
     }
 
     @Delete('remove/:id')

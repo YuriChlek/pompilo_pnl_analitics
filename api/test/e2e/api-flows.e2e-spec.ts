@@ -13,9 +13,8 @@ import {
     FakeUsersHttpService,
     TestingJwtAuthGuard,
 } from './support/e2e-test.module';
-import { UserRoles } from '@/module-auth/enums/role.enum';
-import { COOKIE_NAMES } from '@/module-auth/constants/auth.constants';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { JwtAuthGuard } from '@/module-auth/guards/jwt-auth.guard';
 import { expectSuccessResponse, expectErrorResponse } from '../utils/request-helpers';
 
@@ -73,13 +72,13 @@ describe('Main API flows (e2e)', () => {
 
             const res = await request(httpServer).post('/customer/register').send(payload);
 
-            const body = expectSuccessResponse<{ id: string; email: string; role: UserRoles }>(
+            const body = expectSuccessResponse<{ id: string; email: string; role: USER_ROLES }>(
                 res,
                 201,
             );
             expect(typeof body.data.id).toBe('string');
             expect(body.data.email).toBe(payload.email);
-            expect(body.data.role).toBe(UserRoles.CUSTOMER);
+            expect(body.data.role).toBe(USER_ROLES.CUSTOMER);
         });
 
         it('rejects duplicate registration attempts with a 409', async () => {
@@ -99,25 +98,25 @@ describe('Main API flows (e2e)', () => {
             const loginPayload = {
                 login: 'existing@example.com',
                 password: 'Password1',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             };
 
             const res = await request(httpServer).post('/customer/login').send(loginPayload);
 
-            const body = expectSuccessResponse<{ id: string; email: string; role: UserRoles }>(
+            const body = expectSuccessResponse<{ id: string; email: string; role: USER_ROLES }>(
                 res,
                 201,
             );
             expect(typeof body.data.id).toBe('string');
             expect(body.data.email).toBe(loginPayload.login);
-            expect(body.data.role).toBe(UserRoles.CUSTOMER);
+            expect(body.data.role).toBe(USER_ROLES.CUSTOMER);
         });
 
         it('fails login with invalid credentials', async () => {
             const payload = {
                 login: 'missing@example.com',
                 password: 'Password1',
-                role: UserRoles.CUSTOMER,
+                role: USER_ROLES.CUSTOMER,
             };
 
             const res = await request(httpServer).post('/customer/login').send(payload);
@@ -147,8 +146,8 @@ describe('Main API flows (e2e)', () => {
             const payload = {
                 apiKey: 'ABCDEFGHIJKLMNOP',
                 secretKey: 'SECRET123456789',
-                exchange: Exchanges.BYBIT,
-                market: MarketTypes.FUTURES,
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Primary Key',
             };
 
@@ -157,17 +156,17 @@ describe('Main API flows (e2e)', () => {
                 .set('x-test-auth', 'customer:user-1')
                 .send(payload);
 
-            const body = expectSuccessResponse<{ apiKey: string; exchange: Exchanges }>(res, 201);
+            const body = expectSuccessResponse<{ apiKey: string; exchange: EXCHANGES }>(res, 201);
             expect(body.data.apiKey).toMatch(/^\*\*\*....$/);
-            expect(body.data.exchange).toBe(Exchanges.BYBIT);
+            expect(body.data.exchange).toBe(EXCHANGES.BYBIT);
         });
 
         it('denies access to protected routes without auth header', async () => {
             const payload = {
                 apiKey: 'ABCDEFGHIJKLMNOP',
                 secretKey: 'SECRET123456789',
-                exchange: Exchanges.BYBIT,
-                market: MarketTypes.FUTURES,
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Primary Key',
             };
 
@@ -238,8 +237,8 @@ describe('Main API flows (e2e)', () => {
         const apiKeyPayload = {
             apiKey: 'ABCDEFGHIJKLMNOP',
             secretKey: 'SECRET123456789',
-            exchange: Exchanges.BYBIT,
-            market: MarketTypes.FUTURES,
+            exchange: EXCHANGES.BYBIT,
+            market: MARKET_TYPES.FUTURES,
             apiKeyName: 'Main Futures',
         };
 
@@ -286,8 +285,8 @@ describe('Main API flows (e2e)', () => {
         const basePayload = {
             tradingAccountName: 'Primary Account',
             apiKeyId: '118d866c-048f-4710-be77-a9ab672456c4',
-            exchange: Exchanges.BYBIT,
-            market: MarketTypes.FUTURES,
+            exchange: EXCHANGES.BYBIT,
+            market: MARKET_TYPES.FUTURES,
         };
 
         it('creates trading accounts when API key is active', async () => {

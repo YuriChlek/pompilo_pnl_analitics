@@ -1,6 +1,6 @@
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 export class ApiKeysRepositoryService {
     public constructor(
@@ -12,7 +12,9 @@ export class ApiKeysRepositoryService {
         return await this.apiKeysRepository.save(apiKeyPayload);
     }
 
-    async update() {}
+    async update(apiKeyId: string, apiKeyPayload: Partial<ApiKey>): Promise<UpdateResult> {
+        return this.apiKeysRepository.update(apiKeyId, apiKeyPayload);
+    }
 
     async remove(apiKeyId: string): Promise<DeleteResult> {
         return await this.apiKeysRepository.delete(apiKeyId);

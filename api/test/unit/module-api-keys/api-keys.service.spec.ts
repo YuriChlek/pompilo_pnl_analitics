@@ -1,6 +1,7 @@
 import {
     BadRequestException,
     InternalServerErrorException,
+    NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
@@ -9,7 +10,7 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.repository.service';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
-import { Exchanges, MarketTypes } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import { buildCreateApiKeyDto } from '../../fixtures/api-keys.fixtures';
 
@@ -30,6 +31,7 @@ describe('ApiKeysService', () => {
     };
     let repository: {
         saveApiKey: jest.MockedFunction<ApiKeysRepositoryService['saveApiKey']>;
+        update: jest.MockedFunction<ApiKeysRepositoryService['update']>;
         getUserApiKeys: jest.MockedFunction<ApiKeysRepositoryService['getUserApiKeys']>;
         getUserApiKeyById: jest.MockedFunction<ApiKeysRepositoryService['getUserApiKeyById']>;
     };
@@ -52,6 +54,7 @@ describe('ApiKeysService', () => {
 
         repository = {
             saveApiKey: jest.fn(),
+            update: jest.fn(),
             getUserApiKeys: jest.fn(),
             getUserApiKeyById: jest.fn(),
         };
@@ -78,10 +81,10 @@ describe('ApiKeysService', () => {
             });
             repository.saveApiKey.mockResolvedValue({
                 id: 'key-id',
-                exchange: Exchanges.BYBIT,
+                exchange: EXCHANGES.BYBIT,
                 apiKeyName: 'Main',
                 connectionStatus: 'CONNECTED',
-                market: MarketTypes.FUTURES,
+                market: MARKET_TYPES.FUTURES,
             } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['saveApiKey']>>);
 
             const result = await service.create(request, apiKeyDto);
@@ -146,10 +149,10 @@ describe('ApiKeysService', () => {
                 {
                     id: 'key-id',
                     apiKey: 'enc-ABCD1234567890',
-                    exchange: Exchanges.BYBIT,
+                    exchange: EXCHANGES.BYBIT,
                     apiKeyName: 'Main',
                     connectionStatus: 'CONNECTED',
-                    market: MarketTypes.FUTURES,
+                    market: MARKET_TYPES.FUTURES,
                 } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeys']>>[number],
             ]);
 
@@ -197,6 +200,172 @@ describe('ApiKeysService', () => {
             const result = await service.getActiveUserApiCredentials('missing');
 
             expect(result).toBeNull();
+        });
+    });
+
+    describe('update', () => {
+        it('updates owned api keys after validation and masks response', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue({
+                id: 'key-id',
+                userId: 'user-id',
+                apiKey: 'enc-OLDAPI',
+                secretKey: 'enc-OLDSECRET',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                apiKeyName: 'Old name',
+                connectionStatus: 'CONNECTED',
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            validationService.validate.mockResolvedValue({
+                valid: true,
+                exchangeUserAccountId: 'updated-user-id',
+            });
+            repository.update.mockResolvedValue({
+                affected: 1,
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['update']>>);
+
+            const result = await service.update(request, 'key-id', {
+                apiKey: 'NEWAPI',
+                secretKey: 'NEWSECRET',
+                exchange: EXCHANGES.BYBIT,
+                apiKeyName: 'Updated name',
+                market: MARKET_TYPES.FUTURES,
+            });
+
+            expect(validationService.validate).toHaveBeenCalledWith(
+                'NEWAPI',
+                'NEWSECRET',
+                EXCHANGES.BYBIT,
+            );
+            expect(repository.update).toHaveBeenCalledWith(
+                'key-id',
+                expect.objectContaining({
+                    apiKeyName: 'Updated name',
+                    apiKey: 'enc-NEWAPI',
+                    secretKey: 'enc-NEWSECRET',
+                    exchange: EXCHANGES.BYBIT,
+                    market: MARKET_TYPES.FUTURES,
+                    exchangeUserAccountId: 'updated-user-id',
+                }),
+            );
+            expect(result).toMatchObject({
+                id: 'key-id',
+                apiKey: '***WAPI',
+                apiKeyName: 'Updated name',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                exchangeUserAccountId: 'updated-user-id',
+            });
+        });
+
+        it('throws UnauthorizedException when user is missing', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue(null);
+
+            await expect(service.update(request, 'key-id', {})).rejects.toBeInstanceOf(
+                UnauthorizedException,
+            );
+        });
+
+        it('throws NotFoundException when api key does not exist', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue(null);
+
+            await expect(service.update(request, 'missing', {})).rejects.toBeInstanceOf(
+                NotFoundException,
+            );
+        });
+
+        it('throws UnauthorizedException when user does not own the key', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue({
+                id: 'key-id',
+                userId: 'another-user',
+                apiKey: 'enc-OLDAPI',
+                secretKey: 'enc-OLDSECRET',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                apiKeyName: 'Old name',
+                connectionStatus: 'CONNECTED',
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+
+            await expect(service.update(request, 'key-id', {})).rejects.toBeInstanceOf(
+                UnauthorizedException,
+            );
+        });
+
+        it('throws BadRequestException when validation fails', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue({
+                id: 'key-id',
+                userId: 'user-id',
+                apiKey: 'enc-OLDAPI',
+                secretKey: 'enc-OLDSECRET',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                apiKeyName: 'Old name',
+                connectionStatus: 'CONNECTED',
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            validationService.validate.mockResolvedValue({
+                valid: false,
+                exchangeUserAccountId: null,
+            });
+
+            await expect(service.update(request, 'key-id', {})).rejects.toBeInstanceOf(
+                BadRequestException,
+            );
+        });
+
+        it('throws BadRequestException when update payload is incomplete', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue({
+                id: 'key-id',
+                userId: 'user-id',
+                apiKey: 'enc-OLDAPI',
+                secretKey: 'enc-OLDSECRET',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                apiKeyName: 'Old name',
+                connectionStatus: 'CONNECTED',
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+
+            await expect(
+                service.update(request, 'key-id', {
+                    apiKey: 'NEWAPI',
+                    secretKey: 'NEWSECRET',
+                    exchange: EXCHANGES.BYBIT,
+                }),
+            ).rejects.toThrow('All API key update fields are required.');
+        });
+
+        it('throws NotFoundException when repository updates zero rows', async () => {
+            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            repository.getUserApiKeyById.mockResolvedValue({
+                id: 'key-id',
+                userId: 'user-id',
+                apiKey: 'enc-OLDAPI',
+                secretKey: 'enc-OLDSECRET',
+                exchange: EXCHANGES.BYBIT,
+                market: MARKET_TYPES.FUTURES,
+                apiKeyName: 'Old name',
+                connectionStatus: 'CONNECTED',
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            validationService.validate.mockResolvedValue({
+                valid: true,
+                exchangeUserAccountId: 'updated-user-id',
+            });
+            repository.update.mockResolvedValue({
+                affected: 0,
+            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['update']>>);
+
+            await expect(
+                service.update(request, 'key-id', {
+                    apiKey: 'NEWAPI',
+                    secretKey: 'NEWSECRET',
+                    exchange: EXCHANGES.BYBIT,
+                    apiKeyName: 'Updated name',
+                    market: MARKET_TYPES.FUTURES,
+                }),
+            ).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 });

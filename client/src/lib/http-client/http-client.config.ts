@@ -4,7 +4,7 @@ const cache: RequestCache = process.env.NODE_ENV === 'development' ? 'no-cache' 
 export const httpClientConfig = {
     baseUrl,
     cache,
-    headers: {}, // тут можна додати заголовки за замовчуванням
+    headers: {}, // додати заголовки за замовчуванням
     next: {
         revalidate: 60,
     },

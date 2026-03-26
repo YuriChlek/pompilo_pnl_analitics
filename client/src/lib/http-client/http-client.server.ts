@@ -28,7 +28,7 @@ class ServerHttpClient extends AbstractHttpClient {
 
         const options: RequestInit = {
             method,
-            headers: this.defaultHeaders,
+            headers: headersInit,
             body: body ? JSON.stringify(body) : undefined,
             credentials: 'include',
             cache: this.cache,

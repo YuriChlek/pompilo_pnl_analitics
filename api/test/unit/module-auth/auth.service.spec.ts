@@ -47,9 +47,7 @@ describe('AuthService', () => {
         removeRefreshToken: jest.MockedFunction<AuthTokenService['removeRefreshToken']>;
         getTokenData: jest.MockedFunction<AuthTokenService['getTokenData']>;
     };
-    let configService: {
-        getOrThrow: jest.MockedFunction<ConfigService['getOrThrow']>;
-    };
+    let configService: Pick<ConfigService, 'getOrThrow'>;
     let response: Response;
     let request: Request;
 
@@ -73,7 +71,7 @@ describe('AuthService', () => {
         };
 
         configService = {
-            getOrThrow: jest.fn((key: string) => {
+            getOrThrow: ((key: string) => {
                 switch (key) {
                     case 'COOKIE_DOMAIN':
                         return '.example.com';
@@ -84,7 +82,7 @@ describe('AuthService', () => {
                     default:
                         throw new Error('Missing key');
                 }
-            }),
+            }) as ConfigService['getOrThrow'],
         };
 
         service = new AuthService(

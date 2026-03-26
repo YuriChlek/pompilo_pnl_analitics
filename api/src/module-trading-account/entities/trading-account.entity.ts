@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 @Entity({ name: 'trading_account' })
 export class TradingAccount {
@@ -26,6 +27,9 @@ export class TradingAccount {
     })
     @JoinColumn({ name: 'api_key_id' })
     apiKey: ApiKey;
+
+    @OneToMany(() => FuturesClosedPnl, futuresClosedPnl => futuresClosedPnl.tradingAccount)
+    futuresClosedPnl: FuturesClosedPnl[];
 
     @Column({
         type: 'enum',

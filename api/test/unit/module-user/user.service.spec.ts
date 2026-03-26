@@ -4,7 +4,7 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserService } from '@/module-user/services/user.service';
 import { User } from '@/module-user/entities/user.entity';
 import { buildUserEntity } from '../../fixtures/users.fixtures';
@@ -29,11 +29,11 @@ describe('UserService', () => {
     let service: UserService;
     let repository: Repository<User>;
     let queryBuilder: ReturnType<typeof createQueryBuilderMock>;
-    let saveMock: jest.MockedFunction<Repository<User>['save']>;
-    let findMock: jest.MockedFunction<Repository<User>['find']>;
-    let findOneMock: jest.MockedFunction<Repository<User>['findOne']>;
-    let updateMock: jest.MockedFunction<Repository<User>['update']>;
-    let deleteMock: jest.MockedFunction<Repository<User>['delete']>;
+    let saveMock: jest.Mock<Promise<User>, [Partial<User>]>;
+    let findMock: jest.Mock<Promise<User[]>, [object?]>;
+    let findOneMock: jest.Mock<Promise<User | null>, [object]>;
+    let updateMock: jest.Mock<Promise<UpdateResult>, [string, Partial<User>]>;
+    let deleteMock: jest.Mock<Promise<DeleteResult>, [string]>;
 
     const baseUser: User = buildUserEntity({
         id: 'user-id',
@@ -43,36 +43,21 @@ describe('UserService', () => {
 
     beforeEach(() => {
         queryBuilder = createQueryBuilderMock();
-        saveMock = jest.fn<
-            ReturnType<Repository<User>['save']>,
-            Parameters<Repository<User>['save']>
-        >();
-        findMock = jest.fn<
-            ReturnType<Repository<User>['find']>,
-            Parameters<Repository<User>['find']>
-        >();
-        findOneMock = jest.fn<
-            ReturnType<Repository<User>['findOne']>,
-            Parameters<Repository<User>['findOne']>
-        >();
-        updateMock = jest.fn<
-            ReturnType<Repository<User>['update']>,
-            Parameters<Repository<User>['update']>
-        >();
-        deleteMock = jest.fn<
-            ReturnType<Repository<User>['delete']>,
-            Parameters<Repository<User>['delete']>
-        >();
+        saveMock = jest.fn();
+        findMock = jest.fn();
+        findOneMock = jest.fn();
+        updateMock = jest.fn();
+        deleteMock = jest.fn();
         findMock.mockResolvedValue([]);
         saveMock.mockResolvedValue(baseUser);
-        updateMock.mockResolvedValue(undefined);
-        deleteMock.mockResolvedValue({});
+        updateMock.mockResolvedValue({ affected: 1, generatedMaps: [], raw: [] });
+        deleteMock.mockResolvedValue({ affected: 1, raw: {} });
         const repositoryImpl: Partial<Repository<User>> = {
             find: findMock,
-            save: saveMock,
+            save: saveMock as unknown as Repository<User>['save'],
             findOne: findOneMock,
-            update: updateMock,
-            delete: deleteMock,
+            update: updateMock as unknown as Repository<User>['update'],
+            delete: deleteMock as unknown as Repository<User>['delete'],
             createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
         };
         repository = repositoryImpl as Repository<User>;
@@ -116,6 +101,7 @@ describe('UserService', () => {
             const result = await service.findAll({
                 name: 'john',
                 email: 'john@example.com',
+                password: 'Secret123',
             });
 
             expect(result).toEqual([baseUser]);

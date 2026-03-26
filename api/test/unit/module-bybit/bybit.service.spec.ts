@@ -15,12 +15,12 @@ type MockFetchResponse = {
 
 describe('BybitService', () => {
     let service: BybitService;
-    let configService: {
-        getOrThrow: jest.MockedFunction<ConfigService['getOrThrow']>;
-    };
+    let configService: Pick<ConfigService, 'getOrThrow'>;
     let repository: {
         saveClosedPnl: jest.MockedFunction<TradesRepositoryService['saveClosedPnl']>;
     };
+    const NOW = 1_700_000_000_000;
+    let dateNowSpy: jest.SpiedFunction<typeof Date.now>;
 
     const createResponse = (data: unknown, ok = true, status = 200): MockFetchResponse => ({
         ok,
@@ -29,10 +29,12 @@ describe('BybitService', () => {
     });
 
     beforeEach(() => {
+        dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(NOW);
         configService = {
-            getOrThrow: jest.fn((key: string) =>
-                key === 'BYBIT_URL' ? 'https://api.bybit.com' : 'https://api-demo.bybit.com',
-            ),
+            getOrThrow: ((key: string) =>
+                key === 'BYBIT_URL'
+                    ? 'https://api.bybit.com'
+                    : 'https://api-demo.bybit.com') as ConfigService['getOrThrow'],
         };
         repository = {
             saveClosedPnl: jest.fn(),
@@ -44,22 +46,32 @@ describe('BybitService', () => {
         );
     });
 
+    afterEach(() => {
+        dateNowSpy.mockRestore();
+    });
+
     describe('getTradingPnl', () => {
-        it('concatenates paginated responses until an empty page is returned', async () => {
+        it('concatenates cursor-paginated responses within the same time window', async () => {
             const fetchSpy = jest
                 .spyOn<any, any>(service as any, 'fetchBybitData')
                 .mockResolvedValueOnce(
                     createResponse({
                         retCode: 0,
                         retMsg: 'OK',
-                        result: { list: [{ closedPnl: '10' }] },
+                        result: {
+                            list: [{ closedPnl: '10', updatedTime: String(NOW - 500) }],
+                            nextPageCursor: 'cursor-1',
+                        },
                     }),
                 )
                 .mockResolvedValueOnce(
                     createResponse({
                         retCode: 0,
                         retMsg: 'OK',
-                        result: { list: [] },
+                        result: {
+                            list: [{ closedPnl: '5', updatedTime: String(NOW - 400) }],
+                            nextPageCursor: null,
+                        },
                     }),
                 );
 
@@ -68,11 +80,81 @@ describe('BybitService', () => {
                 'apiKey',
                 'secret',
                 MARKET_TYPES.FUTURES,
-                '0',
+                String(NOW - 1_000),
             );
 
-            expect(result).toEqual([{ closedPnl: '10' }]);
+            expect(result).toEqual([
+                { closedPnl: '10', updatedTime: String(NOW - 500) },
+                { closedPnl: '5', updatedTime: String(NOW - 400) },
+            ]);
             expect(fetchSpy).toHaveBeenCalledTimes(2);
+        });
+
+        it('filters out trades that are not newer than the last synced timestamp', async () => {
+            jest.spyOn<any, any>(service as any, 'fetchBybitData').mockResolvedValue(
+                createResponse({
+                    retCode: 0,
+                    retMsg: 'OK',
+                    result: {
+                        list: [
+                            { closedPnl: '10', updatedTime: String(NOW - 1_000) },
+                            { closedPnl: '12', updatedTime: String(NOW - 999) },
+                        ],
+                        nextPageCursor: null,
+                    },
+                }),
+            );
+
+            const result = await service.getTradingPnl(
+                EXCHANGES.BYBIT,
+                'apiKey',
+                'secret',
+                MARKET_TYPES.FUTURES,
+                String(NOW - 1_000),
+            );
+
+            expect(result).toEqual([{ closedPnl: '12', updatedTime: String(NOW - 999) }]);
+        });
+
+        it('continues scanning older windows even if one window is empty', async () => {
+            jest.spyOn<any, any>(service as any, 'fetchBybitData')
+                .mockResolvedValueOnce(
+                    createResponse({
+                        retCode: 0,
+                        retMsg: 'OK',
+                        result: {
+                            list: [],
+                            nextPageCursor: null,
+                        },
+                    }),
+                )
+                .mockResolvedValueOnce(
+                    createResponse({
+                        retCode: 0,
+                        retMsg: 'OK',
+                        result: {
+                            list: [
+                                {
+                                    closedPnl: '7',
+                                    updatedTime: String(NOW - 8 * 24 * 60 * 60 * 1000),
+                                },
+                            ],
+                            nextPageCursor: null,
+                        },
+                    }),
+                );
+
+            const result = await service.getTradingPnl(
+                EXCHANGES.BYBIT,
+                'apiKey',
+                'secret',
+                MARKET_TYPES.FUTURES,
+                String(NOW - 14 * 24 * 60 * 60 * 1000),
+            );
+
+            expect(result).toEqual([
+                { closedPnl: '7', updatedTime: String(NOW - 8 * 24 * 60 * 60 * 1000) },
+            ]);
         });
 
         it('throws HttpException when Bybit returns an error code', async () => {

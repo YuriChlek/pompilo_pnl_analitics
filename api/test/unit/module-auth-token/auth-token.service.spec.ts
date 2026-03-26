@@ -165,7 +165,7 @@ describe('AuthTokenService', () => {
 
         it('throws when tokenService cannot decode token', async () => {
             tokenService.verifyToken.mockReturnValue(
-                undefined as ReturnType<TokenService['verifyToken']>,
+                undefined as unknown as ReturnType<TokenService['verifyToken']>,
             );
 
             await expect(

@@ -13,19 +13,82 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     networks:
       - pompilo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: pompilo_redis
     ports:
-        - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT}:6379"
     command: >
-        redis-server
-        --appendonly yes
-        --appendfsync everysec
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
     volumes:
-        - redis_data:/data
+      - redis_data:/data
     restart: always
+    networks:
+      - pompilo
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    container_name: pompilo_api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ./api/.env
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CLIENT_ORIGIN: http://localhost:3001
+    ports:
+      - "3000:3000"
+    networks:
+      - pompilo
+
+  client:
+    container_name: pompilo_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost
+        NEXT_PUBLIC_API_PORT: 3001
+        API_BASE_URL: http://api:3000
+    restart: always
+    depends_on:
+      - api
+    env_file:
+      - ./client/.env
+    environment:
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_API_URL: http://localhost
+      NEXT_PUBLIC_API_PORT: 3001
+      API_BASE_URL: http://api:3000
+    ports:
+      - "3001:3001"
+    networks:
+      - pompilo
 
 volumes:
   postgres_data:

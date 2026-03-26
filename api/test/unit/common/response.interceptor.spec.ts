@@ -1,8 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 import type { ExecutionContext, CallHandler } from '@nestjs/common';
 import type { Response, Request } from 'express';
-import { of, throwError, lastValueFrom } from 'rxjs';
+import { Observable, of, throwError, lastValueFrom } from 'rxjs';
 import { ResponseInterceptor } from '@/common/interceptors/response.interceptor';
+import { ResponseData } from '@/common/dto/response.dto';
 
 const createExecutionContext = (): ExecutionContext =>
     ({
@@ -32,14 +33,16 @@ describe('ResponseInterceptor', () => {
             handle: () => of({ message: 'ok' }),
         };
 
-        const result = await lastValueFrom(interceptor.intercept(context, handler));
+        const result = await lastValueFrom(
+            interceptor.intercept(context, handler) as Observable<ResponseData<unknown>>,
+        );
 
         expect(result).toMatchObject({
             success: true,
             statusCode: 200,
             data: { message: 'ok' },
         });
-        expect(result.timestamp).toBeDefined();
+        expect((result as ResponseData<unknown>).timestamp).toBeDefined();
     });
 
     it('propagates thrown exceptions without mutating them', async () => {
@@ -47,8 +50,10 @@ describe('ResponseInterceptor', () => {
             handle: () => throwError(() => new BadRequestException('Invalid')),
         };
 
-        await expect(lastValueFrom(interceptor.intercept(context, handler))).rejects.toBeInstanceOf(
-            BadRequestException,
-        );
+        await expect(
+            lastValueFrom(
+                interceptor.intercept(context, handler) as Observable<ResponseData<unknown>>,
+            ),
+        ).rejects.toBeInstanceOf(BadRequestException);
     });
 });

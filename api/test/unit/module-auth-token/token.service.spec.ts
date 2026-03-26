@@ -13,9 +13,7 @@ describe('TokenService', () => {
         sign: jest.MockedFunction<JwtService['sign']>;
         verify: jest.MockedFunction<JwtService['verify']>;
     };
-    let configService: {
-        getOrThrow: jest.MockedFunction<ConfigService['getOrThrow']>;
-    };
+    let configService: Pick<ConfigService, 'getOrThrow'>;
 
     beforeEach(() => {
         jwtService = {
@@ -23,7 +21,8 @@ describe('TokenService', () => {
             verify: jest.fn().mockReturnValue({ userId: 'user-id' }),
         };
         configService = {
-            getOrThrow: jest.fn((key: string) => (key === 'JWT_ACCESS_TOKEN_TTL' ? '15m' : '7d')),
+            getOrThrow: ((key: string) =>
+                key === 'JWT_ACCESS_TOKEN_TTL' ? '15m' : '7d') as ConfigService['getOrThrow'],
         };
 
         service = new TokenService(

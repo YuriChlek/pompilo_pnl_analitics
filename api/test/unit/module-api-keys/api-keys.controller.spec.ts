@@ -3,6 +3,7 @@ import { ApiKeysController } from '@/module-api-keys/api-keys.controller';
 import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
 import { CreateApiKeyDto } from '@/module-api-keys/dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '@/module-api-keys/dto/update-api-key.dto';
+import { CONNECTION_STATUS } from '@/module-api-keys/enums/api-keys-enums';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
@@ -33,13 +34,20 @@ describe('ApiKeysController', () => {
     it('calls ApiKeysService.create with incoming payload', async () => {
         const req = {} as Request;
         const dto = { apiKey: 'key' } as CreateApiKeyDto;
-        createMock.mockResolvedValue(
-            'result' as AwaitedReturn<ReturnType<ApiKeysService['create']>>,
-        );
+        const createdResult = {
+            id: 'api-key-id',
+            apiKey: 'key',
+            exchange: dto.exchange,
+            apiKeyName: 'Primary key',
+            connectionStatus: CONNECTION_STATUS.CONNECTED,
+            market: dto.market,
+            exchangeUserAccountId: 'exchange-user-id',
+        } as unknown as AwaitedReturn<ReturnType<ApiKeysService['create']>>;
+        createMock.mockResolvedValue(createdResult);
 
         const result = await controller.create(req, dto);
 
-        expect(result).toBe('result');
+        expect(result).toBe(createdResult);
         expect(createMock).toHaveBeenCalledWith(req, dto);
     });
 

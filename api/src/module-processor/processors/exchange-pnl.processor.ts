@@ -4,10 +4,14 @@ import { Job } from 'bullmq';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';
 import { InternalServerErrorException } from '@nestjs/common';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
+import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
 
 @Processor('excange-pnl-sync')
 export class ExchangePnlProcessor extends WorkerHost {
-    constructor(private readonly bybitService: BybitService) {
+    constructor(
+        private readonly bybitService: BybitService,
+        private readonly tradesRepositoryService: TradesRepositoryService,
+    ) {
         super();
     }
 
@@ -24,12 +28,15 @@ export class ExchangePnlProcessor extends WorkerHost {
     }
 
     private async handleBybitSync(job: Job<BybitSyncPnlJobResponse>): Promise<void> {
+        const lastTradeTime = await this.tradesRepositoryService.findLatestUpdatedTime(
+            job.data.tradingAccountId,
+        );
         const result: FuturesClosedPnl[] = await this.bybitService.getTradingPnl(
             job.data.exchange,
             job.data.apiKey,
             job.data.secretKey,
             job.data.market,
-            '0',
+            lastTradeTime,
         );
 
         await this.bybitService.savePnl(result, job.data.tradingAccountId);

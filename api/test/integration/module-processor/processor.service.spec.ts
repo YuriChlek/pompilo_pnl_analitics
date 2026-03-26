@@ -5,6 +5,8 @@ import { BybitService } from '@/module-bybit/services/bybit.service';
 import { ExchangePnlProcessor } from '@/module-processor/processors/exchange-pnl.processor';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';
 import type { Job } from 'bullmq';
+import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
+import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 const createJob = (data: Partial<BybitSyncPnlJobResponse>): BybitSyncPnlJobResponse => ({
     tradingAccountId: 'account-id',
@@ -22,6 +24,9 @@ describe('ExchangePnlProcessor', () => {
     let processor: ExchangePnlProcessor;
     let getTradingPnlMock: jest.MockedFunction<BybitService['getTradingPnl']>;
     let savePnlMock: jest.MockedFunction<BybitService['savePnl']>;
+    let findLatestUpdatedTimeByTradingAccountIdMock: jest.MockedFunction<
+        TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']
+    >;
 
     beforeEach(async () => {
         getTradingPnlMock = jest
@@ -29,11 +34,17 @@ describe('ExchangePnlProcessor', () => {
                 ReturnType<BybitService['getTradingPnl']>,
                 Parameters<BybitService['getTradingPnl']>
             >()
-            .mockResolvedValue([{ closedPnl: '1' }]);
+            .mockResolvedValue([{ closedPnl: '1' } as unknown as FuturesClosedPnl]);
         savePnlMock = jest.fn<
             ReturnType<BybitService['savePnl']>,
             Parameters<BybitService['savePnl']>
         >();
+        findLatestUpdatedTimeByTradingAccountIdMock = jest
+            .fn<
+                ReturnType<TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']>,
+                Parameters<TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']>
+            >()
+            .mockResolvedValue('123');
         const moduleRef: TestingModule = await Test.createTestingModule({
             providers: [
                 ExchangePnlProcessor,
@@ -42,6 +53,13 @@ describe('ExchangePnlProcessor', () => {
                     useValue: {
                         getTradingPnl: getTradingPnlMock,
                         savePnl: savePnlMock,
+                    },
+                },
+                {
+                    provide: TradesRepositoryService,
+                    useValue: {
+                        findLatestUpdatedTimeByTradingAccountId:
+                            findLatestUpdatedTimeByTradingAccountIdMock,
                     },
                 },
             ],
@@ -60,9 +78,12 @@ describe('ExchangePnlProcessor', () => {
             'api',
             'secret',
             MARKET_TYPES.FUTURES,
-            '0',
+            '123',
         );
-        expect(savePnlMock).toHaveBeenCalledWith([{ closedPnl: '1' }], 'account-id');
+        expect(savePnlMock).toHaveBeenCalledWith(
+            [{ closedPnl: '1' } as unknown as FuturesClosedPnl],
+            'account-id',
+        );
     });
 
     it('rethrows errors raised during processing', async () => {

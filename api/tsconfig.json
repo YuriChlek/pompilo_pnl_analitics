@@ -21,6 +21,7 @@
         "noImplicitAny": false,
         "strictBindCallApply": false,
         "noFallthroughCasesInSwitch": false,
+        "composite": true,
         "paths": {
             "@/*": ["src/*"],
             "@config/*": ["src/config/*"],

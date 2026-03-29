@@ -12,8 +12,8 @@ export class TradingAccountController {
 
     @Post('create')
     @Authorisation(USER_ROLES.CUSTOMER)
-    create(@Body() createTradingAccountDto: CreateTradingAccountDto) {
-        return this.tradingAccountService.create(createTradingAccountDto);
+    create(@Req() request: Request, @Body() createTradingAccountDto: CreateTradingAccountDto) {
+        return this.tradingAccountService.create(request, createTradingAccountDto);
     }
 
     @Get()
@@ -22,15 +22,19 @@ export class TradingAccountController {
         return this.tradingAccountService.findAll(request);
     }
 
-    @Patch(':id')
+    @Patch('update/:id')
     @Authorisation(USER_ROLES.CUSTOMER)
-    update(@Param('id') id: string, @Body() updateTradingAccountDto: UpdateTradingAccountDto) {
-        return this.tradingAccountService.update(+id, updateTradingAccountDto);
+    update(
+        @Req() request: Request,
+        @Param('id') id: string,
+        @Body() updateTradingAccountDto: UpdateTradingAccountDto,
+    ) {
+        return this.tradingAccountService.update(request, id, updateTradingAccountDto);
     }
 
     @Delete('remove/:id')
     @Authorisation(USER_ROLES.CUSTOMER)
-    remove(@Param('id') id: string) {
-        return this.tradingAccountService.remove(+id);
+    remove(@Req() request: Request, @Param('id') id: string) {
+        return this.tradingAccountService.remove(request, id);
     }
 }

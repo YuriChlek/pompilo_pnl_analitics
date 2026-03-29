@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import styles from '@/features/module-api-keys/components/api-key-settings-popup/styles.module.css';
-import { ApiKeyPayload, ApiKeySettingsPopupProps } from '@/features/module-api-keys/interfaces/apiKeys';
+import {
+    ApiKeyPayload,
+    ApiKeySettingsPopupProps,
+} from '@/features/module-api-keys/interfaces/apiKeys';
 import { useRemoveApiKey, useUpdateApiKey } from '@/features/module-api-keys/hooks/mutation';
 import { ApiKeyFormPopup } from '@/features/module-api-keys/components/api-key-form-popup/ApiKeyFormPopup';
 
@@ -45,24 +48,30 @@ export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPop
 
     return (
         <>
-            <div
-                className={`${styles.menu} ${open ? styles.menuOpen : styles.menuClosed}`}
-                role="menu"
-                aria-label={`Settings for api key ${apiKey.id}`}
-                aria-hidden={!open}
-            >
-                <button onClick={edit} className={styles.menuItem} type="button" role="menuitem">
-                    Edit
-                </button>
-                <button
-                    onClick={remove}
-                    className={`${styles.menuItem} ${styles.menuItemDanger}`}
-                    type="button"
-                    role="menuitem"
+            {open ? (
+                <div
+                    className={`${styles.menu} ${styles.menuOpen}`}
+                    role="menu"
+                    aria-label={`Settings for api key ${apiKey.id}`}
                 >
-                    Delete
-                </button>
-            </div>
+                    <button
+                        onClick={edit}
+                        className={styles.menuItem}
+                        type="button"
+                        role="menuitem"
+                    >
+                        Edit
+                    </button>
+                    <button
+                        onClick={remove}
+                        className={`${styles.menuItem} ${styles.menuItemDanger}`}
+                        type="button"
+                        role="menuitem"
+                    >
+                        Delete
+                    </button>
+                </div>
+            ) : null}
 
             <ApiKeyFormPopup
                 open={isEditOpen}

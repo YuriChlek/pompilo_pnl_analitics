@@ -9,6 +9,7 @@ import { ApiKey } from '@/features/module-api-keys/interfaces/apiKeys';
 import { useCreateTradingAccount } from '@/features/module-trading-account/hooks/mutation';
 import { EmptyState } from '@/components/empty-state/EmptyState';
 import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
+import { useAvailableTradingAccountApiKeys } from '@/features/module-trading-account/hooks/query';
 
 export const AddTradingAccount = () => {
     const [open, setOpen] = useState(false);
@@ -18,15 +19,18 @@ export const AddTradingAccount = () => {
         exchange: '',
         market: '',
     });
-    const { mutate, isPending, isError } = useCreateTradingAccount();
+    const { mutate, isPending } = useCreateTradingAccount();
     const { data: apiKeysList } = useApiKeysList();
+    const availableApiKeys = useAvailableTradingAccountApiKeys();
     const router = useRouter();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
-        if (name === 'apiKeyId' && apiKeysList) {
-            const selectedApiKey: ApiKey | undefined = apiKeysList.find(key => key.id === value);
+        if (name === 'apiKeyId') {
+            const selectedApiKey: ApiKey | undefined = availableApiKeys.find(
+                key => key.id === value,
+            );
 
             setFormData(prev => ({
                 ...prev,
@@ -80,6 +84,20 @@ export const AddTradingAccount = () => {
                                     </Button>
                                 }
                             />
+                        ) : availableApiKeys.length === 0 ? (
+                            <EmptyState
+                                title="No available API keys"
+                                description="Every API key is already linked to a trading account. Add a new API key to create another account."
+                                action={
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={() => router.push('/customer/api-keys')}
+                                    >
+                                        Go to API Keys
+                                    </Button>
+                                }
+                            />
                         ) : (
                             <>
                                 <label htmlFor="apiKey">Api Key</label>
@@ -93,7 +111,7 @@ export const AddTradingAccount = () => {
                                     <option value="" hidden={true}>
                                         Select Api Key
                                     </option>
-                                    {apiKeysList.map(apiKey => (
+                                    {availableApiKeys.map(apiKey => (
                                         <option key={apiKey.id} value={apiKey.id}>
                                             {apiKey.apiKeyName}
                                         </option>
@@ -118,8 +136,10 @@ export const AddTradingAccount = () => {
                         <Button variant="secondary" type="button" onClick={() => setOpen(false)}>
                             Cancel
                         </Button>
-                        {!!(apiKeysList && apiKeysList.length > 0) && (
-                            <Button type="submit">Save</Button>
+                        {!!availableApiKeys.length && (
+                            <Button type="submit" disabled={isPending}>
+                                Save
+                            </Button>
                         )}
                     </div>
                 </form>

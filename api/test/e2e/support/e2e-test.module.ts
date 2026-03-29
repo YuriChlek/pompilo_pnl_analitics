@@ -209,6 +209,7 @@ export class FakeTradingAccountService {
     }
 
     create(
+        _request: Request,
         createTradingAccountDto: CreateTradingAccountDto,
     ): Promise<(typeof this.accounts)[number]> {
         if (createTradingAccountDto.tradingAccountName === 'boom') {

@@ -4,13 +4,11 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
-    OneToMany,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
 import { CONNECTION_STATUS, EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { Exclude } from 'class-transformer';
-import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
 
 @Entity({ name: 'api_keys' })
 export class ApiKey {
@@ -84,7 +82,4 @@ export class ApiKey {
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
-
-    @OneToMany(() => TradingAccount, acc => acc.apiKey)
-    tradingAccount: TradingAccount[];
 }

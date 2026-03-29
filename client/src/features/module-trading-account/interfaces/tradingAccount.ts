@@ -8,16 +8,29 @@ export interface TradingAccountPayload {
 export interface TradingAccount {
     id: string;
     tradingAccountName: string;
+    apiKeyId: string | null;
     apiKey: {
         apiKeyName: string;
-    };
+    } | null;
     exchange: string;
     market: string;
 }
 
 export interface TradingAccountSettingsPopupProps {
-    tradingAccountId: string;
+    account: TradingAccount;
     open: boolean;
+    onClose: () => void;
+}
+
+export interface TradingAccountFormPopupProps {
+    open: boolean;
+    title: string;
+    submitLabel: string;
+    initialData: TradingAccountPayload;
+    currentTradingAccountId?: string;
+    onClose: () => void;
+    onSubmit: (payload: TradingAccountPayload) => void;
+    isPending?: boolean;
 }
 
 /*
@@ -28,10 +41,11 @@ export interface TradingAccountOpenPnL {}
 
 export interface TradingAccountService {
     createTradingAccount: (tradingAccountPayload: TradingAccountPayload) => Promise<TradingAccount>;
-    removeTradingAccount: (id: string) => Promise<void>;
+    removeTradingAccount: (id: string) => Promise<boolean | null>;
     editTradingAccount: (
+        id: string,
         tradingAccountPayload: TradingAccountPayload,
-    ) => Promise<TradingAccountPayload>;
+    ) => Promise<TradingAccount | null>;
     getTradingAccountList: () => Promise<TradingAccount[]>;
     getTradingAccountStatistic: () => Promise<void>;
     getTradingAccountClosedPnL: () => Promise<void>;

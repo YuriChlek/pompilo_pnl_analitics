@@ -69,8 +69,9 @@ export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {
                     </Button>
 
                     <TradingAccountSettingsPopup
-                        tradingAccountId={account.id}
+                        account={account}
                         open={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
                     />
                 </div>
             </td>

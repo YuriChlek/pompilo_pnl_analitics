@@ -29,7 +29,9 @@ export const useUpdateApiKey = () => {
         onSuccess: (updatedApiKey: ApiKey | null, variables) => {
             queryClient.setQueryData<ApiKey[]>(['apiKeysList'], old =>
                 old
-                    ? old.map(item => (item.id === variables.id && updatedApiKey ? updatedApiKey : item))
+                    ? old.map(item =>
+                          item.id === variables.id && updatedApiKey ? updatedApiKey : item,
+                      )
                     : updatedApiKey
                       ? [updatedApiKey]
                       : [],

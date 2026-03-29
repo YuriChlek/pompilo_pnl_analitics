@@ -31,6 +31,7 @@ describe('TradingAccountController', () => {
     });
 
     it('delegates create to the service', async () => {
+        const req = {} as Request;
         const dto: CreateTradingAccountDto = {
             tradingAccountName: 'Test',
             apiKeyId: 'api-key',
@@ -41,10 +42,10 @@ describe('TradingAccountController', () => {
             ReturnType<TradingAccountService['create']>
         >);
 
-        const result = await controller.create(dto);
+        const result = await controller.create(req, dto);
 
         expect(result).toEqual({ id: 'acc' });
-        expect(createMock).toHaveBeenCalledWith(dto);
+        expect(createMock).toHaveBeenCalledWith(req, dto);
     });
 
     it('delegates findAll with request context', async () => {
@@ -58,13 +59,15 @@ describe('TradingAccountController', () => {
         expect(findAllMock).toHaveBeenCalledWith(req);
     });
 
-    it('passes identifiers to update/remove', () => {
-        controller.update('8', {
+    it('passes request context and identifiers to update/remove', () => {
+        const req = {} as Request;
+
+        controller.update(req, '8', {
             tradingAccountName: 'Updated',
         } satisfies UpdateTradingAccountDto);
-        expect(updateMock).toHaveBeenCalledWith(8, expect.any(Object));
+        expect(updateMock).toHaveBeenCalledWith(req, '8', expect.any(Object));
 
-        controller.remove('12');
-        expect(removeMock).toHaveBeenCalledWith(12);
+        controller.remove(req, '12');
+        expect(removeMock).toHaveBeenCalledWith(req, '12');
     });
 });

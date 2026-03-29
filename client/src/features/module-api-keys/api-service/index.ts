@@ -42,9 +42,7 @@ export const apiKeysService: AuthApiKeys = {
     async removeApiKey(id: string): Promise<boolean | null> {
         const response: HttpResponse<{ removed: boolean }> = await apiClient.delete<{
             removed: boolean;
-        }>(
-            `/customer/api-key/remove/${id}`,
-        );
+        }>(`/customer/api-key/remove/${id}`);
 
         return response.data?.removed as unknown as boolean;
     },

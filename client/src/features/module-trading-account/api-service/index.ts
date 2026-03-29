@@ -12,7 +12,11 @@ export const tradingAccountService: TradingAccountService = {
             '/customer/trading-account/create',
             tradingAccountPayload,
         );
-        console.log(response);
+
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
         return response.data as unknown as TradingAccount;
     },
     async getTradingAccountList(): Promise<TradingAccount[]> {
@@ -20,12 +24,35 @@ export const tradingAccountService: TradingAccountService = {
             '/customer/trading-account',
         );
 
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
         return response.data as unknown as TradingAccount[];
     },
-    async editTradingAccount(tradingAccountPayload: TradingAccountPayload) {
-        return tradingAccountPayload;
+    async editTradingAccount(id: string, tradingAccountPayload: TradingAccountPayload) {
+        const response: HttpResponse<TradingAccount> = await apiClient.patch(
+            `/customer/trading-account/update/${id}`,
+            tradingAccountPayload,
+        );
+
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
+        return response.data as unknown as TradingAccount;
     },
-    async removeTradingAccount() {},
+    async removeTradingAccount(id: string) {
+        const response: HttpResponse<{ removed: boolean }> = await apiClient.delete(
+            `/customer/trading-account/remove/${id}`,
+        );
+
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
+        return response.data?.removed as unknown as boolean;
+    },
     async getTradingAccountStatistic() {},
     async getTradingAccountClosedPnL() {},
     async getTradingAccountOpenPnL() {},

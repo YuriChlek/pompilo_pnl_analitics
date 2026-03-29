@@ -40,7 +40,7 @@ export class BybitService {
         const now = Date.now();
 
         let endTime = now;
-        console.log(lastTradeTime);
+        console.log('lastTradeTime', lastTradeTime);
 
         const allResults: FuturesClosedPnl[] = [];
 

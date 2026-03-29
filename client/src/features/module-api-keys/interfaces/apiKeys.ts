@@ -36,4 +36,4 @@ export interface ApiKeyFormPopupProps {
     onClose: () => void;
     onSubmit: (payload: ApiKeyPayload) => void;
     isPending?: boolean;
-};
+}

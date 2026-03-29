@@ -5,9 +5,7 @@ import { Button } from '@/components/button';
 import { Popup } from '@/components/popup/Popup';
 import styles from '@/features/module-api-keys/components/api-key-form-popup/styles.module.css';
 import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums/api-keys.enums';
-import type {
-    ApiKeyFormPopupProps,
-} from '@/features/module-api-keys/interfaces/apiKeys';
+import type { ApiKeyFormPopupProps } from '@/features/module-api-keys/interfaces/apiKeys';
 
 export const ApiKeyFormPopup = ({
     open,
@@ -55,12 +53,7 @@ export const ApiKeyFormPopup = ({
 
                 <div className={styles.field}>
                     <label htmlFor="market">Exchange Market</label>
-                    <select
-                        id="market"
-                        name="market"
-                        defaultValue={initialData.market}
-                        required
-                    >
+                    <select id="market" name="market" defaultValue={initialData.market} required>
                         <option value="" hidden={true}>
                             Select market
                         </option>
@@ -72,12 +65,7 @@ export const ApiKeyFormPopup = ({
 
                 <div className={styles.field}>
                     <label htmlFor="apiKey">Api Key</label>
-                    <input
-                        id="apiKey"
-                        name="apiKey"
-                        defaultValue={initialData.apiKey}
-                        required
-                    />
+                    <input id="apiKey" name="apiKey" defaultValue={initialData.apiKey} required />
                 </div>
 
                 <div className={styles.field}>

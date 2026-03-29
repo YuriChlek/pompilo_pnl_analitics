@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
-import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
@@ -20,13 +19,6 @@ export class TradingAccount {
     })
     @JoinColumn({ name: 'user_id' })
     user: User;
-
-    @ManyToOne(() => ApiKey, {
-        onDelete: 'CASCADE',
-        nullable: false,
-    })
-    @JoinColumn({ name: 'api_key_id' })
-    apiKey: ApiKey;
 
     @OneToMany(() => FuturesClosedPnl, futuresClosedPnl => futuresClosedPnl.tradingAccount)
     futuresClosedPnl: FuturesClosedPnl[];

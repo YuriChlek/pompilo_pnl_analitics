@@ -6,6 +6,7 @@ import {
     HttpError,
     HttpResponse,
 } from './http-client-entities';
+import { getRefreshPathByRequestPath } from '@/features/module-auth/lib/auth-refresh';
 
 export abstract class AbstractHttpClient {
     protected readonly baseUrl: string;
@@ -104,16 +105,11 @@ export abstract class AbstractHttpClient {
     }
 
     private async refreshToken(path: string): Promise<boolean> {
-        const isAdmin: boolean = path.includes('admin');
-
         try {
-            const response = await fetch(
-                new URL(`${isAdmin ? '/admin' : '/customer'}/refresh`, this.baseUrl),
-                {
-                    method: 'POST',
-                    credentials: 'include',
-                },
-            );
+            const response = await fetch(new URL(getRefreshPathByRequestPath(path), this.baseUrl), {
+                method: 'POST',
+                credentials: 'include',
+            });
 
             return response.ok;
         } catch {

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
+import { ClosedPnlStatisticsRaw } from '@/module-trades/types/trades.repository.types';
 
 @Injectable()
 export class TradesRepositoryService {
@@ -41,6 +42,97 @@ export class TradesRepositoryService {
         });
 
         return latestTrade?.updatedTime ?? null;
+    }
+
+    async findClosedPnlStatisticsByTradingAccountId(
+        tradingAccountId: string,
+    ): Promise<ClosedPnlStatisticsRaw> {
+        const statistics = await this.futuresClosedPnlRepository
+            .createQueryBuilder('trade')
+            .select('COUNT(*)', 'totalTrades')
+            .addSelect(
+                'SUM(CASE WHEN trade.closedPnl > 0 THEN 1 ELSE 0 END)',
+                'winningTrades',
+            )
+            .addSelect(
+                'SUM(CASE WHEN trade.closedPnl < 0 THEN 1 ELSE 0 END)',
+                'losingTrades',
+            )
+            .addSelect('COALESCE(SUM(trade.closedPnl), 0)', 'totalClosedPnl')
+            .addSelect(
+                'COALESCE(SUM(CASE WHEN trade.closedPnl > 0 THEN trade.closedPnl ELSE 0 END), 0)',
+                'grossProfit',
+            )
+            .addSelect(
+                'COALESCE(SUM(CASE WHEN trade.closedPnl < 0 THEN trade.closedPnl ELSE 0 END), 0)',
+                'grossLoss',
+            )
+            .addSelect('COALESCE(AVG(trade.closedPnl), 0)', 'averageClosedPnl')
+            .addSelect('MAX(trade.closedPnl)', 'bestTrade')
+            .addSelect('MIN(trade.closedPnl)', 'worstTrade')
+            .addSelect('MAX(trade.createdTime)', 'latestTradeAt')
+            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId })
+            .getRawOne<ClosedPnlStatisticsRaw>();
+
+        return (
+            statistics ?? {
+                totalTrades: '0',
+                winningTrades: '0',
+                losingTrades: '0',
+                totalClosedPnl: '0',
+                grossProfit: '0',
+                grossLoss: '0',
+                averageClosedPnl: '0',
+                bestTrade: null,
+                worstTrade: null,
+                latestTradeAt: null,
+            }
+        );
+    }
+
+    async findClosedPnlTimelineByTradingAccountId(
+        tradingAccountId: string,
+    ): Promise<Array<Pick<FuturesClosedPnl, 'createdTime' | 'closedPnl'>>> {
+        return this.futuresClosedPnlRepository.find({
+            where: { tradingAccountId },
+            select: {
+                createdTime: true,
+                closedPnl: true,
+            },
+            order: { createdTime: 'ASC' },
+        });
+    }
+
+    async findRecentClosedTradesByTradingAccountId(
+        tradingAccountId: string,
+        page: number,
+        pageSize: number,
+    ): Promise<FuturesClosedPnl[]> {
+        return this.futuresClosedPnlRepository.find({
+            where: { tradingAccountId },
+            select: {
+                id: true,
+                symbol: true,
+                side: true,
+                closedPnl: true,
+                qty: true,
+                avgEntryPrice: true,
+                avgExitPrice: true,
+                leverage: true,
+                createdTime: true,
+                updatedTime: true,
+                orderType: true,
+            },
+            order: { createdTime: 'DESC' },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        });
+    }
+
+    async countClosedTradesByTradingAccountId(tradingAccountId: string): Promise<number> {
+        return this.futuresClosedPnlRepository.count({
+            where: { tradingAccountId },
+        });
     }
 
     private async findExistingOrderIds(

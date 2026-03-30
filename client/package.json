@@ -14,11 +14,12 @@
     "change-case": "^5.4.4",
     "clsx": "^2.1.1",
     "cookies-next": "^6.1.1",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
     "next": "^16.1.6",
     "next-intl": "^4.8.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-echarts-kit": "^1.0.7",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

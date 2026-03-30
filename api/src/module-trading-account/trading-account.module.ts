@@ -7,8 +7,10 @@ import { TradingAccountService } from '@/module-trading-account/services/trading
 import { BullModule } from '@nestjs/bullmq';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
+import { TradingAccountQueryService } from '@/module-trading-account/services/trading-account-query.service';
 import { ApiKeysModule } from '@/module-api-keys/api-keys.module';
 import { AuthTokenModule } from '@/module-auth-token/auth-token.module';
+import { TradesModule } from '@/module-trades/trades.module';
 
 @Module({
     imports: [
@@ -18,10 +20,12 @@ import { AuthTokenModule } from '@/module-auth-token/auth-token.module';
         }),
         ApiKeysModule,
         AuthTokenModule,
+        TradesModule,
     ],
     controllers: [TradingAccountController],
     providers: [
         TradingAccountService,
+        TradingAccountQueryService,
         TradingAccountRepositoryService,
         TradingAccountBindingRepositoryService,
     ],

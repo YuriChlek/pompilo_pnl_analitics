@@ -1,4 +1,6 @@
 import {
+    TradingAccountDetails,
+    TradingAccountRecentTradePage,
     TradingAccount,
     TradingAccountPayload,
     TradingAccountService,
@@ -53,7 +55,32 @@ export const tradingAccountService: TradingAccountService = {
 
         return response.data?.removed as unknown as boolean;
     },
-    async getTradingAccountStatistic() {},
-    async getTradingAccountClosedPnL() {},
-    async getTradingAccountOpenPnL() {},
+    async getTradingAccountDetails(id: string) {
+        const response: HttpResponse<TradingAccountDetails> = await apiClient.get(
+            `/customer/trading-account/${id}`,
+        );
+
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
+        return response.data as unknown as TradingAccountDetails;
+    },
+    async getTradingAccountTrades(id: string, page: number, pageSize: number) {
+        const response: HttpResponse<TradingAccountRecentTradePage> = await apiClient.get(
+            `/customer/trading-account/${id}/trades`,
+            {
+                params: {
+                    page,
+                    pageSize,
+                },
+            },
+        );
+
+        if (!response.success) {
+            throw new Error(response.message);
+        }
+
+        return response.data as unknown as TradingAccountRecentTradePage;
+    },
 };

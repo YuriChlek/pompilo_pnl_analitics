@@ -16,6 +16,54 @@ export interface TradingAccount {
     market: string;
 }
 
+export interface TradingAccountStatistic {
+    totalTrades: number;
+    winningTrades: number;
+    losingTrades: number;
+    winRate: number;
+    totalClosedPnl: number;
+    grossProfit: number;
+    grossLoss: number;
+    averageClosedPnl: number;
+    bestTrade: number | null;
+    worstTrade: number | null;
+    profitFactor: number | null;
+    latestTradeAt: string | null;
+}
+
+export interface TradingAccountChartPoint {
+    time: string;
+    cumulativeClosedPnl: number;
+}
+
+export interface TradingAccountRecentTrade {
+    id: string;
+    symbol: string;
+    side: 'Buy' | 'Sell';
+    closedPnl: number;
+    qty: number;
+    avgEntryPrice: number;
+    avgExitPrice: number;
+    leverage: number;
+    createdTime: string | null;
+    updatedTime: string | null;
+    orderType: string;
+}
+
+export interface TradingAccountRecentTradePage {
+    items: TradingAccountRecentTrade[];
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+}
+
+export interface TradingAccountDetails {
+    account: TradingAccount;
+    statistics: TradingAccountStatistic;
+    chart: TradingAccountChartPoint[];
+}
+
 export interface TradingAccountSettingsPopupProps {
     account: TradingAccount;
     open: boolean;
@@ -33,12 +81,6 @@ export interface TradingAccountFormPopupProps {
     isPending?: boolean;
 }
 
-/*
-export interface TradingAccountStatistic {}
-export interface TradingAccountClosedPnL {}
-export interface TradingAccountOpenPnL {}
-*/
-
 export interface TradingAccountService {
     createTradingAccount: (tradingAccountPayload: TradingAccountPayload) => Promise<TradingAccount>;
     removeTradingAccount: (id: string) => Promise<boolean | null>;
@@ -47,7 +89,10 @@ export interface TradingAccountService {
         tradingAccountPayload: TradingAccountPayload,
     ) => Promise<TradingAccount | null>;
     getTradingAccountList: () => Promise<TradingAccount[]>;
-    getTradingAccountStatistic: () => Promise<void>;
-    getTradingAccountClosedPnL: () => Promise<void>;
-    getTradingAccountOpenPnL: () => Promise<void>;
+    getTradingAccountDetails: (id: string) => Promise<TradingAccountDetails>;
+    getTradingAccountTrades: (
+        id: string,
+        page: number,
+        pageSize: number,
+    ) => Promise<TradingAccountRecentTradePage>;
 }

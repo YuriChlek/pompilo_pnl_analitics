@@ -7,8 +7,8 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { CreateTradingAccountDto } from '../dto/create-trading-account.dto';
-import { UpdateTradingAccountDto } from '../dto/update-trading-account.dto';
+import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
+import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
@@ -22,7 +22,7 @@ import { DataSource, DeleteResult, UpdateResult } from 'typeorm';
 import {
     TradingAccountApiKeySummary,
     TradingAccountSummary,
-} from '@/module-trading-account/interfaces';
+} from '@/module-trading-account/types';
 import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
 
 @Injectable()
@@ -122,10 +122,6 @@ export class TradingAccountService {
                 apiKeyByTradingAccountId.get(account.id) ?? null,
             ),
         );
-    }
-
-    findOne(id: number) {
-        return `This action returns a #${id} tradingAccount`;
     }
 
     async update(

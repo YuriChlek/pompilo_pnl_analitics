@@ -7,6 +7,6 @@ export const useApiKeysList = () => {
         queryKey: ['apiKeysList'],
         queryFn: (): Promise<ApiKey[]> => apiKeysService.getUserApiKeys(),
         gcTime: 300000,
-        refetchInterval: 10000,
+        staleTime: 300000,
     });
 };

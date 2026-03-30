@@ -6,7 +6,7 @@ import { TradesRepositoryService } from '@/module-trades/services/trades-reposit
 
 @Module({
     imports: [TypeOrmModule.forFeature([FuturesClosedPnl])],
-    exports: [TradesRepositoryService],
+    exports: [TradesRepositoryService, TradesService],
     providers: [TradesService, TradesRepositoryService],
 })
 export class TradesModule {}

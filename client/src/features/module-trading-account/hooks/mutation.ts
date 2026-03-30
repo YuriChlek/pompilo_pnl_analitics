@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+    TradingAccountDetails,
     TradingAccount,
     TradingAccountPayload,
 } from '@/features/module-trading-account/interfaces/tradingAccount';
@@ -41,6 +42,17 @@ export const useUpdateTradingAccount = () => {
                       ? [updatedTradingAccount]
                       : [],
             );
+
+            queryClient.setQueryData<TradingAccountDetails | undefined>(
+                ['tradingAccountDetails', variables.id],
+                old =>
+                    old && updatedTradingAccount
+                        ? {
+                              ...old,
+                              account: updatedTradingAccount,
+                          }
+                        : old,
+            );
         },
         onError: error => {
             console.log(error.message);
@@ -58,6 +70,7 @@ export const useRemoveTradingAccount = () => {
             queryClient.setQueryData<TradingAccount[]>(['tradingAccountsList'], old =>
                 old ? old.filter(item => item.id !== id) : [],
             );
+            queryClient.removeQueries({ queryKey: ['tradingAccountDetails', id] });
         },
         onError: error => {
             console.log(error.message);

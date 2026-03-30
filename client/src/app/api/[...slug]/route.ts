@@ -1,15 +1,18 @@
+import { apiBaseUrl } from '@/lib/config/api-base-url';
+
 type RequestParams = { params: Promise<{ slug: string[] }> };
 
-const API_BASE_URL = process.env.API_BASE_URL;
-
 async function proxyRequest(request: Request, paramsPromise: RequestParams['params']) {
-    if (!API_BASE_URL) {
+    if (!apiBaseUrl) {
         return new Response('API_BASE_URL environment variable is not configured', { status: 500 });
     }
 
     const { slug } = await paramsPromise;
     const pathname = slug.join('/');
-    const proxyURL = new URL(pathname, API_BASE_URL);
+    const proxyURL = new URL(pathname, apiBaseUrl);
+    const requestURL = new URL(request.url);
+
+    proxyURL.search = requestURL.search;
     const proxyRequest = new Request(proxyURL, request);
 
     try {

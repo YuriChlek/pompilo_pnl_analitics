@@ -4,6 +4,7 @@
     --color-primary: #2563eb;
     --color-primary-hover: #1d4ed8;
     --color-primary-light: rgba(37, 99, 235, 0.16);
+    --color-chart-line-primary: #2563eb;
 
     /* Neutral */
     --color-white: #ffffff;
@@ -52,6 +53,12 @@
     --color-button-secondary-hover: rgba(111, 92, 70, 0.06);
     --color-button-secondary-border: #e3d7c9;
 
+    /* Semantic */
+    --color-text-positive: #2f855a;
+    --color-text-negative: #c05621;
+    --color-surface-negative-soft: rgba(192, 86, 33, 0.12);
+    --color-border-negative-soft: rgba(192, 86, 33, 0.22);
+
     --color-background-accent-start: rgba(217, 196, 168, 0.22);
     --color-background-accent-end: rgba(196, 176, 149, 0.16);
     --color-accent-glow: rgba(150, 127, 98, 0.18);
@@ -82,6 +89,12 @@
     --color-button-secondary-bg: transparent;
     --color-button-secondary-hover: rgba(196, 179, 157, 0.08);
     --color-button-secondary-border: rgba(196, 179, 157, 0.16);
+
+    /* Semantic */
+    --color-text-positive: #68d391;
+    --color-text-negative: #f6ad55;
+    --color-surface-negative-soft: rgba(246, 173, 85, 0.12);
+    --color-border-negative-soft: rgba(246, 173, 85, 0.24);
 
     --color-background-accent-start: rgba(95, 123, 186, 0.14);
     --color-background-accent-end: rgba(113, 92, 71, 0.12);

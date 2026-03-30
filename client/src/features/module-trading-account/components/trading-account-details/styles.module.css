@@ -1,0 +1,91 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-6);
+    padding: var(--spacing-6);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    border-radius: var(--border-radius-2xl);
+    background:
+        radial-gradient(circle at top right, var(--color-background-accent-start), transparent 38%),
+        linear-gradient(145deg, var(--color-surface), var(--color-surface-secondary));
+    box-shadow: var(--shadow-lg);
+}
+
+.eyebrow {
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.accountName {
+    font-size: clamp(1.75rem, 2vw, 2.5rem);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-primary);
+}
+
+.accountMeta {
+    margin-top: var(--spacing-2);
+    color: var(--color-text-secondary);
+}
+
+.summaryGrid {
+    min-width: 280px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-3);
+}
+
+.summaryItem {
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-xl);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+}
+
+.summaryItem dt {
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.summaryItem dd {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.placeholder {
+    width: 100%;
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-6);
+    border: 1px dashed var(--color-border-secondary);
+    border-radius: var(--border-radius-2xl);
+    background: var(--color-surface);
+}
+
+@media (max-width: 960px) {
+    .hero {
+        flex-direction: column;
+    }
+
+    .summaryGrid {
+        min-width: 0;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}

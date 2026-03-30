@@ -1,14 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
-import { TradingAccountService } from './services/trading-account.service';
-import { CreateTradingAccountDto } from './dto/create-trading-account.dto';
-import { UpdateTradingAccountDto } from './dto/update-trading-account.dto';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Query,
+    Req,
+    ValidationPipe,
+} from '@nestjs/common';
+import { TradingAccountService } from '@/module-trading-account/services/trading-account.service';
+import { TradingAccountQueryService } from '@/module-trading-account/services/trading-account-query.service';
+import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
+import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
+import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
 import { Authorisation } from '@/module-auth/decorators/auth.decorator';
 import { USER_ROLES } from '@/module-auth/enums/auth-enums';
 import type { Request } from 'express';
 
 @Controller()
 export class TradingAccountController {
-    constructor(private readonly tradingAccountService: TradingAccountService) {}
+    constructor(
+        private readonly tradingAccountService: TradingAccountService,
+        private readonly tradingAccountQueryService: TradingAccountQueryService,
+    ) {}
 
     @Post('create')
     @Authorisation(USER_ROLES.CUSTOMER)
@@ -20,6 +36,22 @@ export class TradingAccountController {
     @Authorisation(USER_ROLES.CUSTOMER)
     findAll(@Req() request: Request) {
         return this.tradingAccountService.findAll(request);
+    }
+
+    @Get(':id')
+    @Authorisation(USER_ROLES.CUSTOMER)
+    findOne(@Req() request: Request, @Param('id') id: string) {
+        return this.tradingAccountQueryService.findOne(request, id);
+    }
+
+    @Get(':id/trades')
+    @Authorisation(USER_ROLES.CUSTOMER)
+    findTrades(
+        @Req() request: Request,
+        @Param('id') id: string,
+        @Query(new ValidationPipe({ transform: true })) query: TradingAccountTradesQueryDto,
+    ) {
+        return this.tradingAccountQueryService.findTrades(request, id, query);
     }
 
     @Patch('update/:id')

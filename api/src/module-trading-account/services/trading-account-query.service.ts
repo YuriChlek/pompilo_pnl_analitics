@@ -14,6 +14,7 @@ import { TradingAccount } from '@/module-trading-account/entities/trading-accoun
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
 import { ClosedPnlTradePage } from '@/module-trades/types/trades.repository.types';
+import { type AnalyticsPeriod } from '@/module-trades/constants/analytics-periods';
 
 @Injectable()
 export class TradingAccountQueryService {
@@ -24,7 +25,11 @@ export class TradingAccountQueryService {
         private readonly tradesService: TradesService,
     ) {}
 
-    async findOne(request: Request, tradingAccountId: string): Promise<TradingAccountPageData> {
+    async findOne(
+        request: Request,
+        tradingAccountId: string,
+        period: AnalyticsPeriod,
+    ): Promise<TradingAccountPageData> {
         const userId = this.getAuthorizedUserId(request);
         const tradingAccount = await this.getOwnedTradingAccount(tradingAccountId, userId);
         const tradingAccountBinding =
@@ -33,8 +38,8 @@ export class TradingAccountQueryService {
             );
 
         const [statistics, chart] = await Promise.all([
-            this.tradesService.getClosedPnlStatistics(tradingAccountId),
-            this.tradesService.getClosedPnlTimeline(tradingAccountId),
+            this.tradesService.getClosedPnlStatistics(tradingAccountId, period),
+            this.tradesService.getClosedPnlTimeline(tradingAccountId, period),
         ]);
 
         return {
@@ -59,7 +64,12 @@ export class TradingAccountQueryService {
         const page = query.page ?? 1;
         const pageSize = query.pageSize ?? 10;
 
-        return this.tradesService.getClosedTradePage(tradingAccountId, page, pageSize);
+        return this.tradesService.getClosedTradePage(
+            tradingAccountId,
+            page,
+            pageSize,
+            query.period,
+        );
     }
 
     private getAuthorizedUserId(request: Request): string {

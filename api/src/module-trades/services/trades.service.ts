@@ -5,21 +5,24 @@ import {
     ClosedPnlTimelinePoint,
     ClosedPnlTradePage,
 } from '@/module-trades/types/trades.repository.types';
-/*import {
-    ClosedPnlTradePage,
-    ClosedPnlStatistics,
-    ClosedPnlTimelinePoint,
-    ClosedPnlTradeSummary,
-} from '@/module-trades/types';*/
+import {
+    DEFAULT_ANALYTICS_PERIOD,
+    type AnalyticsPeriod,
+} from '@/module-trades/constants/analytics-periods';
 
 @Injectable()
 export class TradesService {
     constructor(private readonly tradesRepositoryService: TradesRepositoryService) {}
 
-    async getClosedPnlStatistics(tradingAccountId: string): Promise<ClosedPnlStatistics> {
+    async getClosedPnlStatistics(
+        tradingAccountId: string,
+        period: AnalyticsPeriod = DEFAULT_ANALYTICS_PERIOD,
+    ): Promise<ClosedPnlStatistics> {
+        const fromTimestamp = this.resolvePeriodStart(period);
         const statistics =
             await this.tradesRepositoryService.findClosedPnlStatisticsByTradingAccountId(
                 tradingAccountId,
+                fromTimestamp,
             );
         const totalTrades = this.toNumber(statistics.totalTrades);
         const winningTrades = this.toNumber(statistics.winningTrades);
@@ -48,11 +51,15 @@ export class TradesService {
         };
     }
 
-    async getClosedPnlTimeline(tradingAccountId: string): Promise<ClosedPnlTimelinePoint[]> {
-        const timeline =
-            await this.tradesRepositoryService.findClosedPnlTimelineByTradingAccountId(
-                tradingAccountId,
-            );
+    async getClosedPnlTimeline(
+        tradingAccountId: string,
+        period: AnalyticsPeriod = DEFAULT_ANALYTICS_PERIOD,
+    ): Promise<ClosedPnlTimelinePoint[]> {
+        const fromTimestamp = this.resolvePeriodStart(period);
+        const timeline = await this.tradesRepositoryService.findClosedPnlTimelineByTradingAccountId(
+            tradingAccountId,
+            fromTimestamp,
+        );
         let cumulativeClosedPnl = 0;
 
         return timeline.flatMap(point => {
@@ -75,17 +82,20 @@ export class TradesService {
         tradingAccountId: string,
         page: number,
         pageSize: number,
+        period: AnalyticsPeriod = DEFAULT_ANALYTICS_PERIOD,
     ): Promise<ClosedPnlTradePage> {
-        const totalItems =
-            await this.tradesRepositoryService.countClosedTradesByTradingAccountId(
-                tradingAccountId,
-            );
+        const fromTimestamp = this.resolvePeriodStart(period);
+        const totalItems = await this.tradesRepositoryService.countClosedTradesByTradingAccountId(
+            tradingAccountId,
+            fromTimestamp,
+        );
         const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
         const normalizedPage = Math.min(Math.max(1, page), totalPages);
         const trades = await this.tradesRepositoryService.findRecentClosedTradesByTradingAccountId(
             tradingAccountId,
             normalizedPage,
             pageSize,
+            fromTimestamp,
         );
 
         return {
@@ -123,5 +133,20 @@ export class TradesService {
         }
 
         return new Date(Number(value)).toISOString();
+    }
+
+    private resolvePeriodStart(period: AnalyticsPeriod): string | null {
+        if (period === 'all') {
+            return null;
+        }
+
+        const daysByPeriod: Record<Exclude<AnalyticsPeriod, 'all'>, number> = {
+            '7d': 7,
+            '30d': 30,
+            '90d': 90,
+            '180d': 180,
+        };
+
+        return String(Date.now() - daysByPeriod[period] * 24 * 60 * 60 * 1000);
     }
 }

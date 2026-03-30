@@ -8,18 +8,20 @@ import {
     formatInteger,
     formatNumber,
 } from '@/features/module-trading-account/lib/format';
+import { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/interfaces/tradingAccount';
 import { useTradingAccountTrades } from '@/features/module-trading-account/hooks/query';
-import { useTradePagination } from '@/features/module-trading-account/hooks/use-trade-pagination';
+import { useTradingAccountPageState } from '@/features/module-trading-account/hooks/use-trading-account-page-state';
 import styles from '@/features/module-trading-account/components/trading-list/styles.module.css';
 
 type TradingListProps = {
     tradingAccountId: string;
+    period: TradingAccountAnalyticsPeriod;
 };
 
-export const TradingList = ({ tradingAccountId }: TradingListProps) => {
-    const { page, pageSize, pageSizeOptions, setPage, setPageSize } = useTradePagination();
+export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
+    const { page, pageSize, pageSizeOptions, setPage, setPageSize } = useTradingAccountPageState();
     const { data, isLoading, isFetching, isPlaceholderData, isError, error } =
-        useTradingAccountTrades(tradingAccountId, page, pageSize);
+        useTradingAccountTrades(tradingAccountId, page, pageSize, period);
 
     const displayPage = isPlaceholderData ? (data?.page ?? page) : page;
     const displayPageSize = isPlaceholderData ? (data?.pageSize ?? pageSize) : pageSize;
@@ -106,7 +108,11 @@ export const TradingList = ({ tradingAccountId }: TradingListProps) => {
                     </p>
                     <label className={styles.pageSizeControl}>
                         <span>Rows per page</span>
-                        <select value={displayPageSize} onChange={handlePageSizeChange} disabled={isFetching}>
+                        <select
+                            value={displayPageSize}
+                            onChange={handlePageSizeChange}
+                            disabled={isFetching}
+                        >
                             {pageSizeOptions.map(option => (
                                 <option key={option} value={option}>
                                     {option}

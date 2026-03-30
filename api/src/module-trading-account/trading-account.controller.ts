@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { TradingAccountService } from '@/module-trading-account/services/trading-account.service';
 import { TradingAccountQueryService } from '@/module-trading-account/services/trading-account-query.service';
+import { TradingAccountAnalyticsQueryDto } from '@/module-trading-account/dto/trading-account-analytics-query.dto';
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
 import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
@@ -40,8 +41,12 @@ export class TradingAccountController {
 
     @Get(':id')
     @Authorisation(USER_ROLES.CUSTOMER)
-    findOne(@Req() request: Request, @Param('id') id: string) {
-        return this.tradingAccountQueryService.findOne(request, id);
+    findOne(
+        @Req() request: Request,
+        @Param('id') id: string,
+        @Query(new ValidationPipe({ transform: true })) query: TradingAccountAnalyticsQueryDto,
+    ) {
+        return this.tradingAccountQueryService.findOne(request, id, query.period);
     }
 
     @Get(':id/trades')

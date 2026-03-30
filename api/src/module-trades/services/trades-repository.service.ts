@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 import { ClosedPnlStatisticsRaw } from '@/module-trades/types/trades.repository.types';
 
@@ -46,8 +46,9 @@ export class TradesRepositoryService {
 
     async findClosedPnlStatisticsByTradingAccountId(
         tradingAccountId: string,
+        fromTimestamp?: string | null,
     ): Promise<ClosedPnlStatisticsRaw> {
-        const statistics = await this.futuresClosedPnlRepository
+        const queryBuilder = this.futuresClosedPnlRepository
             .createQueryBuilder('trade')
             .select('COUNT(*)', 'totalTrades')
             .addSelect('SUM(CASE WHEN trade.closedPnl > 0 THEN 1 ELSE 0 END)', 'winningTrades')
@@ -65,8 +66,11 @@ export class TradesRepositoryService {
             .addSelect('MAX(trade.closedPnl)', 'bestTrade')
             .addSelect('MIN(trade.closedPnl)', 'worstTrade')
             .addSelect('MAX(trade.createdTime)', 'latestTradeAt')
-            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId })
-            .getRawOne<ClosedPnlStatisticsRaw>();
+            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId });
+
+        this.applyFromTimestampFilter(queryBuilder, fromTimestamp);
+
+        const statistics = await queryBuilder.getRawOne<ClosedPnlStatisticsRaw>();
 
         return (
             statistics ?? {
@@ -86,47 +90,61 @@ export class TradesRepositoryService {
 
     async findClosedPnlTimelineByTradingAccountId(
         tradingAccountId: string,
+        fromTimestamp?: string | null,
     ): Promise<Array<Pick<FuturesClosedPnl, 'createdTime' | 'closedPnl'>>> {
-        return this.futuresClosedPnlRepository.find({
-            where: { tradingAccountId },
-            select: {
-                createdTime: true,
-                closedPnl: true,
-            },
-            order: { createdTime: 'ASC' },
-        });
+        const queryBuilder = this.futuresClosedPnlRepository
+            .createQueryBuilder('trade')
+            .select(['trade.createdTime AS "createdTime"', 'trade.closedPnl AS "closedPnl"'])
+            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId })
+            .orderBy('trade.createdTime', 'ASC');
+
+        this.applyFromTimestampFilter(queryBuilder, fromTimestamp);
+
+        return queryBuilder.getRawMany<Pick<FuturesClosedPnl, 'createdTime' | 'closedPnl'>>();
     }
 
     async findRecentClosedTradesByTradingAccountId(
         tradingAccountId: string,
         page: number,
         pageSize: number,
+        fromTimestamp?: string | null,
     ): Promise<FuturesClosedPnl[]> {
-        return this.futuresClosedPnlRepository.find({
-            where: { tradingAccountId },
-            select: {
-                id: true,
-                symbol: true,
-                side: true,
-                closedPnl: true,
-                qty: true,
-                avgEntryPrice: true,
-                avgExitPrice: true,
-                leverage: true,
-                createdTime: true,
-                updatedTime: true,
-                orderType: true,
-            },
-            order: { createdTime: 'DESC' },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-        });
+        const queryBuilder = this.futuresClosedPnlRepository
+            .createQueryBuilder('trade')
+            .select([
+                'trade.id',
+                'trade.symbol',
+                'trade.side',
+                'trade.closedPnl',
+                'trade.qty',
+                'trade.avgEntryPrice',
+                'trade.avgExitPrice',
+                'trade.leverage',
+                'trade.createdTime',
+                'trade.updatedTime',
+                'trade.orderType',
+            ])
+            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId })
+            .orderBy('trade.createdTime', 'DESC')
+            .skip((page - 1) * pageSize)
+            .take(pageSize);
+
+        this.applyFromTimestampFilter(queryBuilder, fromTimestamp);
+
+        return queryBuilder.getMany();
     }
 
-    async countClosedTradesByTradingAccountId(tradingAccountId: string): Promise<number> {
-        return this.futuresClosedPnlRepository.count({
-            where: { tradingAccountId },
-        });
+    async countClosedTradesByTradingAccountId(
+        tradingAccountId: string,
+        fromTimestamp?: string | null,
+    ): Promise<number> {
+        const queryBuilder = this.futuresClosedPnlRepository
+            .createQueryBuilder('trade')
+            .where('trade.tradingAccountId = :tradingAccountId', { tradingAccountId });
+
+        this.applyFromTimestampFilter(queryBuilder, fromTimestamp);
+
+        return queryBuilder.getCount();
     }
 
     private async findExistingOrderIds(
@@ -144,5 +162,16 @@ export class TradesRepositoryService {
         });
 
         return new Set(existingTrades.map(({ orderId }) => orderId));
+    }
+
+    private applyFromTimestampFilter(
+        queryBuilder: SelectQueryBuilder<FuturesClosedPnl>,
+        fromTimestamp?: string | null,
+    ): void {
+        if (!fromTimestamp) {
+            return;
+        }
+
+        queryBuilder.andWhere('trade.createdTime >= :fromTimestamp', { fromTimestamp });
     }
 }

@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
     TradingAccount,
+    TradingAccountAnalyticsPeriod,
     TradingAccountDetails,
     TradingAccountRecentTradePage,
 } from '@/features/module-trading-account/interfaces/tradingAccount';
@@ -17,22 +18,27 @@ export const useTradingAccountList = () => {
     });
 };
 
-export const useTradingAccountDetails = (id: string) => {
+export const useTradingAccountDetails = (id: string, period: TradingAccountAnalyticsPeriod) => {
     return useQuery<TradingAccountDetails>({
-        queryKey: ['tradingAccountDetails', id],
+        queryKey: ['tradingAccountDetails', id, period],
         queryFn: (): Promise<TradingAccountDetails> =>
-            tradingAccountService.getTradingAccountDetails(id),
+            tradingAccountService.getTradingAccountDetails(id, period),
         enabled: Boolean(id),
         staleTime: 300000,
         gcTime: 300000,
     });
 };
 
-export const useTradingAccountTrades = (id: string, page: number, pageSize: number) => {
+export const useTradingAccountTrades = (
+    id: string,
+    page: number,
+    pageSize: number,
+    period: TradingAccountAnalyticsPeriod,
+) => {
     return useQuery<TradingAccountRecentTradePage>({
-        queryKey: ['tradingAccountTrades', id, page, pageSize],
+        queryKey: ['tradingAccountTrades', id, period, page, pageSize],
         queryFn: (): Promise<TradingAccountRecentTradePage> =>
-            tradingAccountService.getTradingAccountTrades(id, page, pageSize),
+            tradingAccountService.getTradingAccountTrades(id, page, pageSize, period),
         enabled: Boolean(id),
         staleTime: 300000,
         gcTime: 300000,

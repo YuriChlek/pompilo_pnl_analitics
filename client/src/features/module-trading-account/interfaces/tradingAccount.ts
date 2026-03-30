@@ -5,6 +5,8 @@ export interface TradingAccountPayload {
     market: string;
 }
 
+export type TradingAccountAnalyticsPeriod = 'all' | '7d' | '30d' | '90d' | '180d';
+
 export interface TradingAccount {
     id: string;
     tradingAccountName: string;
@@ -89,10 +91,14 @@ export interface TradingAccountService {
         tradingAccountPayload: TradingAccountPayload,
     ) => Promise<TradingAccount | null>;
     getTradingAccountList: () => Promise<TradingAccount[]>;
-    getTradingAccountDetails: (id: string) => Promise<TradingAccountDetails>;
+    getTradingAccountDetails: (
+        id: string,
+        period: TradingAccountAnalyticsPeriod,
+    ) => Promise<TradingAccountDetails>;
     getTradingAccountTrades: (
         id: string,
         page: number,
         pageSize: number,
+        period: TradingAccountAnalyticsPeriod,
     ) => Promise<TradingAccountRecentTradePage>;
 }

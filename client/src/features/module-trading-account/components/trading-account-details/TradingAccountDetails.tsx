@@ -7,6 +7,8 @@ import { StatisticDiagram } from '@/features/module-trading-account/components/s
 import { TradingList } from '@/features/module-trading-account/components/trading-list/TradingList';
 import { AccountStatistic } from '@/features/module-trading-account/components/account-diagram/AccountStatistic';
 import { useTradingAccountDetails } from '@/features/module-trading-account/hooks/query';
+import { TRADING_ACCOUNT_ANALYTICS_PERIOD_OPTIONS } from '@/features/module-trading-account/constants/analytics-periods';
+import { useTradingAccountPageState } from '@/features/module-trading-account/hooks/use-trading-account-page-state';
 import { formatDateTime } from '@/features/module-trading-account/lib/format';
 import styles from '@/features/module-trading-account/components/trading-account-details/styles.module.css';
 
@@ -15,7 +17,8 @@ type TradingAccountDetailsProps = {
 };
 
 export const TradingAccountDetails = ({ id }: TradingAccountDetailsProps) => {
-    const { data, isLoading, isError, error } = useTradingAccountDetails(id);
+    const { period, setPeriod } = useTradingAccountPageState();
+    const { data, isLoading, isError, error } = useTradingAccountDetails(id, period);
 
     if (isLoading) {
         return (
@@ -74,9 +77,33 @@ export const TradingAccountDetails = ({ id }: TradingAccountDetailsProps) => {
                 </dl>
             </section>
 
+            <section className={styles.analyticsToolbar}>
+                <div>
+                    <p className={styles.eyebrow}>Analytics range</p>
+                    <h2 className={styles.toolbarTitle}>Selected period</h2>
+                </div>
+                <div className={styles.periodButtons} aria-label="Analytics period">
+                    {TRADING_ACCOUNT_ANALYTICS_PERIOD_OPTIONS.map(option => (
+                        <button
+                            key={option.value}
+                            type="button"
+                            aria-pressed={period === option.value}
+                            className={
+                                period === option.value
+                                    ? styles.periodButtonActive
+                                    : styles.periodButton
+                            }
+                            onClick={() => setPeriod(option.value)}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
             <StatisticDiagram chart={chart} />
             <AccountStatistic statistics={statistics} />
-            <TradingList tradingAccountId={id} />
+            <TradingList tradingAccountId={id} period={period} />
         </div>
     );
 };

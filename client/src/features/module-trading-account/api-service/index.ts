@@ -2,6 +2,7 @@ import {
     TradingAccountDetails,
     TradingAccountRecentTradePage,
     TradingAccount,
+    TradingAccountAnalyticsPeriod,
     TradingAccountPayload,
     TradingAccountService,
 } from '@/features/module-trading-account/interfaces/tradingAccount';
@@ -55,9 +56,14 @@ export const tradingAccountService: TradingAccountService = {
 
         return response.data?.removed as unknown as boolean;
     },
-    async getTradingAccountDetails(id: string) {
+    async getTradingAccountDetails(id: string, period: TradingAccountAnalyticsPeriod) {
         const response: HttpResponse<TradingAccountDetails> = await apiClient.get(
             `/customer/trading-account/${id}`,
+            {
+                params: {
+                    period,
+                },
+            },
         );
 
         if (!response.success) {
@@ -66,11 +72,17 @@ export const tradingAccountService: TradingAccountService = {
 
         return response.data as unknown as TradingAccountDetails;
     },
-    async getTradingAccountTrades(id: string, page: number, pageSize: number) {
+    async getTradingAccountTrades(
+        id: string,
+        page: number,
+        pageSize: number,
+        period: TradingAccountAnalyticsPeriod,
+    ) {
         const response: HttpResponse<TradingAccountRecentTradePage> = await apiClient.get(
             `/customer/trading-account/${id}/trades`,
             {
                 params: {
+                    period,
                     page,
                     pageSize,
                 },

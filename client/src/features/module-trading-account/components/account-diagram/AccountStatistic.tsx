@@ -24,8 +24,7 @@ export const AccountStatistic = ({ statistics }: AccountStatisticProps) => {
         { label: 'Worst trade', value: formatCurrency(statistics.worstTrade) },
         {
             label: 'Profit factor',
-            value:
-                statistics.profitFactor === null ? '—' : statistics.profitFactor.toFixed(2),
+            value: statistics.profitFactor === null ? '—' : statistics.profitFactor.toFixed(2),
         },
         { label: 'Latest trade', value: formatDateTime(statistics.latestTradeAt) },
         { label: 'Total trades', value: formatInteger(statistics.totalTrades) },

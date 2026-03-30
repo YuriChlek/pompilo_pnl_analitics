@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { TradingAccountAnalyticsQueryDto } from '@/module-trading-account/dto/trading-account-analytics-query.dto';
 
-export class TradingAccountTradesQueryDto {
+export class TradingAccountTradesQueryDto extends TradingAccountAnalyticsQueryDto {
     @IsOptional()
     @Type(() => Number)
     @IsInt()

@@ -14,7 +14,9 @@ class HttpClient extends AbstractHttpClient {
         body?: HttpData<TBody>,
         config?: RequestConfig,
     ): Promise<HttpResponse<TResponse>> {
-        const url = new URL(`/api${path}`, this.baseUrl);
+        const requestBaseUrl =
+            typeof window === 'undefined' ? this.baseUrl : window.location.origin;
+        const url = new URL(`/api${path}`, requestBaseUrl);
 
         if (config?.params) {
             Object.entries(config.params).forEach(([key, value]) =>

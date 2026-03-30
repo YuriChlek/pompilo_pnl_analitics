@@ -3,7 +3,7 @@ import {
     ANALYTICS_PERIODS,
     DEFAULT_ANALYTICS_PERIOD,
     type AnalyticsPeriod,
-} from '@/module-trades/constants/analytics-periods';
+} from '@/module-analyze/constants/analytics-periods';
 
 export class TradingAccountAnalyticsQueryDto {
     @IsOptional()

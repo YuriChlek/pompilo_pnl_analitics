@@ -5,7 +5,7 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { TradesService } from '@/module-trades/services/trades.service';
+import { AnalyseService } from '@/module-analyze/services/analyse.service';
 import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
 
 jest.mock('@/common/utils/get-user-id-from-tocken', () => ({
@@ -24,10 +24,10 @@ describe('TradingAccountQueryService', () => {
             TradingAccountBindingRepositoryService['findTradingAccountBindingByTradingAccountId']
         >;
     };
-    let tradesService: {
-        getClosedPnlStatistics: jest.MockedFunction<TradesService['getClosedPnlStatistics']>;
-        getClosedPnlTimeline: jest.MockedFunction<TradesService['getClosedPnlTimeline']>;
-        getClosedTradePage: jest.MockedFunction<TradesService['getClosedTradePage']>;
+    let analyseService: {
+        getClosedPnlStatistics: jest.MockedFunction<AnalyseService['getClosedPnlStatistics']>;
+        getClosedPnlTimeline: jest.MockedFunction<AnalyseService['getClosedPnlTimeline']>;
+        getClosedTradePage: jest.MockedFunction<AnalyseService['getClosedTradePage']>;
     };
 
     beforeEach(() => {
@@ -37,7 +37,7 @@ describe('TradingAccountQueryService', () => {
         tradingAccountBindingRepositoryService = {
             findTradingAccountBindingByTradingAccountId: jest.fn(),
         };
-        tradesService = {
+        analyseService = {
             getClosedPnlStatistics: jest.fn(),
             getClosedPnlTimeline: jest.fn(),
             getClosedTradePage: jest.fn(),
@@ -47,7 +47,7 @@ describe('TradingAccountQueryService', () => {
             {} as TokenService,
             tradingAccountRepositoryService as unknown as TradingAccountRepositoryService,
             tradingAccountBindingRepositoryService as unknown as TradingAccountBindingRepositoryService,
-            tradesService as unknown as TradesService,
+            analyseService as unknown as AnalyseService,
         );
         jest.clearAllMocks();
     });
@@ -69,7 +69,7 @@ describe('TradingAccountQueryService', () => {
                 },
             } as never,
         );
-        tradesService.getClosedPnlStatistics.mockResolvedValue({
+        analyseService.getClosedPnlStatistics.mockResolvedValue({
             totalTrades: 0,
             winningTrades: 0,
             losingTrades: 0,
@@ -83,12 +83,12 @@ describe('TradingAccountQueryService', () => {
             profitFactor: null,
             latestTradeAt: null,
         });
-        tradesService.getClosedPnlTimeline.mockResolvedValue([]);
+        analyseService.getClosedPnlTimeline.mockResolvedValue([]);
 
         await service.findOne({} as Request, 'account-id', '90d');
 
-        expect(tradesService.getClosedPnlStatistics).toHaveBeenCalledWith('account-id', '90d');
-        expect(tradesService.getClosedPnlTimeline).toHaveBeenCalledWith('account-id', '90d');
+        expect(analyseService.getClosedPnlStatistics).toHaveBeenCalledWith('account-id', '90d');
+        expect(analyseService.getClosedPnlTimeline).toHaveBeenCalledWith('account-id', '90d');
     });
 
     it('passes period through paginated trades query', async () => {
@@ -97,7 +97,7 @@ describe('TradingAccountQueryService', () => {
             id: 'account-id',
             userId: 'user-id',
         } as never);
-        tradesService.getClosedTradePage.mockResolvedValue({
+        analyseService.getClosedTradePage.mockResolvedValue({
             items: [],
             page: 1,
             pageSize: 10,
@@ -111,7 +111,7 @@ describe('TradingAccountQueryService', () => {
             pageSize: 10,
         });
 
-        expect(tradesService.getClosedTradePage).toHaveBeenCalledWith('account-id', 1, 10, '7d');
+        expect(analyseService.getClosedTradePage).toHaveBeenCalledWith('account-id', 1, 10, '7d');
     });
 
     it('rejects access when account does not belong to authenticated user', async () => {

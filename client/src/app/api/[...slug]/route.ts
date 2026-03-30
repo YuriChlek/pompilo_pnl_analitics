@@ -1,6 +1,16 @@
 import { apiBaseUrl } from '@/lib/config/api-base-url';
 
 type RequestParams = { params: Promise<{ slug: string[] }> };
+const HOP_BY_HOP_HEADERS = new Set([
+    'connection',
+    'keep-alive',
+    'proxy-authenticate',
+    'proxy-authorization',
+    'te',
+    'trailer',
+    'transfer-encoding',
+    'upgrade',
+]);
 
 async function proxyRequest(request: Request, paramsPromise: RequestParams['params']) {
     if (!apiBaseUrl) {
@@ -11,9 +21,20 @@ async function proxyRequest(request: Request, paramsPromise: RequestParams['para
     const pathname = slug.join('/');
     const proxyURL = new URL(pathname, apiBaseUrl);
     const requestURL = new URL(request.url);
+    const proxyHeaders = new Headers(request.headers);
 
     proxyURL.search = requestURL.search;
-    const proxyRequest = new Request(proxyURL, request);
+
+    for (const header of HOP_BY_HOP_HEADERS) {
+        proxyHeaders.delete(header);
+    }
+
+    const proxyRequest = new Request(proxyURL, {
+        method: request.method,
+        headers: proxyHeaders,
+        body: request.body,
+        duplex: 'half',
+    } as RequestInit);
 
     try {
         return await fetch(proxyRequest);

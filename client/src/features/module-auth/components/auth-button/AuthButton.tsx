@@ -14,7 +14,7 @@ type AuthButtonProps = {
 
 export const AuthButton = ({
     isAuthenticated,
-    loginPath = '/customer/login',
+    loginPath = '/login',
     className,
 }: AuthButtonProps) => {
     const router = useRouter();

@@ -3,7 +3,7 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { TradesService } from '@/module-trades/services/trades.service';
+import { AnalyseService } from '@/module-analyze/services/analyse.service';
 import type { Request } from 'express';
 import {
     TradingAccountApiKeySummary,
@@ -13,8 +13,8 @@ import {
 import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
 import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
-import { ClosedPnlTradePage } from '@/module-trades/types/trades.repository.types';
-import { type AnalyticsPeriod } from '@/module-trades/constants/analytics-periods';
+import { ClosedPnlTradePage } from '@/module-analyze/types/analyse.types';
+import { type AnalyticsPeriod } from '@/module-analyze/constants/analytics-periods';
 
 @Injectable()
 export class TradingAccountQueryService {
@@ -22,7 +22,7 @@ export class TradingAccountQueryService {
         private readonly tokenService: TokenService,
         private readonly tradingAccountRepositoryService: TradingAccountRepositoryService,
         private readonly tradingAccountBindingRepositoryService: TradingAccountBindingRepositoryService,
-        private readonly tradesService: TradesService,
+        private readonly analyseService: AnalyseService,
     ) {}
 
     async findOne(
@@ -38,8 +38,8 @@ export class TradingAccountQueryService {
             );
 
         const [statistics, chart] = await Promise.all([
-            this.tradesService.getClosedPnlStatistics(tradingAccountId, period),
-            this.tradesService.getClosedPnlTimeline(tradingAccountId, period),
+            this.analyseService.getClosedPnlStatistics(tradingAccountId, period),
+            this.analyseService.getClosedPnlTimeline(tradingAccountId, period),
         ]);
 
         return {
@@ -64,7 +64,7 @@ export class TradingAccountQueryService {
         const page = query.page ?? 1;
         const pageSize = query.pageSize ?? 10;
 
-        return this.tradesService.getClosedTradePage(
+        return this.analyseService.getClosedTradePage(
             tradingAccountId,
             page,
             pageSize,

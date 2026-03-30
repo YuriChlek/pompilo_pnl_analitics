@@ -11,6 +11,7 @@ import { TradingAccountQueryService } from '@/module-trading-account/services/tr
 import { ApiKeysModule } from '@/module-api-keys/api-keys.module';
 import { AuthTokenModule } from '@/module-auth-token/auth-token.module';
 import { TradesModule } from '@/module-trades/trades.module';
+import { AnalyseModule } from '@/module-analyze/analyse.module';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { TradesModule } from '@/module-trades/trades.module';
         ApiKeysModule,
         AuthTokenModule,
         TradesModule,
+        AnalyseModule,
     ],
     controllers: [TradingAccountController],
     providers: [

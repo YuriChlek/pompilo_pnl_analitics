@@ -50,14 +50,8 @@ export class TradesRepositoryService {
         const statistics = await this.futuresClosedPnlRepository
             .createQueryBuilder('trade')
             .select('COUNT(*)', 'totalTrades')
-            .addSelect(
-                'SUM(CASE WHEN trade.closedPnl > 0 THEN 1 ELSE 0 END)',
-                'winningTrades',
-            )
-            .addSelect(
-                'SUM(CASE WHEN trade.closedPnl < 0 THEN 1 ELSE 0 END)',
-                'losingTrades',
-            )
+            .addSelect('SUM(CASE WHEN trade.closedPnl > 0 THEN 1 ELSE 0 END)', 'winningTrades')
+            .addSelect('SUM(CASE WHEN trade.closedPnl < 0 THEN 1 ELSE 0 END)', 'losingTrades')
             .addSelect('COALESCE(SUM(trade.closedPnl), 0)', 'totalClosedPnl')
             .addSelect(
                 'COALESCE(SUM(CASE WHEN trade.closedPnl > 0 THEN trade.closedPnl ELSE 0 END), 0)',

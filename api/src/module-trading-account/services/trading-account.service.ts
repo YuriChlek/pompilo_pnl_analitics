@@ -19,10 +19,7 @@ import { TokenService } from '@/module-auth-token/services/token.service';
 import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import type { Request } from 'express';
 import { DataSource, DeleteResult, UpdateResult } from 'typeorm';
-import {
-    TradingAccountApiKeySummary,
-    TradingAccountSummary,
-} from '@/module-trading-account/types';
+import { TradingAccountApiKeySummary, TradingAccountSummary } from '@/module-trading-account/types';
 import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
 
 @Injectable()

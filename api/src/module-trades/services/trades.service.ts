@@ -82,12 +82,11 @@ export class TradesService {
             );
         const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
         const normalizedPage = Math.min(Math.max(1, page), totalPages);
-        const trades =
-            await this.tradesRepositoryService.findRecentClosedTradesByTradingAccountId(
-                tradingAccountId,
-                normalizedPage,
-                pageSize,
-            );
+        const trades = await this.tradesRepositoryService.findRecentClosedTradesByTradingAccountId(
+            tradingAccountId,
+            normalizedPage,
+            pageSize,
+        );
 
         return {
             items: trades.map(trade => ({

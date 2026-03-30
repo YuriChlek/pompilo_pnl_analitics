@@ -31,9 +31,6 @@ export const Menu = ({ isLogin }: { isLogin: boolean }) => {
                         </li>
                     );
                 })}
-                {/*<li key={LoginLogoutTitle}>
-                    <LogoutBotton />
-                </li>*/}
             </ul>
         </nav>
     );

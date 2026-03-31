@@ -1,7 +1,7 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { EmptyState } from '@/components/empty-state/EmptyState';
 import { Loader } from '@/components/loader/Loader';
-import { Button } from '@/components/button';
+import { Button } from '@/components/button/Button';
 import {
     formatCurrency,
     formatDateTime,
@@ -10,7 +10,6 @@ import {
 } from '@/features/module-trading-account/lib/format';
 import { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/interfaces/tradingAccount';
 import { useTradingAccountTrades } from '@/features/module-trading-account/hooks/query';
-import { useTradingAccountPageState } from '@/features/module-trading-account/hooks/use-trading-account-page-state';
 import styles from '@/features/module-trading-account/components/trading-list/styles.module.css';
 
 type TradingListProps = {
@@ -18,8 +17,13 @@ type TradingListProps = {
     period: TradingAccountAnalyticsPeriod;
 };
 
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+
 export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
-    const { page, pageSize, pageSizeOptions, setPage, setPageSize } = useTradingAccountPageState();
+    const [page, setPage] = useState(DEFAULT_PAGE);
+    const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
     const { data, isLoading, isFetching, isPlaceholderData, isError, error } =
         useTradingAccountTrades(tradingAccountId, page, pageSize, period);
 
@@ -33,6 +37,7 @@ export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
     const pageEnd = Math.min(displayPage * displayPageSize, totalItems);
 
     const handlePageSizeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setPage(DEFAULT_PAGE);
         setPageSize(Number(event.target.value));
     };
 
@@ -113,7 +118,7 @@ export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
                             onChange={handlePageSizeChange}
                             disabled={isFetching}
                         >
-                            {pageSizeOptions.map(option => (
+                            {PAGE_SIZE_OPTIONS.map(option => (
                                 <option key={option} value={option}>
                                     {option}
                                 </option>

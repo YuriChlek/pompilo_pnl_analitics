@@ -1,6 +1,4 @@
-import { CustomerHeader } from '@/features/module-customer/components/header/CustomerHeader';
-
-export default function CustomerLayout({
+export default function AuthLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;

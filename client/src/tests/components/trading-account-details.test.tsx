@@ -30,8 +30,8 @@ vi.mock('@/features/module-trading-account/hooks/query', () => ({
     })),
 }));
 
-vi.mock('@/lib/charts/LineChart', () => ({
-    LineChart: () => <div>chart</div>,
+vi.mock('@/lib/charts/LazyLineChart', () => ({
+    LazyLineChart: () => <div>chart</div>,
 }));
 
 describe('TradingAccountDetails', () => {
@@ -60,6 +60,6 @@ describe('TradingAccountDetails', () => {
             { scroll: false },
         );
         expect(getNextNavigationSearchParams().get('period')).toBe('7d');
-        expect(getNextNavigationSearchParams().get('tradesPage')).toBeNull();
+        expect(getNextNavigationSearchParams().get('tradesPage')).toBe('2');
     });
 });

@@ -1,13 +1,17 @@
 import { CustomerHeader } from '@/features/module-customer/components/header/CustomerHeader';
+import { UserRoles } from '@/features/module-auth/interfaces/auth';
+import { getCurrentUser } from '@/features/module-auth/server/get-current-user';
 
-export default function CustomerLayout({
+export default async function CustomerLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const currentUser = await getCurrentUser(UserRoles.CUSTOMER);
+
     return (
         <>
-            <CustomerHeader />
+            <CustomerHeader initialUser={currentUser} />
             <main className="page">{children}</main>
         </>
     );

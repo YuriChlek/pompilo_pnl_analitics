@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/features/module-auth/api-service';
 import { CreateUserData, LoginData, UserRoles } from '@/features/module-auth/interfaces/auth';
+import { getUserQueryKey } from '@/features/module-auth/hooks/query';
 import { useRouter } from 'next/navigation';
 
 export const useRegister = () => {
@@ -16,9 +17,7 @@ export const useRegister = () => {
 
         onSuccess: newUser => {
             if (newUser) {
-                const { role } = newUser;
-                const stateName = role === UserRoles.CUSTOMER ? 'customerData' : 'adminData';
-                queryClient.setQueryData([stateName], newUser);
+                queryClient.setQueryData(getUserQueryKey(newUser.role), newUser);
 
                 router.push('/');
             }
@@ -44,9 +43,7 @@ export const useLogin = () => {
         onSuccess: newUser => {
             if (newUser) {
                 const { role } = newUser;
-                const stateName = role === UserRoles.CUSTOMER ? 'customerData' : 'adminData';
-
-                queryClient.setQueryData([stateName], newUser);
+                queryClient.setQueryData(getUserQueryKey(role), newUser);
 
                 const adminRoles: UserRoles[] = [UserRoles.ADMIN, UserRoles.SUPER_ADMIN];
                 const redirectPath: string = adminRoles.includes(role)

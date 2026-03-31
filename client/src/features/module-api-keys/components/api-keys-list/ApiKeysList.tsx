@@ -6,7 +6,7 @@ import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
 import { capitalCase } from 'change-case';
 import { Loader } from '@/components/loader/Loader';
 import { EmptyState } from '@/components/empty-state/EmptyState';
-import { Button } from '@/components/button';
+import { Button } from '@/components/button/Button';
 import { ApiKeySettingsPopup } from '@/features/module-api-keys/components/api-key-settings-popup/ApiKeySettingsPopup';
 
 export const ApiKeysList = () => {

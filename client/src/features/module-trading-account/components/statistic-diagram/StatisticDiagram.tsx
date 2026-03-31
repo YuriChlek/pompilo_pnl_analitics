@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/empty-state/EmptyState';
 import { TradingAccountChartPoint } from '@/features/module-trading-account/interfaces/tradingAccount';
 import { formatChartLabel } from '@/features/module-trading-account/lib/format';
-import { LineChart } from '@/lib/charts/LineChart';
+import { LazyLineChart } from '@/components/charts/LazyLineChart';
 import styles from '@/features/module-trading-account/components/statistic-diagram/styles.module.css';
 
 type StatisticDiagramProps = {
@@ -37,7 +37,7 @@ export const StatisticDiagram = ({ chart }: StatisticDiagramProps) => {
             </div>
 
             <div className={styles.chart}>
-                <LineChart
+                <LazyLineChart
                     data={{
                         categories: chart.map(point => formatChartLabel(point.time)),
                         series: [

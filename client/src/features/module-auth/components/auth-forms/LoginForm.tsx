@@ -4,7 +4,7 @@ import { FormEvent } from 'react';
 import styles from '@/features/module-auth/components/auth-forms/styles.module.css';
 import { LoginData, UserRoles } from '@/features/module-auth/interfaces/auth';
 import { useLogin } from '@/features/module-auth/hooks/mutation';
-import { Button } from '@/components/button';
+import { Button } from '@/components/button/Button';
 
 interface LoginFormProps {
     mode: UserRoles;
@@ -12,7 +12,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ mode, title }: LoginFormProps) => {
-    const { mutate, isPending, isError } = useLogin();
+    const { mutate } = useLogin();
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();

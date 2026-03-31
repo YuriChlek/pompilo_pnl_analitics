@@ -4,10 +4,10 @@ import { FormEvent } from 'react';
 import styles from '@/features/module-auth/components/auth-forms/styles.module.css';
 import { CreateUserData } from '@/features/module-auth/interfaces/auth';
 import { useRegister } from '@/features/module-auth/hooks/mutation';
-import { Button } from '@/components/button';
+import { Button } from '@/components/button/Button';
 
 export const RegisterForm = () => {
-    const { mutate, isPending, isError } = useRegister();
+    const { mutate } = useRegister();
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();

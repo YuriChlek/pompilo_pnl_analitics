@@ -4,7 +4,7 @@ import { TradingAccountService } from '@/module-trading-account/services/trading
 import { TradingAccountQueryService } from '@/module-trading-account/services/trading-account-query.service';
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
 import { TradingAccountAnalyticsQueryDto } from '@/module-trading-account/dto/trading-account-analytics-query.dto';
 

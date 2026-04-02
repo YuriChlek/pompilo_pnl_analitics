@@ -1,37 +1,30 @@
 import {
     BadRequestException,
-    ConflictException,
     HttpException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { CreateTradingAccountDto } from '@/module-trading-account/dto/create-trading-account.dto';
 import { UpdateTradingAccountDto } from '@/module-trading-account/dto/update-trading-account.dto';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
-import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
-import { TokenService } from '@/module-auth-token/services/token.service';
-import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
 import type { Request } from 'express';
 import { DataSource, DeleteResult, UpdateResult } from 'typeorm';
-import { TradingAccountApiKeySummary, TradingAccountSummary } from '@/module-trading-account/types';
-import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
+import { TradingAccountSummary } from '@/module-trading-account/types/trading-account.types';
+import { TradingAccountSyncService } from '@/module-trading-account/services/trading-account-sync.service';
+import { TradingAccountAccessService } from '@/module-trading-account/services/trading-account-access.service';
+import { TradingAccountViewService } from '@/module-trading-account/services/trading-account-view.service';
 
 @Injectable()
 export class TradingAccountService {
     constructor(
-        @InjectQueue('excange-pnl-sync')
-        private readonly exchangePnlQueue: Queue,
         private readonly dataSource: DataSource,
-        private readonly tokenService: TokenService,
         private readonly tradingAccountRepositoryService: TradingAccountRepositoryService,
         private readonly tradingAccountBindingRepositoryService: TradingAccountBindingRepositoryService,
-        private readonly apiKeysService: ApiKeysService,
+        private readonly tradingAccountSyncService: TradingAccountSyncService,
+        private readonly tradingAccountAccessService: TradingAccountAccessService,
+        private readonly tradingAccountViewService: TradingAccountViewService,
     ) {}
 
     async create(
@@ -39,14 +32,16 @@ export class TradingAccountService {
         createTradingAccountDto: CreateTradingAccountDto,
     ): Promise<TradingAccountSummary | null | undefined> {
         try {
-            const userId = this.getAuthorizedUserId(request);
-            const apiKeyData = await this.getOwnedActiveApiKey(
+            const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
+            const apiKeyData = await this.tradingAccountAccessService.getOwnedActiveApiKey(
                 userId,
                 createTradingAccountDto.apiKeyId,
             );
 
             if (apiKeyData) {
-                await this.ensureApiKeyIsAvailable(createTradingAccountDto.apiKeyId);
+                await this.tradingAccountAccessService.ensureApiKeyIsAvailable(
+                    createTradingAccountDto.apiKeyId,
+                );
 
                 const result = await this.dataSource.transaction(async entityManager => {
                     const tradingAccount =
@@ -72,18 +67,12 @@ export class TradingAccountService {
                     return tradingAccount;
                 });
 
-                await this.exchangePnlQueue.add('excange-pnl-sync', {
-                    tradingAccountId: result.id,
-                    market: result.market,
-                    apiKey: apiKeyData.apiKey,
-                    secretKey: apiKeyData.secretKey,
-                    exchange: apiKeyData.exchange,
-                });
+                await this.tradingAccountSyncService.enqueueExchangePnlSync(result, apiKeyData);
 
-                return this.buildTradingAccountSummary(result, {
-                    id: createTradingAccountDto.apiKeyId,
-                    apiKeyName: apiKeyData.apiKeyName,
-                });
+                return this.tradingAccountViewService.buildTradingAccountSummary(
+                    result,
+                    this.tradingAccountViewService.toApiKeySummary(apiKeyData),
+                );
             }
 
             return null;
@@ -93,7 +82,7 @@ export class TradingAccountService {
     }
 
     async findAll(request: Request): Promise<TradingAccountSummary[]> {
-        const userId = this.getAuthorizedUserId(request);
+        const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
 
         const tradingAccounts =
             await this.tradingAccountRepositoryService.findTradingAccountsByUserId(userId);
@@ -114,9 +103,11 @@ export class TradingAccountService {
         );
 
         return tradingAccounts.map(account =>
-            this.buildTradingAccountSummary(
+            this.tradingAccountViewService.buildTradingAccountSummary(
                 account,
-                apiKeyByTradingAccountId.get(account.id) ?? null,
+                this.tradingAccountViewService.toApiKeySummary(
+                    apiKeyByTradingAccountId.get(account.id) ?? null,
+                ),
             ),
         );
     }
@@ -127,11 +118,12 @@ export class TradingAccountService {
         updateTradingAccountDto: UpdateTradingAccountDto,
     ): Promise<TradingAccountSummary> {
         try {
-            const userId = this.getAuthorizedUserId(request);
-            const existingTradingAccount = await this.getOwnedTradingAccount(
-                tradingAccountId,
-                userId,
-            );
+            const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
+            const existingTradingAccount =
+                await this.tradingAccountAccessService.getOwnedTradingAccount(
+                    tradingAccountId,
+                    userId,
+                );
 
             const nextTradingAccountName = updateTradingAccountDto.tradingAccountName?.trim();
             const nextApiKeyId = updateTradingAccountDto.apiKeyId;
@@ -147,7 +139,8 @@ export class TradingAccountService {
                     tradingAccountId,
                 );
 
-            let apiKeySummary = this.toApiKeySummary(existingBinding?.apiKey);
+            let apiKeySummary =
+                this.tradingAccountViewService.toApiKeySummary(existingBinding?.apiKey);
 
             await this.dataSource.transaction(async entityManager => {
                 if (nextTradingAccountName) {
@@ -166,11 +159,15 @@ export class TradingAccountService {
                 }
 
                 if (nextApiKeyId && nextApiKeyId !== existingBinding?.apiKeyId) {
-                    await this.ensureApiKeyIsAvailable(nextApiKeyId, tradingAccountId);
-                    const nextApiKeyData = await this.getRequiredOwnedActiveApiKey(
-                        userId,
+                    await this.tradingAccountAccessService.ensureApiKeyIsAvailable(
                         nextApiKeyId,
+                        tradingAccountId,
                     );
+                    const nextApiKeyData =
+                        await this.tradingAccountAccessService.getRequiredOwnedActiveApiKey(
+                            userId,
+                            nextApiKeyId,
+                        );
 
                     const isSameExchangeAccount =
                         nextApiKeyData.exchange === existingTradingAccount.exchange &&
@@ -205,11 +202,11 @@ export class TradingAccountService {
                         );
                     }
 
-                    apiKeySummary = this.toApiKeySummary(nextApiKeyData);
+                    apiKeySummary = this.tradingAccountViewService.toApiKeySummary(nextApiKeyData);
                 }
             });
 
-            return this.buildTradingAccountSummary(
+            return this.tradingAccountViewService.buildTradingAccountSummary(
                 {
                     ...existingTradingAccount,
                     tradingAccountName:
@@ -224,8 +221,8 @@ export class TradingAccountService {
 
     async remove(request: Request, tradingAccountId: string): Promise<{ removed: boolean }> {
         try {
-            const userId = this.getAuthorizedUserId(request);
-            await this.getOwnedTradingAccount(tradingAccountId, userId);
+            const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
+            await this.tradingAccountAccessService.getOwnedTradingAccount(tradingAccountId, userId);
 
             const data: DeleteResult =
                 await this.tradingAccountRepositoryService.removeTradingAccount(tradingAccountId);
@@ -248,105 +245,5 @@ export class TradingAccountService {
         }
 
         throw new InternalServerErrorException(message);
-    }
-
-    private getAuthorizedUserId(request: Request): string {
-        const userId = getUserIdFromToken(request, this.tokenService);
-
-        if (!userId) {
-            throw new UnauthorizedException('Invalid or missing user.');
-        }
-
-        return userId;
-    }
-
-    private async getOwnedTradingAccount(
-        tradingAccountId: string,
-        userId: string,
-    ): Promise<TradingAccount> {
-        const tradingAccount =
-            await this.tradingAccountRepositoryService.findTradingAccountById(tradingAccountId);
-
-        if (!tradingAccount) {
-            throw new NotFoundException('Trading account not found.');
-        }
-
-        if (tradingAccount.userId !== userId) {
-            throw new UnauthorizedException('Invalid or missing user.');
-        }
-
-        return tradingAccount;
-    }
-
-    private async getOwnedActiveApiKey(userId: string, apiKeyId: string): Promise<ApiKey | null> {
-        const apiKeyData = await this.apiKeysService.getActiveUserApiCredentials(apiKeyId);
-
-        if (!apiKeyData) {
-            return null;
-        }
-
-        if (apiKeyData.userId !== userId) {
-            throw new UnauthorizedException('Invalid or missing user.');
-        }
-
-        return apiKeyData;
-    }
-
-    private async getRequiredOwnedActiveApiKey(userId: string, apiKeyId: string): Promise<ApiKey> {
-        const apiKeyData = await this.getOwnedActiveApiKey(userId, apiKeyId);
-
-        if (!apiKeyData) {
-            throw new BadRequestException('Provided API key is not active.');
-        }
-
-        return apiKeyData;
-    }
-
-    private async ensureApiKeyIsAvailable(
-        apiKeyId: string,
-        tradingAccountId?: string,
-    ): Promise<void> {
-        const existingBindingByApiKey =
-            await this.tradingAccountBindingRepositoryService.findTradingAccountBindingByApiKeyId(
-                apiKeyId,
-            );
-
-        if (
-            existingBindingByApiKey &&
-            existingBindingByApiKey.tradingAccountId !== tradingAccountId
-        ) {
-            throw new ConflictException('API key is already linked to another trading account.');
-        }
-    }
-
-    private buildTradingAccountSummary(
-        tradingAccount: Pick<TradingAccount, 'id' | 'tradingAccountName' | 'exchange' | 'market'>,
-        apiKey: TradingAccountApiKeySummary | null,
-    ): TradingAccountSummary {
-        return {
-            id: tradingAccount.id,
-            tradingAccountName: tradingAccount.tradingAccountName,
-            exchange: tradingAccount.exchange,
-            market: tradingAccount.market,
-            apiKeyId: apiKey?.id ?? null,
-            apiKey: apiKey
-                ? {
-                      apiKeyName: apiKey.apiKeyName,
-                  }
-                : null,
-        };
-    }
-
-    private toApiKeySummary(
-        apiKey: Pick<ApiKey, 'id' | 'apiKeyName'> | null | undefined,
-    ): TradingAccountApiKeySummary | null {
-        if (!apiKey) {
-            return null;
-        }
-
-        return {
-            id: apiKey.id,
-            apiKeyName: apiKey.apiKeyName,
-        };
     }
 }

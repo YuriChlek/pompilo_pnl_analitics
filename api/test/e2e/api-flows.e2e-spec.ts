@@ -14,7 +14,7 @@ import {
     TestingJwtAuthGuard,
 } from './support/e2e-test.module';
 import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { JwtAuthGuard } from '@/module-auth/guards/jwt-auth.guard';
 import { expectSuccessResponse, expectErrorResponse } from '../utils/request-helpers';
 

@@ -3,13 +3,13 @@ import {
     InternalServerErrorException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { AuthService } from '@/module-auth/services/auth.service';
 import { UserService } from '@/module-user/services/user.service';
 import { AuthTokenService } from '@/module-auth-token/services/auth-token.service';
 import { COOKIE_NAMES, USER_ROLES } from '@/module-auth/enums/auth-enums';
 import { Argon2HashUtil } from '@/common/utils/hash.util';
+import { AuthSessionService } from '@/module-auth/services/auth-session.service';
 import { buildRegisterDto, buildLoginDto } from '../../fixtures/auth.fixtures';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
@@ -41,13 +41,16 @@ describe('AuthService', () => {
         findByLogin: jest.MockedFunction<UserService['findByLogin']>;
     };
     let tokenService: {
-        createAccessToken: jest.MockedFunction<AuthTokenService['createAccessToken']>;
-        createRefreshToken: jest.MockedFunction<AuthTokenService['createRefreshToken']>;
         verifyRefreshToken: jest.MockedFunction<AuthTokenService['verifyRefreshToken']>;
         removeRefreshToken: jest.MockedFunction<AuthTokenService['removeRefreshToken']>;
         getTokenData: jest.MockedFunction<AuthTokenService['getTokenData']>;
     };
-    let configService: Pick<ConfigService, 'getOrThrow'>;
+    let authSessionService: {
+        issueTokens: jest.MockedFunction<AuthSessionService['issueTokens']>;
+        clearTokens: jest.MockedFunction<AuthSessionService['clearTokens']>;
+        getCookieName: jest.MockedFunction<AuthSessionService['getCookieName']>;
+        getUserMetaData: jest.MockedFunction<AuthSessionService['getUserMetaData']>;
+    };
     let response: Response;
     let request: Request;
 
@@ -61,8 +64,6 @@ describe('AuthService', () => {
         };
 
         tokenService = {
-            createAccessToken: jest.fn().mockReturnValue('access-token'),
-            createRefreshToken: jest.fn().mockResolvedValue('refresh-token'),
             verifyRefreshToken: jest
                 .fn()
                 .mockResolvedValue({ verified: true, user: { id: 'user-id' } }),
@@ -70,25 +71,30 @@ describe('AuthService', () => {
             getTokenData: jest.fn().mockReturnValue({ userId: 'user-id' }),
         };
 
-        configService = {
-            getOrThrow: ((key: string) => {
-                switch (key) {
-                    case 'COOKIE_DOMAIN':
-                        return '.example.com';
-                    case 'JWT_ACCESS_TOKEN_TTL':
-                        return '15m';
-                    case 'JWT_REFRESH_TOKEN_TTL':
-                        return '7d';
-                    default:
-                        throw new Error('Missing key');
+        authSessionService = {
+            issueTokens: jest.fn(),
+            clearTokens: jest.fn(),
+            getCookieName: jest.fn((userRole, tokenType) => {
+                if (userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN) {
+                    return tokenType === 'access'
+                        ? COOKIE_NAMES.ADMIN_ACCESS_TOKEN
+                        : COOKIE_NAMES.ADMIN_REFRESH_TOKEN;
                 }
-            }) as ConfigService['getOrThrow'],
+
+                return tokenType === 'access'
+                    ? COOKIE_NAMES.CUSTOMER_ACCESS_TOKEN
+                    : COOKIE_NAMES.CUSTOMER_REFRESH_TOKEN;
+            }),
+            getUserMetaData: jest.fn().mockReturnValue({
+                ipAddress: '203.0.113.1',
+                userAgent: 'Jest',
+            }),
         };
 
         service = new AuthService(
             userService as unknown as UserService,
             tokenService as unknown as AuthTokenService,
-            configService as unknown as ConfigService,
+            authSessionService as unknown as AuthSessionService,
         );
         response = createResponse();
         request = createRequest();
@@ -109,15 +115,14 @@ describe('AuthService', () => {
             const result = await service.register(response, request, registerDto);
 
             expect(userService.create).toHaveBeenCalledWith(registerDto);
-            expect(tokenService.createAccessToken).toHaveBeenCalledWith(
+            expect(authSessionService.issueTokens).toHaveBeenCalledWith(
+                response,
                 expect.objectContaining({
                     id: 'user-id',
                     ipAddress: '203.0.113.1',
                     userAgent: 'Jest',
                 }),
             );
-            expect(tokenService.createRefreshToken).toHaveBeenCalled();
-            expect((response.cookie as jest.Mock).mock.calls).toHaveLength(2);
             expect(result).toEqual({
                 id: 'user-id',
                 name: 'John Doe',
@@ -167,8 +172,7 @@ describe('AuthService', () => {
 
             expect(userService.findByLogin).toHaveBeenCalledWith(loginDto.login);
             expect(compareMock).toHaveBeenCalledWith(loginDto.password, baseUser.password);
-            expect(tokenService.createAccessToken).toHaveBeenCalled();
-            expect(tokenService.createRefreshToken).toHaveBeenCalled();
+            expect(authSessionService.issueTokens).toHaveBeenCalled();
             expect(result).toEqual({
                 id: 'user-id',
                 name: 'John Doe',
@@ -239,18 +243,10 @@ describe('AuthService', () => {
                 'Jest',
                 '203.0.113.1',
             );
-            expect((response.cookie as jest.Mock).mock.calls).toEqual([
-                [
-                    COOKIE_NAMES.CUSTOMER_ACCESS_TOKEN,
-                    '',
-                    expect.objectContaining({ expires: new Date(0) }),
-                ],
-                [
-                    COOKIE_NAMES.CUSTOMER_REFRESH_TOKEN,
-                    '',
-                    expect.objectContaining({ expires: new Date(0) }),
-                ],
-            ]);
+            expect(authSessionService.clearTokens).toHaveBeenCalledWith(
+                response,
+                USER_ROLES.CUSTOMER,
+            );
         });
 
         it('throws UnauthorizedException when required cookies are missing', async () => {
@@ -319,15 +315,15 @@ describe('AuthService', () => {
             );
 
             expect(result).toBe(true);
-            expect(tokenService.createAccessToken).toHaveBeenCalledWith(
+            expect(authSessionService.issueTokens).toHaveBeenCalledWith(
+                response,
                 expect.objectContaining({
                     id: 'user-id',
                     ipAddress: '203.0.113.1',
                     userAgent: 'Jest',
                 }),
+                false,
             );
-            expect(tokenService.createRefreshToken).not.toHaveBeenCalled();
-            expect((response.cookie as jest.Mock).mock.calls).toHaveLength(1);
         });
 
         it('returns false when refresh token cookie is missing', async () => {
@@ -349,7 +345,7 @@ describe('AuthService', () => {
             const result = await service.refreshAccessToken(response, refreshRequest, 'any');
 
             expect(result).toBe(false);
-            expect(tokenService.createAccessToken).not.toHaveBeenCalled();
+            expect(authSessionService.issueTokens).not.toHaveBeenCalled();
         });
     });
 });

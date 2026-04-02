@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BybitService } from '@/module-bybit/services/bybit.service';
-import { EXCHANGES } from '@/module-api-keys/enums/api-keys-enums';
-import { ApiValidationInterface } from '@/module-api-keys/interfaces/api-keys.interfaces';
+import { EXCHANGES } from '@/module-api-keys/enums/api-keys.enums';
+import { ApiValidationInterface } from '@/module-api-keys/types/api-keys.types';
 
 @Injectable()
 export class ApiKeysValidationService {

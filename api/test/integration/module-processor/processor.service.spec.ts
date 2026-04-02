@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { BybitService } from '@/module-bybit/services/bybit.service';
 import { ExchangePnlProcessor } from '@/module-processor/processors/exchange-pnl.processor';
 import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.interfaces';
@@ -24,8 +24,8 @@ describe('ExchangePnlProcessor', () => {
     let processor: ExchangePnlProcessor;
     let getTradingPnlMock: jest.MockedFunction<BybitService['getTradingPnl']>;
     let savePnlMock: jest.MockedFunction<BybitService['savePnl']>;
-    let findLatestUpdatedTimeByTradingAccountIdMock: jest.MockedFunction<
-        TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']
+    let findLatestUpdatedTimeMock: jest.MockedFunction<
+        TradesRepositoryService['findLatestUpdatedTime']
     >;
 
     beforeEach(async () => {
@@ -39,10 +39,10 @@ describe('ExchangePnlProcessor', () => {
             ReturnType<BybitService['savePnl']>,
             Parameters<BybitService['savePnl']>
         >();
-        findLatestUpdatedTimeByTradingAccountIdMock = jest
+        findLatestUpdatedTimeMock = jest
             .fn<
-                ReturnType<TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']>,
-                Parameters<TradesRepositoryService['findLatestUpdatedTimeByTradingAccountId']>
+                ReturnType<TradesRepositoryService['findLatestUpdatedTime']>,
+                Parameters<TradesRepositoryService['findLatestUpdatedTime']>
             >()
             .mockResolvedValue('123');
         const moduleRef: TestingModule = await Test.createTestingModule({
@@ -58,8 +58,7 @@ describe('ExchangePnlProcessor', () => {
                 {
                     provide: TradesRepositoryService,
                     useValue: {
-                        findLatestUpdatedTimeByTradingAccountId:
-                            findLatestUpdatedTimeByTradingAccountIdMock,
+                        findLatestUpdatedTime: findLatestUpdatedTimeMock,
                     },
                 },
             ],

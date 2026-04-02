@@ -11,26 +11,24 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { Argon2HashUtil } from '@/common/utils/hash.util';
 import { RegisterUserDto } from '@/module-auth/dto/register-user.dto';
+import { UserPasswordService } from '@/module-user/services/user-password.service';
+import { UserUniquenessService } from '@/module-user/services/user-uniqueness.service';
 
 @Injectable()
 export class UserService {
     public constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        private readonly userPasswordService: UserPasswordService,
+        private readonly userUniquenessService: UserUniquenessService,
     ) {}
 
     async create(createUserDto: CreateUserDto | RegisterUserDto): Promise<User> {
-        const users: User[] = await this.findAll(createUserDto);
-
-        if (users.length) {
-            throw new ConflictException('User with this email or user name already exists.');
-        }
-
         try {
             const { name, email, password } = createUserDto;
-            const hashPassword = await Argon2HashUtil.hash(password);
+            await this.userUniquenessService.ensureUnique(email, name);
+            const hashPassword = await this.userPasswordService.hashPassword(password);
 
             return await this.userRepository.save({
                 name,
@@ -93,17 +91,11 @@ export class UserService {
             }
 
             if (updateUserDto.email || updateUserDto.name) {
-                const existingUsers = await this.checkUserExists(
+                await this.userUniquenessService.ensureUnique(
                     updateUserDto.email || user.email,
                     updateUserDto.name || user.name,
                     id,
                 );
-
-                if (existingUsers.length > 0) {
-                    throw new ConflictException(
-                        'A user with this email or username already exists.',
-                    );
-                }
             }
 
             const updateData: Partial<User> = {};
@@ -112,7 +104,9 @@ export class UserService {
             if (updateUserDto.email) updateData.email = updateUserDto.email;
             if (updateUserDto.role) updateData.role = updateUserDto.role;
             if (updateUserDto.password) {
-                updateData.password = await Argon2HashUtil.hash(updateUserDto.password);
+                updateData.password = await this.userPasswordService.hashPassword(
+                    updateUserDto.password,
+                );
             }
 
             await this.userRepository.update(id, updateData);
@@ -137,22 +131,6 @@ export class UserService {
         } catch (error) {
             this.handleUnexpectedDatabaseError(error, 'Failed to remove user.');
         }
-    }
-
-    private async checkUserExists(
-        email: string,
-        name: string,
-        excludeId?: string,
-    ): Promise<User[]> {
-        const query = this.userRepository
-            .createQueryBuilder('user')
-            .where('user.email = :email OR user.name = :name', { email, name });
-
-        if (excludeId) {
-            query.andWhere('user.id != :excludeId', { excludeId });
-        }
-
-        return query.getMany();
     }
 
     private handleUnexpectedDatabaseError(

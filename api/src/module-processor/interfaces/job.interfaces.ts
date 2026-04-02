@@ -1,4 +1,4 @@
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 
 export interface ExchangeSyncPnlJob {
     tradingAccountId: string;

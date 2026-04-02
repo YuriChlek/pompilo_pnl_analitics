@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnalyseService } from '@/module-analyze/services/analyse.service';
+import { AnalyzeService } from '@/module-analyze/services/analyze.service';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
 import { DEFAULT_ANALYTICS_PERIOD } from '@/module-analyze/constants/analytics-periods';
 
-describe('AnalyseService', () => {
-    let service: AnalyseService;
+describe('AnalyzeService', () => {
+    let service: AnalyzeService;
     let repository: {
         findClosedPnlStatisticsByTradingAccountId: jest.Mock;
         findClosedPnlTimelineByTradingAccountId: jest.Mock;
@@ -33,7 +33,7 @@ describe('AnalyseService', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                AnalyseService,
+                AnalyzeService,
                 {
                     provide: TradesRepositoryService,
                     useValue: repository,
@@ -41,7 +41,7 @@ describe('AnalyseService', () => {
             ],
         }).compile();
 
-        service = module.get<AnalyseService>(AnalyseService);
+        service = module.get<AnalyzeService>(AnalyzeService);
     });
 
     it('should be defined', () => {

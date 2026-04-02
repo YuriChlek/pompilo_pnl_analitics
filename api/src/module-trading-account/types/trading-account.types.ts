@@ -1,7 +1,7 @@
 import {
     ClosedPnlStatistics,
     ClosedPnlTimelinePoint,
-} from '@/module-analyze/types/analyse.types';
+} from '@/module-analyze/types/analyze.types';
 
 export type TradingAccountApiKeySummary = {
     id: string;

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 @Entity({ name: 'trading_account' })

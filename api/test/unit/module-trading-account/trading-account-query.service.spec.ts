@@ -1,39 +1,38 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
 import { TradingAccountQueryService } from '@/module-trading-account/services/trading-account-query.service';
-import { TokenService } from '@/module-auth-token/services/token.service';
-import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
-import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { AnalyseService } from '@/module-analyze/services/analyse.service';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
-
-jest.mock('@/common/utils/get-user-id-from-tocken', () => ({
-    getUserIdFromToken: jest.fn(),
-}));
+import { AnalyzeService } from '@/module-analyze/services/analyze.service';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
+import { TradingAccountAccessService } from '@/module-trading-account/services/trading-account-access.service';
+import { TradingAccountViewService } from '@/module-trading-account/services/trading-account-view.service';
 
 describe('TradingAccountQueryService', () => {
     let service: TradingAccountQueryService;
-    let tradingAccountRepositoryService: {
-        findTradingAccountById: jest.MockedFunction<
-            TradingAccountRepositoryService['findTradingAccountById']
-        >;
-    };
     let tradingAccountBindingRepositoryService: {
         findTradingAccountBindingByTradingAccountId: jest.MockedFunction<
             TradingAccountBindingRepositoryService['findTradingAccountBindingByTradingAccountId']
         >;
     };
     let analyseService: {
-        getClosedPnlStatistics: jest.MockedFunction<AnalyseService['getClosedPnlStatistics']>;
-        getClosedPnlTimeline: jest.MockedFunction<AnalyseService['getClosedPnlTimeline']>;
-        getClosedTradePage: jest.MockedFunction<AnalyseService['getClosedTradePage']>;
+        getClosedPnlStatistics: jest.MockedFunction<AnalyzeService['getClosedPnlStatistics']>;
+        getClosedPnlTimeline: jest.MockedFunction<AnalyzeService['getClosedPnlTimeline']>;
+        getClosedTradePage: jest.MockedFunction<AnalyzeService['getClosedTradePage']>;
+    };
+    let tradingAccountAccessService: {
+        getAuthorizedUserId: jest.MockedFunction<TradingAccountAccessService['getAuthorizedUserId']>;
+        getOwnedTradingAccount: jest.MockedFunction<
+            TradingAccountAccessService['getOwnedTradingAccount']
+        >;
+    };
+    let tradingAccountViewService: {
+        buildTradingAccountSummary: jest.MockedFunction<
+            TradingAccountViewService['buildTradingAccountSummary']
+        >;
+        toApiKeySummary: jest.MockedFunction<TradingAccountViewService['toApiKeySummary']>;
     };
 
     beforeEach(() => {
-        tradingAccountRepositoryService = {
-            findTradingAccountById: jest.fn(),
-        };
         tradingAccountBindingRepositoryService = {
             findTradingAccountBindingByTradingAccountId: jest.fn(),
         };
@@ -42,19 +41,27 @@ describe('TradingAccountQueryService', () => {
             getClosedPnlTimeline: jest.fn(),
             getClosedTradePage: jest.fn(),
         };
+        tradingAccountAccessService = {
+            getAuthorizedUserId: jest.fn(),
+            getOwnedTradingAccount: jest.fn(),
+        };
+        tradingAccountViewService = {
+            buildTradingAccountSummary: jest.fn(),
+            toApiKeySummary: jest.fn(),
+        };
 
         service = new TradingAccountQueryService(
-            {} as TokenService,
-            tradingAccountRepositoryService as unknown as TradingAccountRepositoryService,
             tradingAccountBindingRepositoryService as unknown as TradingAccountBindingRepositoryService,
-            analyseService as unknown as AnalyseService,
+            analyseService as unknown as AnalyzeService,
+            tradingAccountAccessService as unknown as TradingAccountAccessService,
+            tradingAccountViewService as unknown as TradingAccountViewService,
         );
         jest.clearAllMocks();
     });
 
     it('passes period through details analytics queries', async () => {
-        (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-        tradingAccountRepositoryService.findTradingAccountById.mockResolvedValue({
+        tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+        tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
             id: 'account-id',
             userId: 'user-id',
             tradingAccountName: 'Main',
@@ -84,6 +91,18 @@ describe('TradingAccountQueryService', () => {
             latestTradeAt: null,
         });
         analyseService.getClosedPnlTimeline.mockResolvedValue([]);
+        tradingAccountViewService.toApiKeySummary.mockReturnValue({
+            id: 'api-key-id',
+            apiKeyName: 'Key',
+        });
+        tradingAccountViewService.buildTradingAccountSummary.mockReturnValue({
+            id: 'account-id',
+            tradingAccountName: 'Main',
+            exchange: EXCHANGES.BYBIT,
+            market: MARKET_TYPES.FUTURES,
+            apiKeyId: 'api-key-id',
+            apiKey: { apiKeyName: 'Key' },
+        });
 
         await service.findOne({} as Request, 'account-id', '90d');
 
@@ -92,8 +111,8 @@ describe('TradingAccountQueryService', () => {
     });
 
     it('passes period through paginated trades query', async () => {
-        (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-        tradingAccountRepositoryService.findTradingAccountById.mockResolvedValue({
+        tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+        tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
             id: 'account-id',
             userId: 'user-id',
         } as never);
@@ -115,11 +134,10 @@ describe('TradingAccountQueryService', () => {
     });
 
     it('rejects access when account does not belong to authenticated user', async () => {
-        (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-        tradingAccountRepositoryService.findTradingAccountById.mockResolvedValue({
-            id: 'account-id',
-            userId: 'other-user-id',
-        } as never);
+        tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+        tradingAccountAccessService.getOwnedTradingAccount.mockRejectedValue(
+            new UnauthorizedException(),
+        );
 
         await expect(service.findOne({} as Request, 'account-id', 'all')).rejects.toBeInstanceOf(
             UnauthorizedException,
@@ -127,8 +145,10 @@ describe('TradingAccountQueryService', () => {
     });
 
     it('throws not found for missing trading account', async () => {
-        (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-        tradingAccountRepositoryService.findTradingAccountById.mockResolvedValue(null);
+        tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+        tradingAccountAccessService.getOwnedTradingAccount.mockRejectedValue(
+            new NotFoundException(),
+        );
 
         await expect(
             service.findTrades({} as Request, 'missing-account', { period: 'all' }),

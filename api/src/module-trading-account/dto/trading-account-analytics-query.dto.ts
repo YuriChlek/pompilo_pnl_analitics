@@ -2,8 +2,8 @@ import { IsIn, IsOptional } from 'class-validator';
 import {
     ANALYTICS_PERIODS,
     DEFAULT_ANALYTICS_PERIOD,
-    type AnalyticsPeriod,
 } from '@/module-analyze/constants/analytics-periods';
+import type { AnalyticsPeriod } from '@/module-analyze/types/analytics-period.types';
 
 export class TradingAccountAnalyticsQueryDto {
     @IsOptional()

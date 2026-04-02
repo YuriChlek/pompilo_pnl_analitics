@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
 import {
     DEFAULT_ANALYTICS_PERIOD,
-    type AnalyticsPeriod,
 } from '@/module-analyze/constants/analytics-periods';
+import type { AnalyticsPeriod } from '@/module-analyze/types/analytics-period.types';
 import {
     ClosedPnlStatistics,
     ClosedPnlTimelinePoint,
     ClosedPnlTradePage,
-} from '@/module-analyze/types/analyse.types';
+} from '@/module-analyze/types/analyze.types';
 
 @Injectable()
-export class AnalyseService {
+export class AnalyzeService {
     constructor(private readonly tradesRepositoryService: TradesRepositoryService) {}
 
     async getClosedPnlStatistics(

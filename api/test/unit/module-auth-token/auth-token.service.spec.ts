@@ -2,23 +2,12 @@ import { BadRequestException, InternalServerErrorException } from '@nestjs/commo
 import { AuthTokenService } from '@/module-auth-token/services/auth-token.service';
 import { TokenService } from '@/module-auth-token/services/token.service';
 import { AuthTokenRepositoryService } from '@/module-auth-token/services/auth-token.repository.service';
-import { UserJWTPayload } from '@/module-user/interfaces/user.interface';
+import { UserJWTPayload } from '@/module-user/interfaces/user.interfaces';
 import { USER_ROLES } from '@/module-auth/enums/auth-enums';
-import { Argon2HashUtil } from '@/common/utils/hash.util';
-import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
-
-jest.mock('@/common/utils/hash.util', () => ({
-    Argon2HashUtil: {
-        compare: jest.fn(),
-        hash: jest.fn(),
-    },
-}));
-
-const randomBytesMock = jest.fn<Buffer, [number]>();
-
-jest.mock('crypto', () => ({
-    randomBytes: (...args: Parameters<typeof randomBytesMock>) => randomBytesMock(...args),
-}));
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token.enums';
+import { AuthTokenPayloadService } from '@/module-auth-token/services/auth-token-payload.service';
+import { RefreshTokenVerificationService } from '@/module-auth-token/services/refresh-token-verification.service';
+import { RefreshTokenStorageService } from '@/module-auth-token/services/refresh-token-storage.service';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
@@ -30,11 +19,21 @@ describe('AuthTokenService', () => {
         verifyToken: jest.MockedFunction<TokenService['verifyToken']>;
     };
     let repository: {
-        saveRefreshTokenData: jest.MockedFunction<
-            AuthTokenRepositoryService['saveRefreshTokenData']
-        >;
-        findRefreshToken: jest.MockedFunction<AuthTokenRepositoryService['findRefreshToken']>;
         removeRefreshToken: jest.MockedFunction<AuthTokenRepositoryService['removeRefreshToken']>;
+    };
+    let payloadService: {
+        createAccessTokenPayload: jest.MockedFunction<
+            AuthTokenPayloadService['createAccessTokenPayload']
+        >;
+        createRefreshTokenPayload: jest.MockedFunction<
+            AuthTokenPayloadService['createRefreshTokenPayload']
+        >;
+    };
+    let refreshTokenVerificationService: {
+        verify: jest.MockedFunction<RefreshTokenVerificationService['verify']>;
+    };
+    let refreshTokenStorageService: {
+        saveRefreshToken: jest.MockedFunction<RefreshTokenStorageService['saveRefreshToken']>;
     };
 
     const userPayload: UserJWTPayload = {
@@ -54,24 +53,11 @@ describe('AuthTokenService', () => {
         };
 
         repository = {
-            saveRefreshTokenData: jest.fn(),
-            findRefreshToken: jest.fn(),
             removeRefreshToken: jest.fn(),
         };
 
-        service = new AuthTokenService(
-            tokenService as unknown as TokenService,
-            repository as unknown as AuthTokenRepositoryService,
-        );
-        randomBytesMock.mockReturnValue(Buffer.alloc(64, 'a'));
-        jest.clearAllMocks();
-    });
-
-    describe('createAccessToken', () => {
-        it('delegates to tokenService with mapped payload', () => {
-            const token = service.createAccessToken(userPayload);
-
-            expect(tokenService.createAccessToken).toHaveBeenCalledWith({
+        payloadService = {
+            createAccessTokenPayload: jest.fn().mockReturnValue({
                 sub: userPayload.id,
                 userId: userPayload.id,
                 email: userPayload.email,
@@ -80,7 +66,45 @@ describe('AuthTokenService', () => {
                 ipAddress: userPayload.ipAddress,
                 userAgent: 'mac chrome',
                 type: TOKEN_TYPE.ACCESS,
-            });
+            }),
+            createRefreshTokenPayload: jest.fn().mockReturnValue({
+                sub: userPayload.id,
+                userId: userPayload.id,
+                userAgent: 'mac chrome',
+                ipAddress: userPayload.ipAddress,
+                type: TOKEN_TYPE.REFRESH,
+                jti: 'refresh-jti',
+            }),
+        };
+
+        refreshTokenVerificationService = {
+            verify: jest.fn(),
+        };
+        refreshTokenStorageService = {
+            saveRefreshToken: jest.fn(),
+        };
+
+        service = new AuthTokenService(
+            tokenService as unknown as TokenService,
+            repository as unknown as AuthTokenRepositoryService,
+            payloadService as unknown as AuthTokenPayloadService,
+            refreshTokenVerificationService as unknown as RefreshTokenVerificationService,
+            refreshTokenStorageService as unknown as RefreshTokenStorageService,
+        );
+        jest.clearAllMocks();
+    });
+
+    describe('createAccessToken', () => {
+        it('delegates to tokenService with mapped payload', () => {
+            const token = service.createAccessToken(userPayload);
+
+            expect(payloadService.createAccessTokenPayload).toHaveBeenCalledWith(userPayload);
+            expect(tokenService.createAccessToken).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sub: userPayload.id,
+                    type: TOKEN_TYPE.ACCESS,
+                }),
+            );
             expect(token).toBe('signed-access');
         });
 
@@ -102,7 +126,8 @@ describe('AuthTokenService', () => {
             const token = await service.createRefreshToken(userPayload);
 
             expect(token).toBe('refresh-token');
-            expect(repository.saveRefreshTokenData).toHaveBeenCalledWith(
+            expect(payloadService.createRefreshTokenPayload).toHaveBeenCalledWith(userPayload);
+            expect(refreshTokenStorageService.saveRefreshToken).toHaveBeenCalledWith(
                 expect.objectContaining({
                     userId: userPayload.id,
                     ipAddress: userPayload.ipAddress,
@@ -110,11 +135,10 @@ describe('AuthTokenService', () => {
                 }),
                 'refresh-token',
             );
-            expect(randomBytesMock).toHaveBeenCalledWith(64);
         });
 
         it('throws InternalServerErrorException on persistence errors', async () => {
-            repository.saveRefreshTokenData.mockRejectedValue(new Error('db error'));
+            refreshTokenStorageService.saveRefreshToken.mockRejectedValue(new Error('db error'));
 
             await expect(service.createRefreshToken(userPayload)).rejects.toBeInstanceOf(
                 InternalServerErrorException,
@@ -123,95 +147,43 @@ describe('AuthTokenService', () => {
     });
 
     describe('verifyRefreshToken', () => {
-        const payload = {
-            type: TOKEN_TYPE.REFRESH,
-            userId: 'user-id',
-            ipAddress: '203.0.113.1',
-            userAgent: 'mac chrome',
-        } as const;
-
-        beforeEach(() => {
-            tokenService.verifyToken.mockReturnValue(
-                payload as ReturnType<TokenService['verifyToken']>,
-            );
-        });
-
         it('returns user info when stored token matches', async () => {
-            repository.findRefreshToken.mockResolvedValue({
-                refreshToken: 'stored-hash',
-                ipAddress: payload.ipAddress,
-                userAgent: 'mac chrome',
-                user: { id: 'user-id', email: 'john@example.com' },
-            } as AwaitedReturn<ReturnType<AuthTokenRepositoryService['findRefreshToken']>>);
-            (Argon2HashUtil.compare as jest.Mock).mockResolvedValue(true);
+            refreshTokenVerificationService.verify.mockResolvedValue({
+                verified: true,
+                user: { id: 'user-id', email: 'john@example.com' } as any,
+            });
 
             const result = await service.verifyRefreshToken(
                 'token',
                 'Mac Chrome',
-                payload.ipAddress,
+                userPayload.ipAddress,
             );
 
             expect(result).toEqual({
                 verified: true,
                 user: { id: 'user-id', email: 'john@example.com' },
             });
-            expect(repository.findRefreshToken).toHaveBeenCalledWith(
-                payload.userId,
-                payload.ipAddress,
-                payload.userAgent,
-                true,
+            expect(refreshTokenVerificationService.verify).toHaveBeenCalledWith(
+                'token',
+                'Mac Chrome',
+                userPayload.ipAddress,
             );
         });
 
-        it('throws when tokenService cannot decode token', async () => {
-            tokenService.verifyToken.mockReturnValue(
-                undefined as unknown as ReturnType<TokenService['verifyToken']>,
+        it('rethrows verification errors', async () => {
+            refreshTokenVerificationService.verify.mockRejectedValue(
+                new BadRequestException('Refresh token not found.'),
             );
 
             await expect(
-                service.verifyRefreshToken('token', 'ua', payload.ipAddress),
+                service.verifyRefreshToken('token', 'ua', userPayload.ipAddress),
             ).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('returns false when token metadata not found', async () => {
-            repository.findRefreshToken.mockResolvedValue(
-                null as AwaitedReturn<ReturnType<AuthTokenRepositoryService['findRefreshToken']>>,
-            );
+            refreshTokenVerificationService.verify.mockResolvedValue({ verified: false });
 
-            const result = await service.verifyRefreshToken('token', 'ua', payload.ipAddress);
-
-            expect(result).toEqual({ verified: false });
-        });
-
-        it('returns false when fingerprint does not match', async () => {
-            repository.findRefreshToken.mockResolvedValue({
-                refreshToken: 'hash',
-                ipAddress: payload.ipAddress,
-                userAgent: 'different-agent',
-            } as AwaitedReturn<ReturnType<AuthTokenRepositoryService['findRefreshToken']>>);
-
-            const result = await service.verifyRefreshToken(
-                'token',
-                'Mac Chrome',
-                payload.ipAddress,
-            );
-
-            expect(result).toEqual({ verified: false });
-        });
-
-        it('returns false when hash comparison fails', async () => {
-            repository.findRefreshToken.mockResolvedValue({
-                refreshToken: 'hash',
-                ipAddress: payload.ipAddress,
-                userAgent: 'mac chrome',
-            } as AwaitedReturn<ReturnType<AuthTokenRepositoryService['findRefreshToken']>>);
-            (Argon2HashUtil.compare as jest.Mock).mockResolvedValue(false);
-
-            const result = await service.verifyRefreshToken(
-                'token',
-                'Mac Chrome',
-                payload.ipAddress,
-            );
+            const result = await service.verifyRefreshToken('token', 'ua', userPayload.ipAddress);
 
             expect(result).toEqual({ verified: false });
         });

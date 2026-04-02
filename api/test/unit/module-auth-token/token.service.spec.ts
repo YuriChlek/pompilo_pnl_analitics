@@ -5,7 +5,7 @@ import {
     AccessTokenPayload,
     RefreshTokenPayload,
 } from '@/module-auth-token/interfaces/auth-token.interfaces';
-import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token.enums';
 
 describe('TokenService', () => {
     let service: TokenService;

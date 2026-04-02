@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { AdminAuthService } from './services/admin-auth.service';
 import type { Request, Response } from 'express';
-import { UserPayload } from '@/module-user/interfaces/user.interface';
+import { UserPayload } from '@/module-user/interfaces/user.interfaces';
 import { LoginAdminDto } from '@/module-admin-auth/dto/login-admin.dto';
 
 @Controller()

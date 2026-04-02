@@ -2,7 +2,7 @@ import { HttpException, Injectable, InternalServerErrorException } from '@nestjs
 import { AuthService } from '@/module-auth/services/auth.service';
 import type { Request, Response } from 'express';
 import { LoginCustomerDto } from '@/module-customer-auth/dto/login-customer.dto';
-import { UserPayload } from '@/module-user/interfaces/user.interface';
+import { UserPayload } from '@/module-user/interfaces/user.interfaces';
 import { RegisterCustomerDto } from '@/module-customer-auth/dto/register-customer.dto';
 import { USER_ROLES, COOKIE_NAMES } from '@/module-auth/enums/auth-enums';
 

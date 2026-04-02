@@ -6,39 +6,32 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import type { Queue } from 'bullmq';
+import { DataSource, EntityManager } from 'typeorm';
 import { TradingAccountService } from '@/module-trading-account/services/trading-account.service';
-import { TokenService } from '@/module-auth-token/services/token.service';
 import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
-import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
-import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
+import { TradingAccountSyncService } from '@/module-trading-account/services/trading-account-sync.service';
+import { TradingAccountAccessService } from '@/module-trading-account/services/trading-account-access.service';
+import { TradingAccountViewService } from '@/module-trading-account/services/trading-account-view.service';
 import { buildTradingAccountDto } from '../../fixtures/trading.fixtures';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
-import { DataSource, EntityManager } from 'typeorm';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
+import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
-jest.mock('@/common/utils/get-user-id-from-tocken', () => ({
-    getUserIdFromToken: jest.fn(),
-}));
-
 describe('TradingAccountService', () => {
     let service: TradingAccountService;
-    let queue: {
-        add: jest.MockedFunction<Queue['add']>;
+    let tradingAccountSyncService: {
+        enqueueExchangePnlSync: jest.MockedFunction<
+            TradingAccountSyncService['enqueueExchangePnlSync']
+        >;
     };
-    let tokenService: TokenService;
     let repository: {
         saveTradingAccount: jest.MockedFunction<
             TradingAccountRepositoryService['saveTradingAccount']
         >;
         findTradingAccountsByUserId: jest.MockedFunction<
             TradingAccountRepositoryService['findTradingAccountsByUserId']
-        >;
-        findTradingAccountById: jest.MockedFunction<
-            TradingAccountRepositoryService['findTradingAccountById']
         >;
         updateTradingAccount: jest.MockedFunction<
             TradingAccountRepositoryService['updateTradingAccount']
@@ -57,17 +50,30 @@ describe('TradingAccountService', () => {
         findTradingAccountBindingByTradingAccountId: jest.MockedFunction<
             TradingAccountBindingRepositoryService['findTradingAccountBindingByTradingAccountId']
         >;
-        findTradingAccountBindingByApiKeyId: jest.MockedFunction<
-            TradingAccountBindingRepositoryService['findTradingAccountBindingByApiKeyId']
-        >;
         updateTradingAccountBindingApiKey: jest.MockedFunction<
             TradingAccountBindingRepositoryService['updateTradingAccountBindingApiKey']
         >;
     };
-    let apiKeysService: {
-        getActiveUserApiCredentials: jest.MockedFunction<
-            ApiKeysService['getActiveUserApiCredentials']
+    let tradingAccountAccessService: {
+        getAuthorizedUserId: jest.MockedFunction<TradingAccountAccessService['getAuthorizedUserId']>;
+        getOwnedTradingAccount: jest.MockedFunction<
+            TradingAccountAccessService['getOwnedTradingAccount']
         >;
+        getOwnedActiveApiKey: jest.MockedFunction<
+            TradingAccountAccessService['getOwnedActiveApiKey']
+        >;
+        getRequiredOwnedActiveApiKey: jest.MockedFunction<
+            TradingAccountAccessService['getRequiredOwnedActiveApiKey']
+        >;
+        ensureApiKeyIsAvailable: jest.MockedFunction<
+            TradingAccountAccessService['ensureApiKeyIsAvailable']
+        >;
+    };
+    let tradingAccountViewService: {
+        buildTradingAccountSummary: jest.MockedFunction<
+            TradingAccountViewService['buildTradingAccountSummary']
+        >;
+        toApiKeySummary: jest.MockedFunction<TradingAccountViewService['toApiKeySummary']>;
     };
     let dataSource: {
         transaction: jest.MockedFunction<DataSource['transaction']>;
@@ -76,12 +82,10 @@ describe('TradingAccountService', () => {
     const dto = buildTradingAccountDto();
 
     beforeEach(() => {
-        queue = { add: jest.fn() };
-        tokenService = {} as TokenService;
+        tradingAccountSyncService = { enqueueExchangePnlSync: jest.fn() };
         repository = {
             saveTradingAccount: jest.fn(),
             findTradingAccountsByUserId: jest.fn(),
-            findTradingAccountById: jest.fn(),
             updateTradingAccount: jest.fn(),
             removeTradingAccount: jest.fn(),
         };
@@ -89,23 +93,44 @@ describe('TradingAccountService', () => {
             saveTradingAccountBinding: jest.fn(),
             findTradingAccountBindingsByTradingAccountIds: jest.fn(),
             findTradingAccountBindingByTradingAccountId: jest.fn(),
-            findTradingAccountBindingByApiKeyId: jest.fn(),
             updateTradingAccountBindingApiKey: jest.fn(),
         };
-        apiKeysService = {
-            getActiveUserApiCredentials: jest.fn(),
+        tradingAccountAccessService = {
+            getAuthorizedUserId: jest.fn(),
+            getOwnedTradingAccount: jest.fn(),
+            getOwnedActiveApiKey: jest.fn(),
+            getRequiredOwnedActiveApiKey: jest.fn(),
+            ensureApiKeyIsAvailable: jest.fn(),
+        };
+        tradingAccountViewService = {
+            buildTradingAccountSummary: jest.fn((tradingAccount, apiKey) => ({
+                id: tradingAccount.id,
+                tradingAccountName: tradingAccount.tradingAccountName,
+                exchange: tradingAccount.exchange,
+                market: tradingAccount.market,
+                apiKeyId: apiKey?.id ?? null,
+                apiKey: apiKey ? { apiKeyName: apiKey.apiKeyName } : null,
+            })),
+            toApiKeySummary: jest.fn(apiKey =>
+                apiKey
+                    ? {
+                          id: apiKey.id,
+                          apiKeyName: apiKey.apiKeyName,
+                      }
+                    : null,
+            ),
         };
         dataSource = {
             transaction: jest.fn(async callback => callback({} as EntityManager)),
         };
 
         service = new TradingAccountService(
-            queue as unknown as Queue,
             dataSource as unknown as DataSource,
-            tokenService,
             repository as unknown as TradingAccountRepositoryService,
             bindingRepository as unknown as TradingAccountBindingRepositoryService,
-            apiKeysService as unknown as ApiKeysService,
+            tradingAccountSyncService as unknown as TradingAccountSyncService,
+            tradingAccountAccessService as unknown as TradingAccountAccessService,
+            tradingAccountViewService as unknown as TradingAccountViewService,
         );
         jest.clearAllMocks();
     });
@@ -114,8 +139,8 @@ describe('TradingAccountService', () => {
         const request = { cookies: {} } as Request;
 
         it('saves trading account, enqueues sync job, and returns summary data', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: 'api-key-id',
                 userId: 'user-id',
                 apiKeyName: 'API Key',
@@ -131,7 +156,6 @@ describe('TradingAccountService', () => {
                 exchange: dto.exchange,
                 market: dto.market,
             } as AwaitedReturn<ReturnType<TradingAccountRepositoryService['saveTradingAccount']>>);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue(null);
 
             const result = await service.create(request, dto);
 
@@ -146,13 +170,18 @@ describe('TradingAccountService', () => {
                 },
                 expect.any(Object),
             );
-            expect(queue.add).toHaveBeenCalledWith(
-                'excange-pnl-sync',
+            expect(tradingAccountAccessService.ensureApiKeyIsAvailable).toHaveBeenCalledWith(
+                dto.apiKeyId,
+            );
+            expect(tradingAccountSyncService.enqueueExchangePnlSync).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    tradingAccountId: 'account-id',
+                    id: 'account-id',
                     market: dto.market,
+                }),
+                expect.objectContaining({
                     apiKey: 'APIKEY',
                     secretKey: 'SECRET',
+                    exchange: EXCHANGES.BYBIT,
                 }),
             );
             expect(result).toEqual({
@@ -160,14 +189,14 @@ describe('TradingAccountService', () => {
                 tradingAccountName: dto.tradingAccountName,
                 exchange: dto.exchange,
                 market: dto.market,
-                apiKeyId: dto.apiKeyId,
+                apiKeyId: 'api-key-id',
                 apiKey: { apiKeyName: 'API Key' },
             });
         });
 
         it('returns null when API key is not found', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue(null);
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedActiveApiKey.mockResolvedValue(null);
 
             const result = await service.create(request, dto);
 
@@ -177,12 +206,11 @@ describe('TradingAccountService', () => {
         });
 
         it('converts unexpected persistence errors into InternalServerErrorException', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: dto.apiKeyId,
                 userId: 'user-id',
             } as ApiKey);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue(null);
             repository.saveTradingAccount.mockRejectedValue(new Error('db error'));
 
             await expect(service.create(request, dto)).rejects.toBeInstanceOf(
@@ -191,26 +219,24 @@ describe('TradingAccountService', () => {
         });
 
         it('rejects create when api key is already linked to another trading account', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: dto.apiKeyId,
                 userId: 'user-id',
             } as ApiKey);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue({
-                tradingAccountId: 'existing-account',
-                apiKeyId: dto.apiKeyId,
-            } as never);
+            tradingAccountAccessService.ensureApiKeyIsAvailable.mockRejectedValue(
+                new ConflictException('duplicate'),
+            );
 
             await expect(service.create(request, dto)).rejects.toBeInstanceOf(ConflictException);
             expect(repository.saveTradingAccount).not.toHaveBeenCalled();
         });
 
         it('rejects create when api key belongs to another user', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
-                id: dto.apiKeyId,
-                userId: 'another-user-id',
-            } as ApiKey);
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedActiveApiKey.mockRejectedValue(
+                new UnauthorizedException(),
+            );
 
             await expect(service.create(request, dto)).rejects.toBeInstanceOf(
                 UnauthorizedException,
@@ -223,7 +249,7 @@ describe('TradingAccountService', () => {
         const request = { cookies: {} } as Request;
 
         it('returns trading accounts for authenticated user', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
             const data = [
                 {
                     id: 'acc-1',
@@ -272,7 +298,9 @@ describe('TradingAccountService', () => {
         });
 
         it('throws UnauthorizedException when token is missing', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue(null);
+            tradingAccountAccessService.getAuthorizedUserId.mockImplementation(() => {
+                throw new UnauthorizedException();
+            });
 
             await expect(service.findAll(request)).rejects.toBeInstanceOf(UnauthorizedException);
         });
@@ -282,17 +310,15 @@ describe('TradingAccountService', () => {
         const request = { cookies: {} } as Request;
 
         it('updates account name and binding api key for the owner', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.findTradingAccountById.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
                 id: 'account-id',
                 userId: 'user-id',
                 tradingAccountName: 'Old name',
                 exchange: EXCHANGES.BYBIT,
                 market: MARKET_TYPES.FUTURES,
                 exchangeUserAccountId: 'acc-1',
-            } as AwaitedReturn<
-                ReturnType<TradingAccountRepositoryService['findTradingAccountById']>
-            >);
+            } as never);
             bindingRepository.findTradingAccountBindingByTradingAccountId.mockResolvedValue({
                 tradingAccountId: 'account-id',
                 apiKeyId: 'old-api-key-id',
@@ -300,17 +326,12 @@ describe('TradingAccountService', () => {
                     id: 'old-api-key-id',
                     apiKeyName: 'Old API Key',
                 },
-            } as AwaitedReturn<
-                ReturnType<
-                    TradingAccountBindingRepositoryService['findTradingAccountBindingByTradingAccountId']
-                >
-            >);
+            } as never);
             repository.updateTradingAccount.mockResolvedValue({ affected: 1 } as never);
             bindingRepository.updateTradingAccountBindingApiKey.mockResolvedValue({
                 affected: 1,
             } as never);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue(null);
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
+            tradingAccountAccessService.getRequiredOwnedActiveApiKey.mockResolvedValue({
                 id: 'new-api-key-id',
                 userId: 'user-id',
                 apiKeyName: 'New API Key',
@@ -347,20 +368,17 @@ describe('TradingAccountService', () => {
         });
 
         it('rejects api key reassignment to another exchange account', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.findTradingAccountById.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
                 id: 'account-id',
                 userId: 'user-id',
                 tradingAccountName: 'Old name',
                 exchange: EXCHANGES.BYBIT,
                 market: MARKET_TYPES.FUTURES,
                 exchangeUserAccountId: 'acc-1',
-            } as AwaitedReturn<
-                ReturnType<TradingAccountRepositoryService['findTradingAccountById']>
-            >);
+            } as never);
             bindingRepository.findTradingAccountBindingByTradingAccountId.mockResolvedValue(null);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue(null);
-            apiKeysService.getActiveUserApiCredentials.mockResolvedValue({
+            tradingAccountAccessService.getRequiredOwnedActiveApiKey.mockResolvedValue({
                 id: 'new-api-key-id',
                 userId: 'user-id',
                 apiKeyName: 'New API Key',
@@ -377,8 +395,8 @@ describe('TradingAccountService', () => {
         });
 
         it('rejects api key reassignment when api key is already used by another account', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.findTradingAccountById.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
                 id: 'account-id',
                 userId: 'user-id',
                 tradingAccountName: 'Old name',
@@ -394,10 +412,9 @@ describe('TradingAccountService', () => {
                     apiKeyName: 'Old API Key',
                 },
             } as never);
-            bindingRepository.findTradingAccountBindingByApiKeyId.mockResolvedValue({
-                tradingAccountId: 'another-account-id',
-                apiKeyId: 'new-api-key-id',
-            } as never);
+            tradingAccountAccessService.ensureApiKeyIsAvailable.mockRejectedValue(
+                new ConflictException('duplicate'),
+            );
 
             await expect(
                 service.update(request, 'account-id', {
@@ -411,13 +428,11 @@ describe('TradingAccountService', () => {
         const request = { cookies: {} } as Request;
 
         it('removes account for the owner', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.findTradingAccountById.mockResolvedValue({
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedTradingAccount.mockResolvedValue({
                 id: 'account-id',
                 userId: 'user-id',
-            } as AwaitedReturn<
-                ReturnType<TradingAccountRepositoryService['findTradingAccountById']>
-            >);
+            } as never);
             repository.removeTradingAccount.mockResolvedValue({ affected: 1 } as never);
 
             const result = await service.remove(request, 'account-id');
@@ -427,8 +442,10 @@ describe('TradingAccountService', () => {
         });
 
         it('throws when trading account does not exist', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.findTradingAccountById.mockResolvedValue(null);
+            tradingAccountAccessService.getAuthorizedUserId.mockReturnValue('user-id');
+            tradingAccountAccessService.getOwnedTradingAccount.mockRejectedValue(
+                new NotFoundException(),
+            );
 
             await expect(service.remove(request, 'missing-id')).rejects.toBeInstanceOf(
                 NotFoundException,

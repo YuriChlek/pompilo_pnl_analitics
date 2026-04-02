@@ -1,4 +1,4 @@
-import { MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 
 export interface BybitQueryApiResponse<T> {

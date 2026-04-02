@@ -8,11 +8,19 @@ import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.re
 import { EncryptModule } from '@/module-encrypt/encrypt.module';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
 import { BybitModule } from '@/module-bybit/bybit.module';
+import { ApiKeysAccessService } from '@/module-api-keys/services/api-keys-access.service';
+import { ApiKeysViewService } from '@/module-api-keys/services/api-keys-view.service';
 
 @Module({
     imports: [TypeOrmModule.forFeature([ApiKey]), AuthTokenModule, EncryptModule, BybitModule],
     controllers: [ApiKeysController],
     exports: [ApiKeysService],
-    providers: [ApiKeysService, ApiKeysRepositoryService, ApiKeysValidationService],
+    providers: [
+        ApiKeysService,
+        ApiKeysRepositoryService,
+        ApiKeysValidationService,
+        ApiKeysAccessService,
+        ApiKeysViewService,
+    ],
 })
 export class ApiKeysModule {}

@@ -10,7 +10,7 @@ import { ResponseInterceptor } from '@/common/interceptors/response.interceptor'
 import { CustomerFrontendModule } from '@/module-customer-frontend/customer-frontend.module';
 import { AdminFrontendModule } from '@/module-admin-frontend/admin-frontend.module';
 import { BullModule } from '@nestjs/bullmq';
-import { getBullMqConfig } from '@config/bullMq.config';
+import { getBullMqConfig } from '@config/bull-mq.config';
 import { ProcessorModule } from '@/module-processor/processor.module';
 import { TradesModule } from '@/module-trades/trades.module';
 

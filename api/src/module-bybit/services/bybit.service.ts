@@ -1,117 +1,67 @@
-import { Injectable, HttpException, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import type { StringValue } from 'ms';
-import * as crypto from 'crypto';
-import {
-    BybitApiKeyInfo,
-    BybitClosedPnlResult,
-    BybitQueryApiResponse,
-} from '@/module-bybit/interfaces/bybit-exchange.interfaces';
-import { ApiValidationInterface } from '@/module-api-keys/interfaces/api-keys.interfaces';
+import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ApiValidationInterface } from '@/module-api-keys/types/api-keys.types';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
+import { BybitApiService } from '@/module-bybit/services/bybit-api.service';
 
 @Injectable()
 export class BybitService {
-    private readonly BYBIT_URL: StringValue;
-    private readonly BYBIT_DEMO_URL: StringValue;
+    private static readonly MAX_RANGE_MS = 7 * 24 * 60 * 60 * 1000;
+    private static readonly MAX_LOOKBACK_MS = 2 * 365 * 24 * 60 * 60 * 1000;
 
     constructor(
-        private readonly configService: ConfigService,
+        private readonly bybitApiService: BybitApiService,
         private readonly bybitRepositoryService: TradesRepositoryService,
-    ) {
-        this.BYBIT_URL = this.configService.getOrThrow<StringValue>('BYBIT_URL');
-        this.BYBIT_DEMO_URL = this.configService.getOrThrow<StringValue>('BYBIT_DEMO_URL');
-    }
+    ) {}
 
     async getTradingPnl(
         exchange: EXCHANGES.BYBIT | EXCHANGES.BYBIT_DEMO,
         apiKey: string,
         secret: string,
         category: MARKET_TYPES,
-        lastTradeTime: string | null,
+        _lastTradeTime: string | null,
     ): Promise<FuturesClosedPnl[]> {
-        const bybitUrl = exchange === EXCHANGES.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
-        const endpoint = `${bybitUrl}/v5/position/closed-pnl`;
-        const recvWindow = '20000';
-
-        const MAX_RANGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
         const now = Date.now();
-
         let endTime = now;
-        console.log('lastTradeTime', lastTradeTime);
-
         const allResults: FuturesClosedPnl[] = [];
 
         while (true) {
-            const startTime = endTime - MAX_RANGE_MS;
-
-            const queryParams = new URLSearchParams({
-                category,
-                startTime: startTime.toString(),
-                endTime: endTime.toString(),
-                limit: '200',
-            });
-
-            const timestamp = Date.now().toString();
-            const queryString = queryParams.toString();
-
-            const signature = this.generateSignature(
-                timestamp,
+            const startTime = endTime - BybitService.MAX_RANGE_MS;
+            const windowTrades = await this.fetchWindowTrades(
+                exchange,
                 apiKey,
-                recvWindow,
-                queryString,
                 secret,
-            );
-            const queryEndpoint = `${endpoint}?${queryString}`;
-
-            const response = await this.fetchBybitData(
-                queryEndpoint,
-                apiKey,
-                signature,
-                timestamp,
-                recvWindow,
+                category,
+                startTime,
+                endTime,
             );
 
-            const data = (await response.json()) as BybitQueryApiResponse<BybitClosedPnlResult>;
-
-            if (data.retCode !== 0) {
-                throw new HttpException(data.retMsg, response.status);
-            }
-
-            if (!data.result?.list?.length) {
+            if (!windowTrades.length) {
                 break;
             }
 
-            allResults.push(...data.result.list);
-
+            allResults.push(...windowTrades);
             endTime = startTime;
 
-            if (endTime < now - 2 * 365 * 24 * 60 * 60 * 1000) {
+            if (endTime < now - BybitService.MAX_LOOKBACK_MS) {
                 break;
             }
         }
-
+        console.log(allResults);
         return allResults;
     }
 
     async savePnl(data: FuturesClosedPnl[], tradingAccountId: string) {
         try {
-            const closedPnlData = data.map(item => {
-                item.tradingAccountId = tradingAccountId;
-
-                return item;
-            });
+            const closedPnlData = data.map(item => ({
+                ...item,
+                tradingAccountId,
+            }));
 
             return await this.bybitRepositoryService.saveClosedPnl(closedPnlData);
         } catch (error) {
-            console.error(error);
-            if (error instanceof HttpException) {
-                throw error;
-            }
-
-            throw new InternalServerErrorException('Failed to save Bybit PnL data');
+            this.handleUnexpectedError(error, 'Failed to save Bybit PnL data');
         }
     }
 
@@ -120,33 +70,7 @@ export class BybitService {
         apiKey: string,
         secret: string,
     ): Promise<ApiValidationInterface | undefined> {
-        const timestamp = Date.now().toString();
-        const recvWindow = '5000';
-        const queryString = '';
-        const bybitUrl = exchange === EXCHANGES.BYBIT_DEMO ? this.BYBIT_DEMO_URL : this.BYBIT_URL;
-        const endpoint = `${bybitUrl}/v5/user/query-api`;
-
-        const signature = this.generateSignature(
-            timestamp,
-            apiKey,
-            recvWindow,
-            queryString,
-            secret,
-        );
-
-        const response: Response = await this.fetchBybitData(
-            endpoint,
-            apiKey,
-            signature,
-            timestamp,
-            recvWindow,
-        );
-
-        const data = (await response.json()) as unknown as BybitQueryApiResponse<BybitApiKeyInfo>;
-
-        if (!response.ok) {
-            throw new HttpException(data, response.status);
-        }
+        const data = await this.bybitApiService.queryApiKey(exchange, apiKey, secret);
 
         if ('retCode' in data && Number(data['retCode']) === 0) {
             return {
@@ -156,33 +80,46 @@ export class BybitService {
         }
     }
 
-    private generateSignature(
-        timestamp: string,
+    private async fetchWindowTrades(
+        exchange: EXCHANGES.BYBIT | EXCHANGES.BYBIT_DEMO,
         apiKey: string,
-        recvWindow: string,
-        queryString: string,
         secret: string,
-    ): string {
-        const payload = timestamp + apiKey + recvWindow + queryString;
+        category: MARKET_TYPES,
+        startTime: number,
+        endTime: number,
+    ): Promise<FuturesClosedPnl[]> {
+        const trades: FuturesClosedPnl[] = [];
+        let cursor: string | undefined;
 
-        return crypto.createHmac('sha256', secret).update(payload).digest('hex');
+        do {
+            const data = await this.bybitApiService.getClosedPnlPage(
+                exchange,
+                apiKey,
+                secret,
+                category,
+                startTime,
+                endTime,
+                cursor,
+            );
+
+            if (data.retCode !== 0) {
+                throw new HttpException(data.retMsg, 400);
+            }
+
+            const pageTrades = data.result?.list ?? [];
+
+            trades.push(...pageTrades);
+            cursor = data.result?.nextPageCursor ?? undefined;
+        } while (cursor);
+
+        return trades;
     }
 
-    private async fetchBybitData(
-        endpoint: string,
-        apiKey: string,
-        signature: string,
-        timestamp: string,
-        recvWindow: string,
-    ): Promise<Response> {
-        return await fetch(`${endpoint}`, {
-            method: 'GET',
-            headers: {
-                'X-BAPI-API-KEY': apiKey,
-                'X-BAPI-SIGN': signature,
-                'X-BAPI-TIMESTAMP': timestamp,
-                'X-BAPI-RECV-WINDOW': recvWindow,
-            },
-        });
+    private handleUnexpectedError(error: unknown, message: string): never {
+        if (error instanceof HttpException) {
+            throw error;
+        }
+
+        throw new InternalServerErrorException(message);
     }
 }

@@ -1,6 +1,6 @@
-import { ApiKeysList } from '@/features/module-api-keys/components/api-keys-list/ApiKeysList';
-import { AddApiKey } from '@/features/module-api-keys/components/add-api-key/AddApiKey';
-import { PageTitle } from '@/components/page-title/PageTitle';
+import { ApiKeysList } from '@/features/module-api-keys/components/api-keys-list/api-keys-list';
+import { AddApiKey } from '@/features/module-api-keys/components/add-api-key/add-api-key';
+import { PageTitle } from '@/components/page-title/page-title';
 
 export default function CustomerApiKeysPage() {
     return (

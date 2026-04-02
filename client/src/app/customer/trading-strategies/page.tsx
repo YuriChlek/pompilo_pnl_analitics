@@ -1,4 +1,4 @@
-import { PageTitle } from '@/components/page-title/PageTitle';
+import { PageTitle } from '@/components/page-title/page-title';
 
 export default function CustomerTradingAccountsPage() {
     return (

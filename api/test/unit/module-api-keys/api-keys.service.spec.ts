@@ -6,29 +6,17 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
-import { TokenService } from '@/module-auth-token/services/token.service';
-import { EncryptService } from '@/module-encrypt/services/encrypt.service';
 import { ApiKeysRepositoryService } from '@/module-api-keys/services/api-keys.repository.service';
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
-import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
-import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
+import { EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
+import { ApiKeysAccessService } from '@/module-api-keys/services/api-keys-access.service';
+import { ApiKeysViewService } from '@/module-api-keys/services/api-keys-view.service';
 import { buildCreateApiKeyDto } from '../../fixtures/api-keys.fixtures';
-
-jest.mock('@/common/utils/get-user-id-from-tocken', () => ({
-    getUserIdFromToken: jest.fn(),
-}));
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 
 describe('ApiKeysService', () => {
     let service: ApiKeysService;
-    let tokenService: {
-        verifyToken: jest.MockedFunction<TokenService['verifyToken']>;
-    };
-    let encryptService: {
-        encrypt: jest.MockedFunction<EncryptService['encrypt']>;
-        decrypt: jest.MockedFunction<EncryptService['decrypt']>;
-    };
     let repository: {
         saveApiKey: jest.MockedFunction<ApiKeysRepositoryService['saveApiKey']>;
         update: jest.MockedFunction<ApiKeysRepositoryService['update']>;
@@ -38,20 +26,21 @@ describe('ApiKeysService', () => {
     let validationService: {
         validate: jest.MockedFunction<ApiKeysValidationService['validate']>;
     };
+    let accessService: {
+        getAuthorizedUserId: jest.MockedFunction<ApiKeysAccessService['getAuthorizedUserId']>;
+        getOwnedActiveApiKey: jest.MockedFunction<ApiKeysAccessService['getOwnedActiveApiKey']>;
+    };
+    let viewService: {
+        encryptCredentials: jest.MockedFunction<ApiKeysViewService['encryptCredentials']>;
+        toMaskedApiKeyResponse: jest.MockedFunction<ApiKeysViewService['toMaskedApiKeyResponse']>;
+        maskApiKeyList: jest.MockedFunction<ApiKeysViewService['maskApiKeyList']>;
+        toDecryptedCredentials: jest.MockedFunction<ApiKeysViewService['toDecryptedCredentials']>;
+    };
     const request = { cookies: {} } as Request;
 
     const apiKeyDto = buildCreateApiKeyDto();
 
     beforeEach(() => {
-        tokenService = {
-            verifyToken: jest.fn(),
-        };
-
-        encryptService = {
-            encrypt: jest.fn((value: string) => `enc-${value}`),
-            decrypt: jest.fn((value: string) => value.replace('enc-', '')),
-        };
-
         repository = {
             saveApiKey: jest.fn(),
             update: jest.fn(),
@@ -63,18 +52,47 @@ describe('ApiKeysService', () => {
             validate: jest.fn(),
         };
 
+        accessService = {
+            getAuthorizedUserId: jest.fn(),
+            getOwnedActiveApiKey: jest.fn(),
+        };
+
+        viewService = {
+            encryptCredentials: jest.fn((apiKey: string, secretKey: string) => ({
+                encryptedApiKey: `enc-${apiKey}`,
+                encryptedSecretKey: `enc-${secretKey}`,
+            })),
+            toMaskedApiKeyResponse: jest.fn((apiKey, rawApiKey, exchangeUserAccountId) => ({
+                id: apiKey.id,
+                apiKey: `***${rawApiKey.slice(-4)}`,
+                exchange: apiKey.exchange,
+                apiKeyName: apiKey.apiKeyName,
+                connectionStatus: apiKey.connectionStatus,
+                market: apiKey.market,
+                exchangeUserAccountId,
+            })),
+            maskApiKeyList: jest.fn(apiKeys =>
+                apiKeys.map(item => ({ ...item, apiKey: `***${String(item.apiKey).slice(-4)}` })),
+            ),
+            toDecryptedCredentials: jest.fn(apiKey => ({
+                ...apiKey,
+                apiKey: 'ABCD',
+                secretKey: 'SECRET',
+            })),
+        };
+
         service = new ApiKeysService(
-            tokenService as unknown as TokenService,
-            encryptService as unknown as EncryptService,
             repository as unknown as ApiKeysRepositoryService,
             validationService as unknown as ApiKeysValidationService,
+            accessService as unknown as ApiKeysAccessService,
+            viewService as unknown as ApiKeysViewService,
         );
         jest.clearAllMocks();
     });
 
     describe('create', () => {
         it('persists api keys after validation and masks response', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
             validationService.validate.mockResolvedValue({
                 valid: true,
                 exchangeUserAccountId: 'uid',
@@ -101,6 +119,7 @@ describe('ApiKeysService', () => {
                     secretKey: `enc-${apiKeyDto.secretKey}`,
                 }),
             );
+            expect(viewService.toMaskedApiKeyResponse).toHaveBeenCalled();
             expect(result).toMatchObject({
                 id: 'key-id',
                 apiKey: `***${apiKeyDto.apiKey.slice(-4)}`,
@@ -109,7 +128,9 @@ describe('ApiKeysService', () => {
         });
 
         it('throws UnauthorizedException when user is missing', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue(null);
+            accessService.getAuthorizedUserId.mockImplementation(() => {
+                throw new UnauthorizedException('Invalid or missing user.');
+            });
 
             await expect(service.create(request, apiKeyDto)).rejects.toBeInstanceOf(
                 UnauthorizedException,
@@ -117,7 +138,7 @@ describe('ApiKeysService', () => {
         });
 
         it('throws BadRequestException when validation fails', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
             validationService.validate.mockResolvedValue({
                 valid: false,
                 exchangeUserAccountId: null,
@@ -129,7 +150,7 @@ describe('ApiKeysService', () => {
         });
 
         it('converts unexpected errors into InternalServerErrorException', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
             validationService.validate.mockResolvedValue({
                 valid: true,
                 exchangeUserAccountId: 'uid',
@@ -144,7 +165,7 @@ describe('ApiKeysService', () => {
 
     describe('getUserApiKeys', () => {
         it('decrypts stored values and masks api keys', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
             repository.getUserApiKeys.mockResolvedValue([
                 {
                     id: 'key-id',
@@ -158,12 +179,14 @@ describe('ApiKeysService', () => {
 
             const result = await service.getUserApiKeys(request);
 
-            expect(encryptService.decrypt).toHaveBeenCalledWith('enc-ABCD1234567890');
+            expect(viewService.maskApiKeyList).toHaveBeenCalled();
             expect(result[0]).toMatchObject({ apiKey: '***7890' });
         });
 
         it('throws Unauthorized when token is missing', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue(null);
+            accessService.getAuthorizedUserId.mockImplementation(() => {
+                throw new UnauthorizedException('Invalid or missing user.');
+            });
 
             await expect(service.getUserApiKeys(request)).rejects.toBeInstanceOf(
                 UnauthorizedException,
@@ -171,7 +194,7 @@ describe('ApiKeysService', () => {
         });
 
         it('raises InternalServerErrorException when repository fails', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
             repository.getUserApiKeys.mockRejectedValue(new Error('db failure'));
 
             await expect(service.getUserApiKeys(request)).rejects.toBeInstanceOf(
@@ -191,7 +214,7 @@ describe('ApiKeysService', () => {
             const result = await service.getActiveUserApiCredentials('key-id');
 
             expect(result).toMatchObject({ apiKey: 'ABCD', secretKey: 'SECRET' });
-            expect(encryptService.decrypt).toHaveBeenCalledTimes(2);
+            expect(viewService.toDecryptedCredentials).toHaveBeenCalledTimes(1);
         });
 
         it('returns null when repository does not find record', async () => {
@@ -205,8 +228,8 @@ describe('ApiKeysService', () => {
 
     describe('update', () => {
         it('updates owned api keys after validation and masks response', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue({
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: 'key-id',
                 userId: 'user-id',
                 apiKey: 'enc-OLDAPI',
@@ -215,7 +238,7 @@ describe('ApiKeysService', () => {
                 market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Old name',
                 connectionStatus: 'CONNECTED',
-            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            } as AwaitedReturn<ReturnType<ApiKeysAccessService['getOwnedActiveApiKey']>>);
             validationService.validate.mockResolvedValue({
                 valid: true,
                 exchangeUserAccountId: 'updated-user-id',
@@ -259,7 +282,9 @@ describe('ApiKeysService', () => {
         });
 
         it('throws UnauthorizedException when user is missing', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue(null);
+            accessService.getAuthorizedUserId.mockImplementation(() => {
+                throw new UnauthorizedException('Invalid or missing user.');
+            });
 
             await expect(service.update(request, 'key-id', {})).rejects.toBeInstanceOf(
                 UnauthorizedException,
@@ -267,8 +292,10 @@ describe('ApiKeysService', () => {
         });
 
         it('throws NotFoundException when api key does not exist', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue(null);
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockImplementation(async () => {
+                throw new NotFoundException('API key not found.');
+            });
 
             await expect(service.update(request, 'missing', {})).rejects.toBeInstanceOf(
                 NotFoundException,
@@ -276,17 +303,10 @@ describe('ApiKeysService', () => {
         });
 
         it('throws UnauthorizedException when user does not own the key', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue({
-                id: 'key-id',
-                userId: 'another-user',
-                apiKey: 'enc-OLDAPI',
-                secretKey: 'enc-OLDSECRET',
-                exchange: EXCHANGES.BYBIT,
-                market: MARKET_TYPES.FUTURES,
-                apiKeyName: 'Old name',
-                connectionStatus: 'CONNECTED',
-            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockImplementation(async () => {
+                throw new UnauthorizedException('Invalid or missing user.');
+            });
 
             await expect(service.update(request, 'key-id', {})).rejects.toBeInstanceOf(
                 UnauthorizedException,
@@ -294,8 +314,8 @@ describe('ApiKeysService', () => {
         });
 
         it('throws BadRequestException when validation fails', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue({
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: 'key-id',
                 userId: 'user-id',
                 apiKey: 'enc-OLDAPI',
@@ -304,7 +324,7 @@ describe('ApiKeysService', () => {
                 market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Old name',
                 connectionStatus: 'CONNECTED',
-            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            } as AwaitedReturn<ReturnType<ApiKeysAccessService['getOwnedActiveApiKey']>>);
             validationService.validate.mockResolvedValue({
                 valid: false,
                 exchangeUserAccountId: null,
@@ -316,8 +336,8 @@ describe('ApiKeysService', () => {
         });
 
         it('throws BadRequestException when update payload is incomplete', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue({
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: 'key-id',
                 userId: 'user-id',
                 apiKey: 'enc-OLDAPI',
@@ -326,7 +346,7 @@ describe('ApiKeysService', () => {
                 market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Old name',
                 connectionStatus: 'CONNECTED',
-            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            } as AwaitedReturn<ReturnType<ApiKeysAccessService['getOwnedActiveApiKey']>>);
 
             await expect(
                 service.update(request, 'key-id', {
@@ -338,8 +358,8 @@ describe('ApiKeysService', () => {
         });
 
         it('throws NotFoundException when repository updates zero rows', async () => {
-            (getUserIdFromToken as jest.Mock).mockReturnValue('user-id');
-            repository.getUserApiKeyById.mockResolvedValue({
+            accessService.getAuthorizedUserId.mockReturnValue('user-id');
+            accessService.getOwnedActiveApiKey.mockResolvedValue({
                 id: 'key-id',
                 userId: 'user-id',
                 apiKey: 'enc-OLDAPI',
@@ -348,7 +368,7 @@ describe('ApiKeysService', () => {
                 market: MARKET_TYPES.FUTURES,
                 apiKeyName: 'Old name',
                 connectionStatus: 'CONNECTED',
-            } as AwaitedReturn<ReturnType<ApiKeysRepositoryService['getUserApiKeyById']>>);
+            } as AwaitedReturn<ReturnType<ApiKeysAccessService['getOwnedActiveApiKey']>>);
             validationService.validate.mockResolvedValue({
                 valid: true,
                 exchangeUserAccountId: 'updated-user-id',

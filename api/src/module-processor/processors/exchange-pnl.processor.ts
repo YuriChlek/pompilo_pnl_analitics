@@ -5,8 +5,9 @@ import { BybitSyncPnlJobResponse } from '@/module-processor/interfaces/job.inter
 import { InternalServerErrorException } from '@nestjs/common';
 import { FuturesClosedPnl } from '@/module-trades/entities/futures-closed-pnl.entity';
 import { TradesRepositoryService } from '@/module-trades/services/trades-repository.service';
+import { EXCHANGE_PNL_QUEUE } from '@/module-processor/constants/processor.constants';
 
-@Processor('excange-pnl-sync')
+@Processor(EXCHANGE_PNL_QUEUE)
 export class ExchangePnlProcessor extends WorkerHost {
     constructor(
         private readonly bybitService: BybitService,

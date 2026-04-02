@@ -3,9 +3,6 @@ import { FindOptionsSelect } from 'typeorm';
 import { Token } from '@/module-auth-token/entities/auth-token.entity';
 import { Repository, MoreThan } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-import ms, { type StringValue } from 'ms';
-import { Argon2HashUtil } from '@/common/utils/hash.util';
 import { normalizeStr } from '@/common/utils/string.utils';
 import { InternalServerErrorException } from '@nestjs/common';
 import {
@@ -15,52 +12,26 @@ import {
 
 @Injectable()
 export class AuthTokenRepositoryService {
-    private readonly JWT_REFRESH_TOKEN_TTL: StringValue;
-
     public constructor(
         @InjectRepository(Token)
         private readonly tokenRepository: Repository<Token>,
-        private readonly configService: ConfigService,
-    ) {
-        this.JWT_REFRESH_TOKEN_TTL =
-            this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_TTL');
-    }
+    ) {}
 
-    async saveRefreshTokenData(
+    async createRefreshToken(
         refreshTokenPayload: RefreshTokenPayload,
-        userRefreshToken: string,
+        refreshTokenHash: string,
+        expiresAt: Date,
     ): Promise<void> {
         try {
-            const refreshTokenData = await this.findRefreshToken(
-                refreshTokenPayload.userId,
-                refreshTokenPayload.ipAddress,
-                refreshTokenPayload.userAgent,
-            );
-            const refreshTokenHash = await Argon2HashUtil.hash(userRefreshToken);
-            const expiresAt = new Date(Date.now() + ms(this.JWT_REFRESH_TOKEN_TTL));
+            const { userId, ipAddress, userAgent } = refreshTokenPayload;
 
-            const isSameClient =
-                refreshTokenData &&
-                refreshTokenData.ipAddress === refreshTokenPayload.ipAddress &&
-                normalizeStr(refreshTokenData.userAgent) ===
-                    normalizeStr(refreshTokenPayload.userAgent);
-
-            if (isSameClient) {
-                await this.updateRefreshToken(refreshTokenPayload, refreshTokenHash);
-                return;
-            }
-
-            if (!refreshTokenData) {
-                const { userId, ipAddress, userAgent } = refreshTokenPayload;
-
-                await this.tokenRepository.save({
-                    userId,
-                    refreshToken: refreshTokenHash,
-                    ipAddress,
-                    userAgent: normalizeStr(userAgent),
-                    expiresAt,
-                });
-            }
+            await this.tokenRepository.save({
+                userId,
+                refreshToken: refreshTokenHash,
+                ipAddress,
+                userAgent: normalizeStr(userAgent),
+                expiresAt,
+            });
         } catch (error: unknown) {
             if (error instanceof Error) {
                 throw new InternalServerErrorException(error.message);
@@ -73,6 +44,7 @@ export class AuthTokenRepositoryService {
     async updateRefreshToken(
         refreshTokenPayload: RefreshTokenPayload,
         refreshTokenHash: string,
+        expiresAt: Date,
     ): Promise<void> {
         await this.tokenRepository.update(
             {
@@ -85,7 +57,7 @@ export class AuthTokenRepositoryService {
                 refreshToken: refreshTokenHash,
                 userAgent: refreshTokenPayload.userAgent,
                 ipAddress: refreshTokenPayload.ipAddress,
-                expiresAt: new Date(Date.now() + ms(this.JWT_REFRESH_TOKEN_TTL)),
+                expiresAt,
             },
         );
     }

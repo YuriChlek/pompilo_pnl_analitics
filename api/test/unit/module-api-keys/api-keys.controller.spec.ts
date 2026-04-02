@@ -3,7 +3,7 @@ import { ApiKeysController } from '@/module-api-keys/api-keys.controller';
 import { ApiKeysService } from '@/module-api-keys/services/api-keys.service';
 import { CreateApiKeyDto } from '@/module-api-keys/dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '@/module-api-keys/dto/update-api-key.dto';
-import { CONNECTION_STATUS } from '@/module-api-keys/enums/api-keys-enums';
+import { CONNECTION_STATUS } from '@/module-api-keys/enums/api-keys.enums';
 
 type AwaitedReturn<T> = T extends Promise<infer R> ? R : T;
 

@@ -1,28 +1,21 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { TokenService } from '@/module-auth-token/services/token.service';
-import { getUserIdFromToken } from '@/common/utils/get-user-id-from-tocken';
-import { TradingAccountRepositoryService } from '@/module-trading-account/services/trading-account-repository.service';
+import { Injectable } from '@nestjs/common';
 import { TradingAccountBindingRepositoryService } from '@/module-trading-account/services/trading-account-binding.repository.service';
-import { AnalyseService } from '@/module-analyze/services/analyse.service';
+import { AnalyzeService } from '@/module-analyze/services/analyze.service';
 import type { Request } from 'express';
-import {
-    TradingAccountApiKeySummary,
-    TradingAccountPageData,
-    TradingAccountSummary,
-} from '@/module-trading-account/types';
-import { TradingAccount } from '@/module-trading-account/entities/trading-account.entity';
-import { ApiKey } from '@/module-api-keys/entities/api-key.entity';
+import { TradingAccountPageData } from '@/module-trading-account/types/trading-account.types';
 import { TradingAccountTradesQueryDto } from '@/module-trading-account/dto/trading-account-trades-query.dto';
-import { ClosedPnlTradePage } from '@/module-analyze/types/analyse.types';
-import { type AnalyticsPeriod } from '@/module-analyze/constants/analytics-periods';
+import { ClosedPnlTradePage } from '@/module-analyze/types/analyze.types';
+import type { AnalyticsPeriod } from '@/module-analyze/types/analytics-period.types';
+import { TradingAccountAccessService } from '@/module-trading-account/services/trading-account-access.service';
+import { TradingAccountViewService } from '@/module-trading-account/services/trading-account-view.service';
 
 @Injectable()
 export class TradingAccountQueryService {
     constructor(
-        private readonly tokenService: TokenService,
-        private readonly tradingAccountRepositoryService: TradingAccountRepositoryService,
         private readonly tradingAccountBindingRepositoryService: TradingAccountBindingRepositoryService,
-        private readonly analyseService: AnalyseService,
+        private readonly analyzeService: AnalyzeService,
+        private readonly tradingAccountAccessService: TradingAccountAccessService,
+        private readonly tradingAccountViewService: TradingAccountViewService,
     ) {}
 
     async findOne(
@@ -30,22 +23,25 @@ export class TradingAccountQueryService {
         tradingAccountId: string,
         period: AnalyticsPeriod,
     ): Promise<TradingAccountPageData> {
-        const userId = this.getAuthorizedUserId(request);
-        const tradingAccount = await this.getOwnedTradingAccount(tradingAccountId, userId);
+        const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
+        const tradingAccount = await this.tradingAccountAccessService.getOwnedTradingAccount(
+            tradingAccountId,
+            userId,
+        );
         const tradingAccountBinding =
             await this.tradingAccountBindingRepositoryService.findTradingAccountBindingByTradingAccountId(
                 tradingAccountId,
             );
 
         const [statistics, chart] = await Promise.all([
-            this.analyseService.getClosedPnlStatistics(tradingAccountId, period),
-            this.analyseService.getClosedPnlTimeline(tradingAccountId, period),
+            this.analyzeService.getClosedPnlStatistics(tradingAccountId, period),
+            this.analyzeService.getClosedPnlTimeline(tradingAccountId, period),
         ]);
 
         return {
-            account: this.buildTradingAccountSummary(
+            account: this.tradingAccountViewService.buildTradingAccountSummary(
                 tradingAccount,
-                this.toApiKeySummary(tradingAccountBinding?.apiKey),
+                this.tradingAccountViewService.toApiKeySummary(tradingAccountBinding?.apiKey),
             ),
             statistics,
             chart,
@@ -57,77 +53,18 @@ export class TradingAccountQueryService {
         tradingAccountId: string,
         query: TradingAccountTradesQueryDto,
     ): Promise<ClosedPnlTradePage> {
-        const userId = this.getAuthorizedUserId(request);
+        const userId = this.tradingAccountAccessService.getAuthorizedUserId(request);
 
-        await this.getOwnedTradingAccount(tradingAccountId, userId);
+        await this.tradingAccountAccessService.getOwnedTradingAccount(tradingAccountId, userId);
 
         const page = query.page ?? 1;
         const pageSize = query.pageSize ?? 10;
 
-        return this.analyseService.getClosedTradePage(
+        return this.analyzeService.getClosedTradePage(
             tradingAccountId,
             page,
             pageSize,
             query.period,
         );
-    }
-
-    private getAuthorizedUserId(request: Request): string {
-        const userId = getUserIdFromToken(request, this.tokenService);
-
-        if (!userId) {
-            throw new UnauthorizedException('Invalid or missing user.');
-        }
-
-        return userId;
-    }
-
-    private async getOwnedTradingAccount(
-        tradingAccountId: string,
-        userId: string,
-    ): Promise<TradingAccount> {
-        const tradingAccount =
-            await this.tradingAccountRepositoryService.findTradingAccountById(tradingAccountId);
-
-        if (!tradingAccount) {
-            throw new NotFoundException('Trading account not found.');
-        }
-
-        if (tradingAccount.userId !== userId) {
-            throw new UnauthorizedException('Invalid or missing user.');
-        }
-
-        return tradingAccount;
-    }
-
-    private buildTradingAccountSummary(
-        tradingAccount: Pick<TradingAccount, 'id' | 'tradingAccountName' | 'exchange' | 'market'>,
-        apiKey: TradingAccountApiKeySummary | null,
-    ): TradingAccountSummary {
-        return {
-            id: tradingAccount.id,
-            tradingAccountName: tradingAccount.tradingAccountName,
-            exchange: tradingAccount.exchange,
-            market: tradingAccount.market,
-            apiKeyId: apiKey?.id ?? null,
-            apiKey: apiKey
-                ? {
-                      apiKeyName: apiKey.apiKeyName,
-                  }
-                : null,
-        };
-    }
-
-    private toApiKeySummary(
-        apiKey: Pick<ApiKey, 'id' | 'apiKeyName'> | null | undefined,
-    ): TradingAccountApiKeySummary | null {
-        if (!apiKey) {
-            return null;
-        }
-
-        return {
-            id: apiKey.id,
-            apiKeyName: apiKey.apiKeyName,
-        };
     }
 }

@@ -5,8 +5,7 @@ import {
     TradingAccountPayload,
     TradingAccountService,
 } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
-import { HttpResponse } from '@/lib/http-client';
-import { apiClient } from '@/lib/http-client/http-client';
+import { HttpResponse, apiClient } from '@/lib/http-client';
 import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 export const tradingAccountService: TradingAccountService = {

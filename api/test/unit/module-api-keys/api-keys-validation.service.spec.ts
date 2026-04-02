@@ -1,6 +1,6 @@
 import { ApiKeysValidationService } from '@/module-api-keys/services/api-keys-validation.service';
 import { BybitService } from '@/module-bybit/services/bybit.service';
-import { EXCHANGES } from '@/module-api-keys/enums/api-keys-enums';
+import { EXCHANGES } from '@/module-api-keys/enums/api-keys.enums';
 
 const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
 

@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '@/module-user/entities/user.entity';
-import { CONNECTION_STATUS, EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys-enums';
+import { CONNECTION_STATUS, EXCHANGES, MARKET_TYPES } from '@/module-api-keys/enums/api-keys.enums';
 import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'api_keys' })

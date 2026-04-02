@@ -1,4 +1,4 @@
-import { TradingAccountDetails } from '@/features/module-trading-account/components/trading-account-details/TradingAccountDetails';
+import { TradingAccountDetails } from '@/features/module-trading-account/components/trading-account-details/trading-account-details';
 import styles from './page.module.css';
 
 type PageProps = {

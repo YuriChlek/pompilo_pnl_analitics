@@ -4,10 +4,11 @@ import { UserModule } from '@/module-user/user.module';
 import { AuthTokenModule } from '@/module-auth-token/auth-token.module';
 import { JwtCustomerAuthStrategy } from '@/module-auth/strategies/jwt-customer-auth.strategy';
 import { JwtAdminAuthStrategy } from '@/module-auth/strategies/jwt-admin-auth.strategy';
+import { AuthSessionService } from '@/module-auth/services/auth-session.service';
 
 @Module({
     imports: [UserModule, AuthTokenModule],
-    providers: [AuthService, JwtCustomerAuthStrategy, JwtAdminAuthStrategy],
+    providers: [AuthService, AuthSessionService, JwtCustomerAuthStrategy, JwtAdminAuthStrategy],
     exports: [AuthService],
 })
 export class AuthModule {}

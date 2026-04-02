@@ -1,0 +1,9 @@
+import { Injectable } from '@nestjs/common';
+import { Argon2HashUtil } from '@/common/utils/hash.util';
+
+@Injectable()
+export class UserPasswordService {
+    async hashPassword(password: string): Promise<string> {
+        return await Argon2HashUtil.hash(password);
+    }
+}

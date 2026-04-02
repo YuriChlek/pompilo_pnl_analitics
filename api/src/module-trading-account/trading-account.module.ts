@@ -11,18 +11,22 @@ import { TradingAccountQueryService } from '@/module-trading-account/services/tr
 import { ApiKeysModule } from '@/module-api-keys/api-keys.module';
 import { AuthTokenModule } from '@/module-auth-token/auth-token.module';
 import { TradesModule } from '@/module-trades/trades.module';
-import { AnalyseModule } from '@/module-analyze/analyse.module';
+import { AnalyzeModule } from '@/module-analyze/analyze.module';
+import { EXCHANGE_PNL_QUEUE } from '@/module-processor/constants/processor.constants';
+import { TradingAccountSyncService } from '@/module-trading-account/services/trading-account-sync.service';
+import { TradingAccountAccessService } from '@/module-trading-account/services/trading-account-access.service';
+import { TradingAccountViewService } from '@/module-trading-account/services/trading-account-view.service';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([TradingAccount, TradingAccountBinding]),
         BullModule.registerQueue({
-            name: 'excange-pnl-sync',
+            name: EXCHANGE_PNL_QUEUE,
         }),
         ApiKeysModule,
         AuthTokenModule,
         TradesModule,
-        AnalyseModule,
+        AnalyzeModule,
     ],
     controllers: [TradingAccountController],
     providers: [
@@ -30,6 +34,9 @@ import { AnalyseModule } from '@/module-analyze/analyse.module';
         TradingAccountQueryService,
         TradingAccountRepositoryService,
         TradingAccountBindingRepositoryService,
+        TradingAccountSyncService,
+        TradingAccountAccessService,
+        TradingAccountViewService,
     ],
 })
 export class TradingAccountModule {}

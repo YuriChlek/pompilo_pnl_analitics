@@ -1,9 +1,5 @@
 import { User } from '@/module-user/entities/user.entity';
-import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token-enums';
-
-export type RefreshTokenVerificationResult =
-    | { verified: true; user: Partial<User> }
-    | { verified: false; user?: never };
+import { TOKEN_TYPE } from '@/module-auth-token/enums/auth-token.enums';
 
 interface BaseTokenMeta {
     ipAddress: string;

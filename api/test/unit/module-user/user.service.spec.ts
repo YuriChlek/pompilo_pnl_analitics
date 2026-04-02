@@ -8,32 +8,23 @@ import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserService } from '@/module-user/services/user.service';
 import { User } from '@/module-user/entities/user.entity';
 import { buildUserEntity } from '../../fixtures/users.fixtures';
-
-jest.mock('@/common/utils/hash.util', () => ({
-    Argon2HashUtil: {
-        hash: jest.fn().mockResolvedValue('hashed'),
-        compare: jest.fn(),
-    },
-}));
-
-const createQueryBuilderMock = () => {
-    const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([] as User[]),
-    };
-    return qb;
-};
+import { UserPasswordService } from '@/module-user/services/user-password.service';
+import { UserUniquenessService } from '@/module-user/services/user-uniqueness.service';
 
 describe('UserService', () => {
     let service: UserService;
     let repository: Repository<User>;
-    let queryBuilder: ReturnType<typeof createQueryBuilderMock>;
     let saveMock: jest.Mock<Promise<User>, [Partial<User>]>;
     let findMock: jest.Mock<Promise<User[]>, [object?]>;
     let findOneMock: jest.Mock<Promise<User | null>, [object]>;
     let updateMock: jest.Mock<Promise<UpdateResult>, [string, Partial<User>]>;
     let deleteMock: jest.Mock<Promise<DeleteResult>, [string]>;
+    let userPasswordService: {
+        hashPassword: jest.MockedFunction<UserPasswordService['hashPassword']>;
+    };
+    let userUniquenessService: {
+        ensureUnique: jest.MockedFunction<UserUniquenessService['ensureUnique']>;
+    };
 
     const baseUser: User = buildUserEntity({
         id: 'user-id',
@@ -42,12 +33,17 @@ describe('UserService', () => {
     });
 
     beforeEach(() => {
-        queryBuilder = createQueryBuilderMock();
         saveMock = jest.fn();
         findMock = jest.fn();
         findOneMock = jest.fn();
         updateMock = jest.fn();
         deleteMock = jest.fn();
+        userPasswordService = {
+            hashPassword: jest.fn().mockResolvedValue('hashed'),
+        };
+        userUniquenessService = {
+            ensureUnique: jest.fn(),
+        };
         findMock.mockResolvedValue([]);
         saveMock.mockResolvedValue(baseUser);
         updateMock.mockResolvedValue({ affected: 1, generatedMaps: [], raw: [] });
@@ -58,11 +54,14 @@ describe('UserService', () => {
             findOne: findOneMock,
             update: updateMock as unknown as Repository<User>['update'],
             delete: deleteMock as unknown as Repository<User>['delete'],
-            createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
         };
         repository = repositoryImpl as Repository<User>;
 
-        service = new UserService(repository);
+        service = new UserService(
+            repository,
+            userPasswordService as unknown as UserPasswordService,
+            userUniquenessService as unknown as UserUniquenessService,
+        );
         jest.clearAllMocks();
     });
 
@@ -81,7 +80,9 @@ describe('UserService', () => {
         });
 
         it('throws ConflictException when user already exists', async () => {
-            findMock.mockResolvedValue([baseUser]);
+            userUniquenessService.ensureUnique.mockRejectedValue(
+                new ConflictException('duplicate'),
+            );
 
             await expect(service.create(dto)).rejects.toBeInstanceOf(ConflictException);
         });
@@ -167,7 +168,9 @@ describe('UserService', () => {
 
         it('throws ConflictException when duplicate user found', async () => {
             findOneMock.mockResolvedValue(baseUser);
-            queryBuilder.getMany.mockResolvedValue([{ id: 'other' } as User]);
+            userUniquenessService.ensureUnique.mockRejectedValue(
+                new ConflictException('duplicate'),
+            );
 
             await expect(service.update('user-id', updateDto)).rejects.toBeInstanceOf(
                 ConflictException,

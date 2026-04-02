@@ -6,7 +6,7 @@ import { BybitModule } from '@/module-bybit/bybit.module';
 import { EncryptModule } from '@/module-encrypt/encrypt.module';
 import { BinanceModule } from '@/module-binance/binance.module';
 import { TradingAccountModule } from '@/module-trading-account/trading-account.module';
-import { AnalyseModule } from '@/module-analyze/analyse.module';
+import { AnalyzeModule } from '@/module-analyze/analyze.module';
 
 @Module({
     imports: [
@@ -16,7 +16,7 @@ import { AnalyseModule } from '@/module-analyze/analyse.module';
         BinanceModule,
         EncryptModule,
         TradingAccountModule,
-        AnalyseModule,
+        AnalyzeModule,
         RouterModule.register([
             {
                 path: 'customer',

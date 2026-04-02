@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TradingList } from '@/features/module-trading-account/components/trading-list/TradingList';
+import { TradingList } from '@/features/module-trading-account/components/trading-list/trading-list';
 import type { TradingAccountRecentTradePage } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { buildPagedTradeData } from '@/tests/fixtures/trading-account';
 

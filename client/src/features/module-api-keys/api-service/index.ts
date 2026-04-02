@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/http-client/http-client';
+import { apiClient } from '@/lib/http-client';
 import {
     ApiKey,
     ApiKeyPayload,

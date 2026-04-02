@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TradingAccountDetails } from '@/features/module-trading-account/components/trading-account-details/TradingAccountDetails';
+import { TradingAccountDetails } from '@/features/module-trading-account/components/trading-account-details/trading-account-details';
 import { renderWithQueryClient } from '@/tests/test-utils/render';
 import {
     configureNextNavigationMock,
@@ -30,7 +30,7 @@ vi.mock('@/features/module-trading-account/hooks/query', () => ({
     })),
 }));
 
-vi.mock('@/lib/charts/LazyLineChart', () => ({
+vi.mock('@/components/charts/lazy-line-chart', () => ({
     LazyLineChart: () => <div>chart</div>,
 }));
 

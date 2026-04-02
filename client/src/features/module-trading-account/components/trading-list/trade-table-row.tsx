@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
-import { Button } from '@/components/button/Button';
-import { TradeAccordionContent } from '@/features/module-trading-account/components/trading-list/TradeAccordionContent';
+import { Button } from '@/components/button/button';
+import { TradeAccordionContent } from '@/features/module-trading-account/components/trading-list/trade-accordion-content';
 import {
     formatCurrency,
     formatDateTime,

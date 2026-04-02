@@ -1,21 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import styles from '@/features/module-api-keys/components/api-key-settings-popup/styles.module.css';
+import styles from '@/features/module-trading-account/components/trading-account-settings-popup/styles.module.css';
 import {
-    ApiKeyPayload,
-    ApiKeySettingsPopupProps,
-} from '@/features/module-api-keys/interfaces/api-keys.interfaces';
-import { useRemoveApiKey, useUpdateApiKey } from '@/features/module-api-keys/hooks/mutation';
-import { ApiKeyFormPopup } from '@/features/module-api-keys/components/api-key-form-popup/ApiKeyFormPopup';
+    TradingAccountPayload,
+    TradingAccountSettingsPopupProps,
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
+import {
+    useRemoveTradingAccount,
+    useUpdateTradingAccount,
+} from '@/features/module-trading-account/hooks/mutation';
+import { TradingAccountFormPopup } from '@/features/module-trading-account/components/trading-account-form-popup/trading-account-form-popup';
 
-export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPopupProps) => {
+export const TradingAccountSettingsPopup = ({
+    account,
+    open,
+    onClose,
+}: TradingAccountSettingsPopupProps) => {
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const { mutate: removeMutate } = useRemoveApiKey();
-    const { mutate: updateMutate, isPending } = useUpdateApiKey();
+    const { mutate: removeMutate } = useRemoveTradingAccount();
+    const { mutate: updateMutate, isPending } = useUpdateTradingAccount();
 
     const remove = () => {
-        removeMutate(apiKey.id, {
+        removeMutate(account.id, {
             onSuccess: () => {
                 onClose();
             },
@@ -27,17 +34,16 @@ export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPop
         onClose();
     };
 
-    const initialData: ApiKeyPayload = {
-        exchange: apiKey.exchange,
-        market: apiKey.market,
-        apiKey: '',
-        secretKey: '',
-        apiKeyName: apiKey.apiKeyName,
+    const initialData: TradingAccountPayload = {
+        tradingAccountName: account.tradingAccountName,
+        apiKeyId: account.apiKeyId ?? '',
+        exchange: account.exchange,
+        market: account.market,
     };
 
-    const handleUpdate = (payload: ApiKeyPayload) => {
+    const handleUpdate = (payload: TradingAccountPayload) => {
         updateMutate(
-            { id: apiKey.id, payload },
+            { id: account.id, payload },
             {
                 onSuccess: () => {
                     setIsEditOpen(false);
@@ -52,7 +58,7 @@ export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPop
                 <div
                     className={`${styles.menu} ${styles.menuOpen}`}
                     role="menu"
-                    aria-label={`Settings for api key ${apiKey.id}`}
+                    aria-label={`Settings for trading account ${account.id}`}
                 >
                     <button
                         onClick={edit}
@@ -73,12 +79,13 @@ export const ApiKeySettingsPopup = ({ apiKey, open, onClose }: ApiKeySettingsPop
                 </div>
             ) : null}
 
-            <ApiKeyFormPopup
+            <TradingAccountFormPopup
                 open={isEditOpen}
                 onClose={() => setIsEditOpen(false)}
-                title="Edit API Key"
+                title="Edit Trading Account"
                 submitLabel="Update"
                 initialData={initialData}
+                currentTradingAccountId={account.id}
                 onSubmit={handleUpdate}
                 isPending={isPending}
             />

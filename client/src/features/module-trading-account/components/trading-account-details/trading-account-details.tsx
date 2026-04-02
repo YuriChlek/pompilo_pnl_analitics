@@ -1,11 +1,11 @@
 'use client';
 
 import { capitalCase } from 'change-case';
-import { EmptyState } from '@/components/empty-state/EmptyState';
-import { Loader } from '@/components/loader/Loader';
-import { StatisticDiagram } from '@/features/module-trading-account/components/statistic-diagram/StatisticDiagram';
-import { TradingList } from '@/features/module-trading-account/components/trading-list/TradingList';
-import { AccountStatistic } from '@/features/module-trading-account/components/account-diagram/AccountStatistic';
+import { EmptyState } from '@/components/empty-state/empty-state';
+import { Loader } from '@/components/loader/loader';
+import { StatisticDiagram } from '@/features/module-trading-account/components/statistic-diagram/statistic-diagram';
+import { TradingList } from '@/features/module-trading-account/components/trading-list/trading-list';
+import { AccountStatistic } from '@/features/module-trading-account/components/account-diagram/account-statistic';
 import { useTradingAccountDetails } from '@/features/module-trading-account/hooks/query';
 import { TRADING_ACCOUNT_ANALYTICS_PERIOD_OPTIONS } from '@/features/module-trading-account/constants/analytics-periods';
 import { useTradingAccountPageState } from '@/features/module-trading-account/hooks/use-trading-account-page-state';

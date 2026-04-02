@@ -5,8 +5,6 @@ export const BREAKPOINTS = {
     wide: 1536,
 } as const;
 
-export type BreakpointKey = keyof typeof BREAKPOINTS;
-
 export const MEDIA_QUERIES = {
     tabletUp: `@media (min-width: ${BREAKPOINTS.tablet}px)`,
     laptopUp: `@media (min-width: ${BREAKPOINTS.laptop}px)`,

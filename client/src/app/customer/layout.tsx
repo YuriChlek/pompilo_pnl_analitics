@@ -1,4 +1,4 @@
-import { CustomerHeader } from '@/features/module-customer/components/header/CustomerHeader';
+import { CustomerHeader } from '@/features/module-customer/components/header/customer-header';
 import { UserRoles } from '@/features/module-auth/enums/auth.enums';
 import { getCurrentUser } from '@/features/module-auth/server/get-current-user';
 

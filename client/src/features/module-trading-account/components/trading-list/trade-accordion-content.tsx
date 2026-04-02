@@ -1,4 +1,4 @@
-import { Button } from '@/components/button/Button';
+import { Button } from '@/components/button/button';
 import styles from '@/features/module-trading-account/components/trading-list/styles.module.css';
 import type { TradeAccordionContentProps } from '@/features/module-trading-account/types/component-props.types';
 

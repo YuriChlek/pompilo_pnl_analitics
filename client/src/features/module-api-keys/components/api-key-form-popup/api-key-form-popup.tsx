@@ -2,7 +2,7 @@
 
 import { FormEvent } from 'react';
 import { Button } from '@/components/button';
-import { Popup } from '@/components/popup/Popup';
+import { Popup } from '@/components/popup/popup';
 import styles from '@/features/module-api-keys/components/api-key-form-popup/styles.module.css';
 import { Exchanges, MarketTypes } from '@/features/module-api-keys/enums/api-keys.enums';
 import type { ApiKeyFormPopupProps } from '@/features/module-api-keys/interfaces/api-keys.interfaces';

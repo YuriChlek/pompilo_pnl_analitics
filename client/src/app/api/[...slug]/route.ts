@@ -1,4 +1,4 @@
-import { apiBaseUrl } from '@/lib/config/api-base-url';
+import { apiBaseUrl } from '@/lib/config/api-base-url.config';
 
 type RequestParams = { params: Promise<{ slug: string[] }> };
 const HOP_BY_HOP_HEADERS = new Set([

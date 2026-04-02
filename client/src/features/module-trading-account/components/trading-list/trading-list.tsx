@@ -1,10 +1,10 @@
 'use client';
 
 import { ChangeEvent, useState } from 'react';
-import { EmptyState } from '@/components/empty-state/EmptyState';
-import { Loader } from '@/components/loader/Loader';
-import { Button } from '@/components/button/Button';
-import { TradeTableRow } from '@/features/module-trading-account/components/trading-list/TradeTableRow';
+import { EmptyState } from '@/components/empty-state/empty-state';
+import { Loader } from '@/components/loader/loader';
+import { Button } from '@/components/button/button';
+import { TradeTableRow } from '@/features/module-trading-account/components/trading-list/trade-table-row';
 import { formatInteger } from '@/features/module-trading-account/lib/format';
 import { TradingAccountRecentTradePage } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { useTradingAccountTrades } from '@/features/module-trading-account/hooks/query';

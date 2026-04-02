@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { capitalCase } from 'change-case';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/button/Button';
+import { Button } from '@/components/button/button';
 import styles from '@/features/module-trading-account/components/trading-account-row/styles.module.css';
-import { TradingAccountSettingsPopup } from '@/features/module-trading-account/components/trading-account-settings-popup/TradingAccountSettingsPopup';
+import { TradingAccountSettingsPopup } from '@/features/module-trading-account/components/trading-account-settings-popup/trading-account-settings-popup';
 import type { TradingAccountRowProps } from '@/features/module-trading-account/types/component-props.types';
 
 export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import styles from '@/components/theme-button/styles.module.css';
-import type { Theme } from '@/shared/theme/types';
+import type { Theme } from '@/shared/theme/types/theme.types';
 import { persistTheme } from '@/shared/theme/actions';
 import { getCookie } from 'cookies-next';
 

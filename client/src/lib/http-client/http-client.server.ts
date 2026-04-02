@@ -2,8 +2,12 @@
 
 import { cookies, headers } from 'next/headers';
 import { Dispatcher } from 'undici-types';
-import { HttpData, HttpResponse, RequestConfig } from '@/lib/http-client/http-client-entities';
-import { httpClientConfig } from '@/lib/http-client/http-client.config';
+import {
+    HttpResponse,
+    RequestConfig,
+} from '@/lib/http-client/interfaces/http-client.interfaces';
+import { HttpData } from '@/lib/http-client/types/http-client.types';
+import { httpClientConfig } from '@/lib/http-client/config/http-client.config';
 import { AbstractHttpClient } from '@/lib/http-client/abstract-http-client';
 
 class ServerHttpClient extends AbstractHttpClient {

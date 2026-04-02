@@ -4,10 +4,10 @@ import { useEffect, useId, useRef, useState } from 'react';
 import styles from '@/features/module-api-keys/components/api-keys-list/styles.module.css';
 import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
 import { capitalCase } from 'change-case';
-import { Loader } from '@/components/loader/Loader';
-import { EmptyState } from '@/components/empty-state/EmptyState';
-import { Button } from '@/components/button/Button';
-import { ApiKeySettingsPopup } from '@/features/module-api-keys/components/api-key-settings-popup/ApiKeySettingsPopup';
+import { Loader } from '@/components/loader/loader';
+import { EmptyState } from '@/components/empty-state/empty-state';
+import { Button } from '@/components/button/button';
+import { ApiKeySettingsPopup } from '@/features/module-api-keys/components/api-key-settings-popup/api-key-settings-popup';
 
 export const ApiKeysList = () => {
     const { data, isLoading, isError, error } = useApiKeysList();

@@ -1,5 +1,5 @@
 import { MenuTypes } from '@/features/module-menu/enums/menu.enums';
-import type { MenuItem } from '@/features/module-menu/interfaces/menu.interfaces.interfaces';
+import type { MenuItem } from '@/features/module-menu/interfaces/menu.interfaces';
 
 export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
     const config: Record<string, Array<MenuItem>> = {
@@ -22,7 +22,7 @@ export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
             },
             {
                 title: 'Diary',
-                href: '/customer/analise-diary',
+                href: '/customer/analyze-diary',
             },
             {
                 title: 'Account',

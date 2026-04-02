@@ -2,9 +2,9 @@
 
 import { FormEvent } from 'react';
 import { Button } from '@/components/button';
-import { Popup } from '@/components/popup/Popup';
+import { Popup } from '@/components/popup/popup';
 import styles from '@/features/module-trading-account/components/trading-account-form-popup/styles.module.css';
-import { EmptyState } from '@/components/empty-state/EmptyState';
+import { EmptyState } from '@/components/empty-state/empty-state';
 import { useRouter } from 'next/navigation';
 import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
 import { useAvailableTradingAccountApiKeys } from '@/features/module-trading-account/hooks/query';

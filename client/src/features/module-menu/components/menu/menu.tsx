@@ -2,17 +2,15 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import { MenuTypes } from '@/features/module-menu/enums/menu.enums';
 import { getMenu } from '@/features/module-menu/config/menu.config';
 import styles from '@/features/module-menu/components/menu/styles.module.css';
 import { usePathname } from 'next/navigation';
 import type {
     MenuItem,
     MenuProps,
-} from '@/features/module-menu/interfaces/menu.interfaces.interfaces';
+} from '@/features/module-menu/interfaces/menu.interfaces';
 
-export const Menu = ({ isLogin }: MenuProps) => {
-    const menuType = isLogin ? MenuTypes.CUSTOMER : MenuTypes.GUEST;
+export const Menu = ({ menuType }: MenuProps) => {
     const menuItems: Array<MenuItem> = getMenu(menuType);
     const pathname = usePathname();
 

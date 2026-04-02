@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { ReactNode } from 'react';
 import styles from '@/components/empty-state/styles.module.css';
-import { DefaultIcon } from '@/components/default-icon/DefaultIcon';
+import { DefaultIcon } from '@/components/default-icon/default-icon';
 
 type EmptyStateProps = {
     title: string;

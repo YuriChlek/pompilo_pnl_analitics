@@ -1,11 +1,10 @@
 import {
     HttpClientOptions,
-    HttpMethod,
-    HttpData,
     RequestConfig,
     HttpError,
     HttpResponse,
-} from './http-client-entities';
+} from '@/lib/http-client/interfaces/http-client.interfaces';
+import { HttpData, HttpMethod } from '@/lib/http-client/types/http-client.types';
 import { getRefreshPathByRequestPath } from '@/features/module-auth/lib/auth-refresh';
 
 export abstract class AbstractHttpClient {

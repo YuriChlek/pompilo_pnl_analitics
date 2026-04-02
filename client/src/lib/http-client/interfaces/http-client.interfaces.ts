@@ -1,7 +1,3 @@
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD';
-
-export type HttpData<T> = T;
-
 export interface HttpClientOptions {
     baseUrl: string;
     headers?: HeadersInit;

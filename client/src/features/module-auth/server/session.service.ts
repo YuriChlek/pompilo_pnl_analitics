@@ -3,7 +3,7 @@ import { AUTH_SCOPE_CONFIG } from '@/features/module-auth/config/auth-scope.conf
 import { getRefreshPathByScope } from '@/features/module-auth/lib/auth-refresh';
 import { getScopes } from '@/features/module-auth/lib/auth-scope';
 import { isGuestRoute, isProtectedRoute } from '@/features/module-auth/lib/route-access';
-import { apiBaseUrl } from '@/lib/config/api-base-url';
+import { apiBaseUrl } from '@/lib/config/api-base-url.config';
 import {
     appendSetCookies,
     buildRefreshHeaders,

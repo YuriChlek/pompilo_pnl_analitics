@@ -1,6 +1,6 @@
-import { EmptyState } from '@/components/empty-state/EmptyState';
+import { EmptyState } from '@/components/empty-state/empty-state';
 import { formatChartLabel } from '@/features/module-trading-account/lib/format';
-import { LazyLineChart } from '@/components/charts/LazyLineChart';
+import { LazyLineChart } from '@/components/charts/lazy-line-chart';
 import styles from '@/features/module-trading-account/components/statistic-diagram/styles.module.css';
 import type { StatisticDiagramProps } from '@/features/module-trading-account/types/component-props.types';
 

@@ -1,38 +1,38 @@
+'use client';
+
 import { ChangeEvent, useState } from 'react';
 import { EmptyState } from '@/components/empty-state/EmptyState';
 import { Loader } from '@/components/loader/Loader';
 import { Button } from '@/components/button/Button';
-import {
-    formatCurrency,
-    formatDateTime,
-    formatInteger,
-    formatNumber,
-} from '@/features/module-trading-account/lib/format';
-import { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/interfaces/tradingAccount';
+import { TradeTableRow } from '@/features/module-trading-account/components/trading-list/TradeTableRow';
+import { formatInteger } from '@/features/module-trading-account/lib/format';
+import { TradingAccountRecentTradePage } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { useTradingAccountTrades } from '@/features/module-trading-account/hooks/query';
 import styles from '@/features/module-trading-account/components/trading-list/styles.module.css';
-
-type TradingListProps = {
-    tradingAccountId: string;
-    period: TradingAccountAnalyticsPeriod;
-};
+import type { TradingListProps } from '@/features/module-trading-account/types/component-props.types';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
+const EMPTY_TRADES_PAGE: TradingAccountRecentTradePage = {
+    items: [],
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+};
 
 export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
     const [page, setPage] = useState(DEFAULT_PAGE);
     const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+    const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
     const { data, isLoading, isFetching, isPlaceholderData, isError, error } =
         useTradingAccountTrades(tradingAccountId, page, pageSize, period);
+    const tradePage = data ?? EMPTY_TRADES_PAGE;
 
-    const displayPage = isPlaceholderData ? (data?.page ?? page) : page;
-    const displayPageSize = isPlaceholderData ? (data?.pageSize ?? pageSize) : pageSize;
-
-    const totalItems = data?.totalItems ?? 0;
-    const totalPages = data?.totalPages ?? 1;
-    const trades = data?.items ?? [];
+    const displayPage = isPlaceholderData ? tradePage.page : page;
+    const displayPageSize = isPlaceholderData ? tradePage.pageSize : pageSize;
+    const { totalItems, totalPages, items: trades } = tradePage;
     const pageStart = totalItems ? (displayPage - 1) * displayPageSize + 1 : 0;
     const pageEnd = Math.min(displayPage * displayPageSize, totalItems);
 
@@ -47,6 +47,10 @@ export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
 
     const handleNextPage = () => {
         setPage(Math.min(totalPages, page + 1));
+    };
+
+    const handleTradeToggle = (tradeId: string) => {
+        setExpandedTradeId(currentTradeId => (currentTradeId === tradeId ? null : tradeId));
     };
 
     if (isLoading && !data) {
@@ -140,34 +144,17 @@ export const TradingList = ({ tradingAccountId, period }: TradingListProps) => {
                             <th>Exit</th>
                             <th>Leverage</th>
                             <th>Opened</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {trades.map(trade => (
-                            <tr key={trade.id}>
-                                <td>{trade.symbol}</td>
-                                <td>
-                                    <span
-                                        className={
-                                            trade.side === 'Buy' ? styles.sideBuy : styles.sideSell
-                                        }
-                                    >
-                                        {trade.side}
-                                    </span>
-                                </td>
-                                <td
-                                    className={
-                                        trade.closedPnl >= 0 ? styles.positive : styles.negative
-                                    }
-                                >
-                                    {formatCurrency(trade.closedPnl)}
-                                </td>
-                                <td>{formatNumber(trade.qty)}</td>
-                                <td>{formatNumber(trade.avgEntryPrice)}</td>
-                                <td>{formatNumber(trade.avgExitPrice)}</td>
-                                <td>{trade.leverage}x</td>
-                                <td>{formatDateTime(trade.createdTime)}</td>
-                            </tr>
+                            <TradeTableRow
+                                key={trade.id}
+                                trade={trade}
+                                isExpanded={expandedTradeId === trade.id}
+                                onToggle={handleTradeToggle}
+                            />
                         ))}
                     </tbody>
                 </table>

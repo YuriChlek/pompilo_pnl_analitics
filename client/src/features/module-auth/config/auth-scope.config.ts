@@ -1,5 +1,5 @@
 import { COOKIE_NAMES } from '@/features/module-auth/enums/auth.enums';
-import { AuthScope, AuthScopeConfig } from '@/features/module-auth/lib/auth-scope';
+import type { AuthScope, AuthScopeConfig } from '@/features/module-auth/types/auth-scope.types';
 
 export const AUTH_SCOPE_CONFIG: Record<AuthScope, AuthScopeConfig> = {
     admin: {

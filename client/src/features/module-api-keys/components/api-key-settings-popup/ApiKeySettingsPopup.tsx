@@ -5,7 +5,7 @@ import styles from '@/features/module-api-keys/components/api-key-settings-popup
 import {
     ApiKeyPayload,
     ApiKeySettingsPopupProps,
-} from '@/features/module-api-keys/interfaces/apiKeys';
+} from '@/features/module-api-keys/interfaces/api-keys.interfaces';
 import { useRemoveApiKey, useUpdateApiKey } from '@/features/module-api-keys/hooks/mutation';
 import { ApiKeyFormPopup } from '@/features/module-api-keys/components/api-key-form-popup/ApiKeyFormPopup';
 

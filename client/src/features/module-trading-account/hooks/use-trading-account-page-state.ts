@@ -6,7 +6,7 @@ import {
     DEFAULT_TRADING_ACCOUNT_ANALYTICS_PERIOD,
     TRADING_ACCOUNT_ANALYTICS_PERIOD_VALUES,
 } from '@/features/module-trading-account/constants/analytics-periods';
-import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/interfaces/tradingAccount';
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 const PERIOD_PARAM = 'period';
 

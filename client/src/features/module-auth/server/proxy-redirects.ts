@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { AUTH_SCOPE_CONFIG } from '@/features/module-auth/config/auth-scope.config';
-import { getScopes, type AuthScope } from '@/features/module-auth/lib/auth-scope';
-import {
-    isGuestRoute,
-    isProtectedRoute,
-    type RouteContext,
-} from '@/features/module-auth/lib/route-access';
-import type { RefreshResult } from '@/features/module-auth/server/session.service';
+import { getScopes } from '@/features/module-auth/lib/auth-scope';
+import { isGuestRoute, isProtectedRoute } from '@/features/module-auth/lib/route-access';
 import { appendSetCookies } from '@/features/module-auth/server/session-http';
+import type { AuthScope } from '@/features/module-auth/types/auth-scope.types';
+import type { RouteContext } from '@/features/module-auth/types/route-access.types';
+import type { RefreshResult } from '@/features/module-auth/types/session.types';
 
 export function resolveProxyRedirect(
     request: NextRequest,

@@ -1,11 +1,11 @@
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
+
 export interface TradingAccountPayload {
     tradingAccountName: string;
     apiKeyId: string;
     exchange: string;
     market: string;
 }
-
-export type TradingAccountAnalyticsPeriod = 'all' | '7d' | '30d' | '90d' | '180d';
 
 export interface TradingAccount {
     id: string;
@@ -85,7 +85,7 @@ export interface TradingAccountFormPopupProps {
 
 export interface TradingAccountService {
     createTradingAccount: (tradingAccountPayload: TradingAccountPayload) => Promise<TradingAccount>;
-    removeTradingAccount: (id: string) => Promise<boolean | null>;
+    removeTradingAccount: (id: string) => Promise<boolean>;
     editTradingAccount: (
         id: string,
         tradingAccountPayload: TradingAccountPayload,

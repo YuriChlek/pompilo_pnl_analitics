@@ -1,12 +1,8 @@
 import { HttpResponse } from '@/lib/http-client';
 import { apiClient } from '@/lib/http-client/http-client';
-import {
-    AuthApi,
-    CreateUserData,
-    LoginData,
-    User,
-    UserRoles,
-} from '@/features/module-auth/interfaces/auth';
+import type { AuthApi, User } from '@/features/module-auth/interfaces/auth.interfaces.interfaces';
+import { UserRoles } from '@/features/module-auth/enums/auth.enums';
+import type { CreateUserData, LoginData } from '@/features/module-auth/types/auth.types';
 
 export const authService: AuthApi = {
     async login(login: string, password: string, role: UserRoles): Promise<User> {

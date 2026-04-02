@@ -1,4 +1,5 @@
-import { MenuItem, MenuTypes } from '@/features/module-menu/interfaces/menu';
+import { MenuTypes } from '@/features/module-menu/enums/menu.enums';
+import type { MenuItem } from '@/features/module-menu/interfaces/menu.interfaces.interfaces';
 
 export const getMenu = (menuType: MenuTypes): Array<MenuItem> => {
     const config: Record<string, Array<MenuItem>> = {

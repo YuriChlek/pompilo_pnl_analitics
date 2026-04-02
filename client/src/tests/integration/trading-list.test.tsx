@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TradingList } from '@/features/module-trading-account/components/trading-list/TradingList';
-import type { TradingAccountRecentTradePage } from '@/features/module-trading-account/interfaces/tradingAccount';
+import type { TradingAccountRecentTradePage } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { buildPagedTradeData } from '@/tests/fixtures/trading-account';
 
 vi.mock('@/features/module-trading-account/hooks/query', () => ({
@@ -53,5 +53,21 @@ describe('TradingList', () => {
         await user.click(screen.getByRole('button', { name: 'Next' }));
 
         expect(within(screen.getByRole('table')).getByText('ETHUSDT')).toBeInTheDocument();
+    });
+
+    it('expands trade details inline when view action is clicked', async () => {
+        const user = userEvent.setup();
+
+        render(<TradingList tradingAccountId="account-id" period="7d" />);
+
+        const toggleButton = screen.getByRole('button', { name: 'View BTCUSDT trade details' });
+
+        await user.click(toggleButton);
+
+        expect(toggleButton).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByText('Realtime Candlestick Chart')).toBeInTheDocument();
+        expect(screen.getByLabelText('Description')).toBeInTheDocument();
+        expect(screen.getByLabelText('Conclusion')).toBeInTheDocument();
+        expect(screen.getByLabelText('Add image')).toBeInTheDocument();
     });
 });

@@ -2,12 +2,12 @@ import {
     TradingAccountDetails,
     TradingAccountRecentTradePage,
     TradingAccount,
-    TradingAccountAnalyticsPeriod,
     TradingAccountPayload,
     TradingAccountService,
-} from '@/features/module-trading-account/interfaces/tradingAccount';
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { HttpResponse } from '@/lib/http-client';
 import { apiClient } from '@/lib/http-client/http-client';
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 export const tradingAccountService: TradingAccountService = {
     async createTradingAccount(tradingAccountPayload: TradingAccountPayload) {
@@ -54,7 +54,11 @@ export const tradingAccountService: TradingAccountService = {
             throw new Error(response.message);
         }
 
-        return response.data?.removed as unknown as boolean;
+        if (!response.data) {
+            throw new Error('Failed to remove trading account');
+        }
+
+        return response.data.removed;
     },
     async getTradingAccountDetails(id: string, period: TradingAccountAnalyticsPeriod) {
         const response: HttpResponse<TradingAccountDetails> = await apiClient.get(

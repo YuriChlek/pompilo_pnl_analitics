@@ -1,14 +1,5 @@
 import { COOKIE_NAMES } from '@/features/module-auth/enums/auth.enums';
-
-export type AuthScope = 'admin' | 'customer';
-
-export type AuthScopeConfig = {
-    accessCookie: COOKIE_NAMES;
-    refreshCookie: COOKIE_NAMES;
-    loginPath: string;
-    dashboardPath: string;
-    refreshPath: string;
-};
+import type { AuthScope } from '@/features/module-auth/types/auth-scope.types';
 
 const AUTH_SCOPES: AuthScope[] = ['admin', 'customer'];
 

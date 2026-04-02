@@ -3,12 +3,8 @@ import { capitalCase } from 'change-case';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/button/Button';
 import styles from '@/features/module-trading-account/components/trading-account-row/styles.module.css';
-import { TradingAccount } from '@/features/module-trading-account/interfaces/tradingAccount';
 import { TradingAccountSettingsPopup } from '@/features/module-trading-account/components/trading-account-settings-popup/TradingAccountSettingsPopup';
-
-type TradingAccountRowProps = {
-    account: TradingAccount;
-};
+import type { TradingAccountRowProps } from '@/features/module-trading-account/types/component-props.types';
 
 export const TradingAccountRow = ({ account }: TradingAccountRowProps) => {
     const router = useRouter();

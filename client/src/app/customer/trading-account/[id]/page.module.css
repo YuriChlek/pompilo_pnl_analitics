@@ -1,0 +1,5 @@
+.fullWidth {
+    width: calc(100vw - (var(--container-padding-inline) * 2));
+    margin-inline: calc(50% - 50vw + var(--container-padding-inline));
+    max-width: none;
+}

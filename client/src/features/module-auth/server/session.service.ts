@@ -1,12 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { AUTH_SCOPE_CONFIG } from '@/features/module-auth/config/auth-scope.config';
 import { getRefreshPathByScope } from '@/features/module-auth/lib/auth-refresh';
-import { getScopes, type AuthScope } from '@/features/module-auth/lib/auth-scope';
-import {
-    isGuestRoute,
-    isProtectedRoute,
-    type RouteContext,
-} from '@/features/module-auth/lib/route-access';
+import { getScopes } from '@/features/module-auth/lib/auth-scope';
+import { isGuestRoute, isProtectedRoute } from '@/features/module-auth/lib/route-access';
 import { apiBaseUrl } from '@/lib/config/api-base-url';
 import {
     appendSetCookies,
@@ -15,11 +11,9 @@ import {
     hasCookie,
 } from '@/features/module-auth/server/session-http';
 import { NextResponse } from 'next/server';
-
-export type RefreshResult = {
-    authenticated: boolean;
-    setCookies: string[];
-};
+import type { AuthScope } from '@/features/module-auth/types/auth-scope.types';
+import type { RouteContext } from '@/features/module-auth/types/route-access.types';
+import type { RefreshResult } from '@/features/module-auth/types/session.types';
 
 export async function resolveSessionState(
     request: NextRequest,

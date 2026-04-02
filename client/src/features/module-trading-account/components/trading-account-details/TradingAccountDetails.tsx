@@ -11,10 +11,7 @@ import { TRADING_ACCOUNT_ANALYTICS_PERIOD_OPTIONS } from '@/features/module-trad
 import { useTradingAccountPageState } from '@/features/module-trading-account/hooks/use-trading-account-page-state';
 import { formatDateTime } from '@/features/module-trading-account/lib/format';
 import styles from '@/features/module-trading-account/components/trading-account-details/styles.module.css';
-
-type TradingAccountDetailsProps = {
-    id: string;
-};
+import type { TradingAccountDetailsProps } from '@/features/module-trading-account/types/component-props.types';
 
 export const TradingAccountDetails = ({ id }: TradingAccountDetailsProps) => {
     const { period, setPeriod } = useTradingAccountPageState();

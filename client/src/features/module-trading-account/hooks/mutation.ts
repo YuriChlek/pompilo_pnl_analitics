@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     TradingAccountDetails,
     TradingAccount,
-    TradingAccountPayload,
-} from '@/features/module-trading-account/interfaces/tradingAccount';
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { tradingAccountService } from '@/features/module-trading-account/api-service';
+import type { TradingAccountPayload } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 
 export const useCreateTradingAccount = () => {
     const queryClient = useQueryClient();

@@ -1,4 +1,4 @@
-import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/interfaces/tradingAccount';
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 export const DEFAULT_TRADING_ACCOUNT_ANALYTICS_PERIOD: TradingAccountAnalyticsPeriod = 'all';
 

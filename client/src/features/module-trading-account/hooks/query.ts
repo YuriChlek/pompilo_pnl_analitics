@@ -1,13 +1,13 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
     TradingAccount,
-    TradingAccountAnalyticsPeriod,
     TradingAccountDetails,
     TradingAccountRecentTradePage,
-} from '@/features/module-trading-account/interfaces/tradingAccount';
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import { tradingAccountService } from '@/features/module-trading-account/api-service';
 import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
-import { ApiKey } from '@/features/module-api-keys/interfaces/apiKeys';
+import { ApiKey } from '@/features/module-api-keys/interfaces/api-keys.interfaces';
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 export const useTradingAccountList = () => {
     return useQuery<TradingAccount[]>({

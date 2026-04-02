@@ -14,6 +14,7 @@ export const ApiKeysList = () => {
     const [selectedApiKeyId, setSelectedApiKeyId] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const menuId = useId();
+    const apiKeys = data ?? [];
 
     useEffect(() => {
         if (!selectedApiKeyId) return;
@@ -56,7 +57,7 @@ export const ApiKeysList = () => {
         );
     }
 
-    if (!data?.length) {
+    if (!apiKeys.length) {
         return (
             <EmptyState
                 title="No API keys yet"
@@ -84,7 +85,7 @@ export const ApiKeysList = () => {
                 </thead>
 
                 <tbody>
-                    {data.map(item => {
+                    {apiKeys.map(item => {
                         const isOpen = selectedApiKeyId === item.id;
                         const popupId = `${menuId}-${item.id}`;
 

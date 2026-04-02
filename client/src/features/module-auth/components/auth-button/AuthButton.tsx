@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/button/Button';
 import { useLogout } from '@/features/module-auth/hooks/mutation';
 import styles from '@/features/module-auth/components/auth-button/styles.module.css';
-
-type AuthButtonProps = {
-    isAuthenticated: boolean;
-    loginPath?: string;
-    className?: string;
-};
+import type { AuthButtonProps } from '@/features/module-auth/interfaces/component-props.interfaces';
 
 export const AuthButton = ({
     isAuthenticated,

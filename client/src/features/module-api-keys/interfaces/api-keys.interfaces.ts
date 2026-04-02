@@ -19,7 +19,7 @@ export interface AuthApiKeys {
     createApiKey: (apiKeyPayload: ApiKeyPayload) => Promise<ApiKey>;
     getUserApiKeys(): Promise<ApiKey[]>;
     updateApiKey(id: string, apiKeyPayload: ApiKeyPayload): Promise<ApiKey | null>;
-    removeApiKey(id: string): Promise<boolean | null>;
+    removeApiKey(id: string): Promise<boolean>;
 }
 
 export interface ApiKeySettingsPopupProps {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/button';
 import styles from '@/features/module-api-keys/components/add-api-key/styles.module.css';
-import { ApiKeyPayload } from '@/features/module-api-keys/interfaces/apiKeys';
+import { ApiKeyPayload } from '@/features/module-api-keys/interfaces/api-keys.interfaces';
 import { useCreateApiKey } from '@/features/module-api-keys/hooks/mutation';
 import { ApiKeyFormPopup } from '@/features/module-api-keys/components/api-key-form-popup/ApiKeyFormPopup';
 

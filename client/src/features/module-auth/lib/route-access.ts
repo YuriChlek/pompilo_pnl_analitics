@@ -1,14 +1,10 @@
-import type { AuthScope } from '@/features/module-auth/lib/auth-scope';
+import type { AuthScope } from '@/features/module-auth/types/auth-scope.types';
+import type { RouteContext } from '@/features/module-auth/types/route-access.types';
 
 const STATIC_PATH_REGEX =
     /^\/(_next|api|favicon\.ico$|.*\.(js|css|map|png|jpg|jpeg|gif|svg|woff|woff2)$)/;
 const ADMIN_PATH_REGEX = /^\/admin(?:\/|$)/;
 const CUSTOMER_PATH_REGEX = /^\/customer(?:\/|$)/;
-
-export type RouteContext = {
-    pathname: string;
-    from: string;
-};
 
 export function getRouteContext(pathname: string, search: string): RouteContext {
     return {

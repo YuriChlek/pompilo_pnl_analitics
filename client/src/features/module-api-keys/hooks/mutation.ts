@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiKey, ApiKeyPayload } from '@/features/module-api-keys/interfaces/apiKeys';
+import { ApiKey, ApiKeyPayload } from '@/features/module-api-keys/interfaces/api-keys.interfaces';
 import { apiKeysService } from '@/features/module-api-keys/api-service';
 
 export const useCreateApiKey = () => {

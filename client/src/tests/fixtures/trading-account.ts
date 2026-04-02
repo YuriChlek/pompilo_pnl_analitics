@@ -2,8 +2,8 @@ import type {
     TradingAccountDetails,
     TradingAccountRecentTrade,
     TradingAccountRecentTradePage,
-    TradingAccountAnalyticsPeriod,
-} from '@/features/module-trading-account/interfaces/tradingAccount';
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
+import type { TradingAccountAnalyticsPeriod } from '@/features/module-trading-account/types/analytics-period.types';
 
 export const buildTradingAccountDetails = (
     overrides: Partial<TradingAccountDetails> = {},

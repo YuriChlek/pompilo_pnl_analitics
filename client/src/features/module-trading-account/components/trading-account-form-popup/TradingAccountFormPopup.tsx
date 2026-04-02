@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/empty-state/EmptyState';
 import { useRouter } from 'next/navigation';
 import { useApiKeysList } from '@/features/module-api-keys/hooks/query';
 import { useAvailableTradingAccountApiKeys } from '@/features/module-trading-account/hooks/query';
-import { TradingAccountFormPopupProps } from '@/features/module-trading-account/interfaces/tradingAccount';
+import { TradingAccountFormPopupProps } from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 
 export const TradingAccountFormPopup = ({
     open,

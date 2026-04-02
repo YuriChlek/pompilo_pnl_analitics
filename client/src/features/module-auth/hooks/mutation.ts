@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/features/module-auth/api-service';
-import { CreateUserData, LoginData, UserRoles } from '@/features/module-auth/interfaces/auth';
 import { getUserQueryKey } from '@/features/module-auth/hooks/query';
 import { useRouter } from 'next/navigation';
+import { UserRoles } from '@/features/module-auth/enums/auth.enums';
+import type { CreateUserData, LoginData } from '@/features/module-auth/types/auth.types';
 
 export const useRegister = () => {
     const queryClient = useQueryClient();

@@ -1,4 +1,3 @@
-import { TradingAccountStatistic } from '@/features/module-trading-account/interfaces/tradingAccount';
 import {
     formatCurrency,
     formatDateTime,
@@ -6,10 +5,7 @@ import {
     formatPercent,
 } from '@/features/module-trading-account/lib/format';
 import styles from '@/features/module-trading-account/components/account-diagram/styles.module.css';
-
-type AccountStatisticProps = {
-    statistics: TradingAccountStatistic;
-};
+import type { AccountStatisticProps } from '@/features/module-trading-account/types/component-props.types';
 
 export const AccountStatistic = ({ statistics }: AccountStatisticProps) => {
     const items = [

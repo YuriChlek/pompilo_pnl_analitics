@@ -5,7 +5,7 @@ import styles from '@/features/module-trading-account/components/trading-account
 import {
     TradingAccountPayload,
     TradingAccountSettingsPopupProps,
-} from '@/features/module-trading-account/interfaces/tradingAccount';
+} from '@/features/module-trading-account/interfaces/trading-account.interfaces';
 import {
     useRemoveTradingAccount,
     useUpdateTradingAccount,

@@ -98,6 +98,10 @@
     background: var(--color-surface-secondary);
 }
 
+.table tbody tr.detailsTableRow:hover {
+    background: transparent;
+}
+
 .table th:nth-child(1),
 .table td:nth-child(1) {
     width: 14%;
@@ -132,7 +136,12 @@
 
 .table th:nth-child(8),
 .table td:nth-child(8) {
-    width: 16%;
+    width: 14%;
+}
+
+.table th:nth-child(9),
+.table td:nth-child(9) {
+    width: 12%;
 }
 
 .placeholder {
@@ -200,6 +209,131 @@
     gap: var(--spacing-2);
 }
 
+.detailsTableRow td {
+    padding: 0;
+    background: linear-gradient(180deg, var(--color-surface-secondary), var(--color-surface));
+}
+
+.accordionEnter {
+    animation: accordion-enter 220ms ease;
+    transform-origin: top;
+}
+
+.tradeAccordion {
+    display: flex;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    align-items: stretch;
+}
+
+.chartSection {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.accordionAside {
+    flex: 1 1 60%;
+    display: grid;
+    gap: var(--spacing-4);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+}
+
+.chartPlaceholder {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--border-width-thin) dashed var(--color-border-secondary);
+    border-radius: var(--border-radius-xl);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+}
+
+.fieldGroup {
+    display: grid;
+    gap: var(--spacing-2);
+}
+
+.fieldLabel {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.textarea {
+    width: 100%;
+    min-height: 112px;
+    resize: vertical;
+    padding: var(--spacing-3);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    border-radius: var(--border-radius-xl);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+}
+
+.imageAction {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.imageUploadLabel {
+    width: 100%;
+    cursor: pointer;
+}
+
+.imageUploadInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.imageUploadButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 36px;
+    padding: 0 var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    border: var(--border-width-thin) solid var(--color-border-secondary);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+@keyframes accordion-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scaleY(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
@@ -215,5 +349,14 @@
     .pagination {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .tradeAccordion {
+        flex-direction: column;
+    }
+
+    .chartSection,
+    .accordionAside {
+        flex: 1 1 auto;
     }
 }

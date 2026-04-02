@@ -1,6 +1,7 @@
-import { User, UserRoles } from '@/features/module-auth/interfaces/auth';
 import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/features/module-auth/api-service';
+import { UserRoles } from '@/features/module-auth/enums/auth.enums';
+import type { User } from '@/features/module-auth/interfaces/auth.interfaces';
 
 export const getUserQueryKey = (userRole: UserRoles) =>
     userRole === UserRoles.CUSTOMER ? ['customerData'] : ['adminData'];

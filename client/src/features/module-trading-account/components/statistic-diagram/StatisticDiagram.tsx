@@ -1,12 +1,8 @@
 import { EmptyState } from '@/components/empty-state/EmptyState';
-import { TradingAccountChartPoint } from '@/features/module-trading-account/interfaces/tradingAccount';
 import { formatChartLabel } from '@/features/module-trading-account/lib/format';
 import { LazyLineChart } from '@/components/charts/LazyLineChart';
 import styles from '@/features/module-trading-account/components/statistic-diagram/styles.module.css';
-
-type StatisticDiagramProps = {
-    chart: TradingAccountChartPoint[];
-};
+import type { StatisticDiagramProps } from '@/features/module-trading-account/types/component-props.types';
 
 export const StatisticDiagram = ({ chart }: StatisticDiagramProps) => {
     if (!chart.length) {

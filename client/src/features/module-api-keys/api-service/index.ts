@@ -1,5 +1,9 @@
 import { apiClient } from '@/lib/http-client/http-client';
-import { ApiKey, ApiKeyPayload, AuthApiKeys } from '@/features/module-api-keys/interfaces/apiKeys';
+import {
+    ApiKey,
+    ApiKeyPayload,
+    AuthApiKeys,
+} from '@/features/module-api-keys/interfaces/api-keys.interfaces';
 import { HttpResponse } from '@/lib/http-client';
 
 export const apiKeysService: AuthApiKeys = {
@@ -39,11 +43,15 @@ export const apiKeysService: AuthApiKeys = {
 
         return response.data as unknown as ApiKey;
     },
-    async removeApiKey(id: string): Promise<boolean | null> {
+    async removeApiKey(id: string): Promise<boolean> {
         const response: HttpResponse<{ removed: boolean }> = await apiClient.delete<{
             removed: boolean;
         }>(`/customer/api-key/remove/${id}`);
 
-        return response.data?.removed as unknown as boolean;
+        if (!response.success || !response.data) {
+            throw new Error(response.message ?? 'Failed to remove API key');
+        }
+
+        return response.data.removed;
     },
 };

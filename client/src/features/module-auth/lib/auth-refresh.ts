@@ -1,5 +1,5 @@
 import { AUTH_SCOPE_CONFIG } from '@/features/module-auth/config/auth-scope.config';
-import { AuthScope } from '@/features/module-auth/lib/auth-scope';
+import type { AuthScope } from '@/features/module-auth/types/auth-scope.types';
 
 export function getAuthScopeFromPath(path: string): AuthScope {
     return path.includes('admin') ? 'admin' : 'customer';

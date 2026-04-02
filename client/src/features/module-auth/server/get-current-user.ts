@@ -1,12 +1,8 @@
 import { cookies } from 'next/headers';
-import type { User } from '@/features/module-auth/interfaces/auth';
-import { UserRoles } from '@/features/module-auth/interfaces/auth';
+import type { User } from '@/features/module-auth/interfaces/auth.interfaces.interfaces';
+import { UserRoles } from '@/features/module-auth/enums/auth.enums';
 import { apiBaseUrl } from '@/lib/config/api-base-url';
-
-type UserResponse = {
-    success?: boolean;
-    data?: User;
-};
+import type { UserResponse } from '@/features/module-auth/types/current-user.types';
 
 export async function getCurrentUser(role: UserRoles): Promise<User | null> {
     const cookieStore = await cookies();

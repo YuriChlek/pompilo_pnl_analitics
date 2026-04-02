@@ -1,5 +1,5 @@
 import { CustomerHeader } from '@/features/module-customer/components/header/CustomerHeader';
-import { UserRoles } from '@/features/module-auth/interfaces/auth';
+import { UserRoles } from '@/features/module-auth/enums/auth.enums';
 import { getCurrentUser } from '@/features/module-auth/server/get-current-user';
 
 export default async function CustomerLayout({

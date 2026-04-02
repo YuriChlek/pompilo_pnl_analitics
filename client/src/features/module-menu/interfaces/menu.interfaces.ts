@@ -1,3 +1,5 @@
+import type { MenuTypes } from '@/features/module-menu/enums/menu.enums';
+
 export interface MenuItem {
     title: string;
     href: string;
@@ -5,9 +7,4 @@ export interface MenuItem {
 
 export interface MenuProps {
     menuType: MenuTypes;
-}
-
-export enum MenuTypes {
-    CUSTOMER = 'customer',
-    GUEST = 'guest',
 }
